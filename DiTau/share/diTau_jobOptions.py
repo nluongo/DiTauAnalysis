@@ -5,7 +5,7 @@ from glob import glob
 print('In jobOptions')
 
 myFiles = glob('/eos/user/n/nicholas/SWAN_projects/DiTauReco/samples/mc16_13TeV.450524.MadGraphPythia8EvtGen_A14NNPDF23LO_X2000tohh_bbtautau_lephad.recon.AOD.e7244_s3126_r10201/*')
-outName = '../samples/ditau_450524_X2000tohh_bbtautau_lephad.recon.AOD.ntuple.root'
+outName = 'ditau_450524_X2000tohh_bbtautau_lephad.recon.AOD.ntuple.root'
 #myFiles = glob('/eos/user/n/nicholas/SWAN_projects/DiTauReco/samples/mc16_13TeV.425105.MadGraphPythia8EvtGen_A14NNPDF23LO_RS_G_hh_4tau_c10_M3000.recon.AOD.e6072_s3126_r10724/*.root.1')
 #outName = '../samples/ditau_425105_G_hh_4tau_M3000.recon.AOD.ntuple.root'
 
