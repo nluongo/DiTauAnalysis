@@ -139,6 +139,7 @@ private:
   std::vector<float> *m_muPt = nullptr;
   std::vector<float> *m_muEta = nullptr;
   std::vector<float> *m_muPhi = nullptr;
+  std::vector<float> *m_muE = nullptr;
   std::vector<unsigned int> *m_muLoose = nullptr;
   std::vector<unsigned int> *m_muMedium = nullptr;
   std::vector<unsigned int> *m_muTight = nullptr;

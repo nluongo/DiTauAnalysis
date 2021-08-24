@@ -74,6 +74,7 @@ DiTauAnalysis :: ~DiTauAnalysis () {
   delete m_muPt;
   delete m_muEta;
   delete m_muPhi;
+  delete m_muE;
   delete m_muLoose;
   delete m_muMedium;
   delete m_muTight;
@@ -202,6 +203,8 @@ StatusCode DiTauAnalysis :: initialize ()
   m_mytree->Branch("MuEta", &m_muEta);
   m_muPhi = new std::vector<float>();
   m_mytree->Branch("MuPhi", &m_muPhi);
+  m_muE = new std::vector<float>();
+  m_mytree->Branch("MuE", &m_muE);
   m_muLoose = new std::vector<unsigned int>();
   m_mytree->Branch("MuLoose", &m_muLoose);
   m_muMedium = new std::vector<unsigned int>();
@@ -459,6 +462,7 @@ StatusCode DiTauAnalysis :: execute ()
   m_muPt->clear();
   m_muEta->clear();
   m_muPhi->clear();
+  m_muE->clear();
   m_muLoose->clear();
   m_muMedium->clear();
   m_muTight->clear();
@@ -717,7 +721,6 @@ StatusCode DiTauAnalysis :: execute ()
       m_hadMuDiTauEta->push_back(hadmuditau->eta());
       m_hadMuDiTauPhi->push_back(hadmuditau->phi());
 
-      /*
       ANA_MSG_INFO("IDVarCalculator");
       ANA_MSG_INFO(m_hadMuDiTauIDVarCalculator);
       CHECK(m_hadMuDiTauIDVarCalculator->execute(*hadmuditau));
@@ -730,7 +733,7 @@ StatusCode DiTauAnalysis :: execute ()
       double flat_bdt = hadmuditau->auxdata<double>("JetBDTFlat");
       m_hadMuDiTauBDTScore->push_back(bdt);
       m_hadMuDiTauFlatBDTScore->push_back(flat_bdt);
-      */
+    
       m_diTauTruthMatchingTool->getTruth(*hadmuditau);
       unsigned int truth_match_type = 0;
       if (hadmuditau->auxdata<char>((const char*)("IsTruthHadronic"))){
@@ -779,6 +782,7 @@ StatusCode DiTauAnalysis :: execute ()
       m_muPt->push_back(muon->pt());
       m_muEta->push_back(muon->eta());
       m_muPhi->push_back(muon->phi());
+      m_muE->push_back(muon->e());
       // Muon quality 0=Tight 1=Medium 2=Loose 3=VeryLoose(all)
       unsigned int muQuality = muon->quality();
       unsigned int mu_pass_loose = 0;
