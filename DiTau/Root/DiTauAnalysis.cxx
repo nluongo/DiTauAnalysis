@@ -721,6 +721,7 @@ StatusCode DiTauAnalysis :: execute ()
       m_hadMuDiTauEta->push_back(hadmuditau->eta());
       m_hadMuDiTauPhi->push_back(hadmuditau->phi());
 
+      /*
       ANA_MSG_INFO("IDVarCalculator");
       ANA_MSG_INFO(m_hadMuDiTauIDVarCalculator);
       CHECK(m_hadMuDiTauIDVarCalculator->execute(*hadmuditau));
@@ -733,7 +734,7 @@ StatusCode DiTauAnalysis :: execute ()
       double flat_bdt = hadmuditau->auxdata<double>("JetBDTFlat");
       m_hadMuDiTauBDTScore->push_back(bdt);
       m_hadMuDiTauFlatBDTScore->push_back(flat_bdt);
-    
+
       m_diTauTruthMatchingTool->getTruth(*hadmuditau);
       unsigned int truth_match_type = 0;
       if (hadmuditau->auxdata<char>((const char*)("IsTruthHadronic"))){
@@ -749,6 +750,7 @@ StatusCode DiTauAnalysis :: execute ()
         m_truthMatchedHadMu++;
       }
       m_hadMuDiTauTruthMatchType->push_back(truth_match_type);
+      */
     }
     ANA_MSG_INFO("Done with hadmus");
 
