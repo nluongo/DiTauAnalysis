@@ -4,14 +4,29 @@ from glob import glob
 
 print('In jobOptions')
 
-myFiles = glob('/eos/user/n/nicholas/SWAN_projects/DiTauReco/samples/mc16_13TeV.450524.MadGraphPythia8EvtGen_A14NNPDF23LO_X2000tohh_bbtautau_lephad.recon.AOD.e7244_s3126_r10201/*')
-outName = 'ditau_450524_X2000tohh_bbtautau_lephad.recon.AOD.ntuple.root'
+sample = 'X2000AOD'
+
+if sample == 'X2000AOD':
+    myFiles = glob('/eos/user/n/nicholas/SWAN_projects/DiTauReco/samples/mc16_13TeV.450524.MadGraphPythia8EvtGen_A14NNPDF23LO_X2000tohh_bbtautau_lephad.recon.AOD.e7244_s3126_r10201/*')
+    outName = 'ditau_450524_X2000tohh_bbtautau_lephad.recon.AOD.ntuple.root'
+    isSignal = 1
+elif sample == 'X2000ESD':
+    myFiles = glob('/eos/user/n/nicholas/SWAN_projects/bbtautau/run3Trigger/r3athanalysis/samples/mc16_13TeV.450524.MadGraphPythia8EvtGen_A14NNPDF23LO_X2000tohh_bbtautau_lephad.recon.ESD.e7244_e5984_s3126_r12406/*')
+    outName = 'ditau_450524_X2000tohh_bbtautau_lephad.recon.ESD.ntuple.root'
+    isSignal = 1
+elif sample == 'Z+jets':
+    myFiles = glob('/eos/user/n/nicholas/SWAN_projects/DiTauReco/samples/mc16_13TeV.364139.Sherpa_221_NNPDF30NNLO_Ztautau_MAXHTPTV280_500_BFilter.recon.AOD.e5313_s3126_r10201/*')
+    outName = 'background_364139_Ztautau_MAXHTPTV280_500_BFilter.recon.AOD.ntuple.root'
+    isSignal = 0
+elif sample == 'ttbar':
+    myFiles = glob('/eos/user/n/nicholas/SWAN_projects/DiTauReco/samples/mc16_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.recon.AOD.e6337_e5984_s3126_r10201/*')
+    outName = 'background_410470_ttbar_nonallhad.recon.AOD.ntuple.root'
+    isSignal = 0
 #myFiles = glob('/eos/user/n/nicholas/SWAN_projects/DiTauReco/samples/mc16_13TeV.425105.MadGraphPythia8EvtGen_A14NNPDF23LO_RS_G_hh_4tau_c10_M3000.recon.AOD.e6072_s3126_r10724/*.root.1')
 #outName = '../samples/ditau_425105_G_hh_4tau_M3000.recon.AOD.ntuple.root'
+
 #myFiles = glob('/eos/user/n/nicholas/SWAN_projects/DiTauReco/samples/group.perf-tau.425104.MadGraphPythia8EvtGen_A14NNPDF23LO_RS_G_hh_4tau_c10_M2500.R22_NewTunes_EXT0/*')
 #outName = 'ditau_425104_4tau.AOD.ntuple.root'
-#myFiles = glob('/eos/user/n/nicholas/SWAN_projects/bbtautau/run3Trigger/r3athanalysis/samples/mc16_13TeV.450524.MadGraphPythia8EvtGen_A14NNPDF23LO_X2000tohh_bbtautau_lephad.recon.ESD.e7244_e5984_s3126_r12406/*')
-#outName = 'ditau_450524_X2000tohh_bbtautau_lephad.recon.ESD.ntuple.root'
 
 isESD = 1
 
@@ -49,6 +64,7 @@ alg = algClass('AnalysisAlg')
 
 # later on we'll add some configuration options for our algorithm that go here
 #alg.outName = outName
+alg.isSignal = isSignal
 
 # Add our algorithm to the main alg sequence
 athAlgSeq += alg

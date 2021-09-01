@@ -35,6 +35,8 @@ public:
 private:
   // Configuration, and any other types of variables go here.
   
+  bool m_isSignal;
+
   //Create TFile and TTree
   TFile* m_myfile = 0;
   TTree* m_mytree = 0;
@@ -94,6 +96,11 @@ private:
   float m_truthFinalLeptonPhi = 0;
   float m_truthFinalLeptonE = 0;
   int m_truthFinalLeptonPdgId = 0;
+
+  float m_truthDiTauVisPt = 0;
+  float m_truthDiTauVisEta = 0;
+  float m_truthDiTauVisPhi = 0;
+  float m_truthDiTauVisE = 0;
 
   unsigned int m_nDiTaus = 0;
   std::vector<float> *m_diTauPt = nullptr;

@@ -33,6 +33,8 @@ DiTauAnalysis :: DiTauAnalysis (const std::string& name,
   // declare all properties for your algorithm.  Note that things like
   // resetting statistics variables or booking histograms should
   // rather go into the initialize() function.
+  
+  declareProperty( "isSignal" , m_isSignal=true );
 }
 
 DiTauAnalysis :: ~DiTauAnalysis () {
@@ -89,42 +91,49 @@ StatusCode DiTauAnalysis :: initialize ()
   // connected.
   ANA_MSG_INFO("in initialize test");
 
-  //ANA_CHECK( book(TTree ("mytree", "mytree")));
-  //m_myfile = new TFile("../samples/ditau_450524_X2000tohh_bbtautau_lephad.recon.AOD.ntuple.root", "recreate");
   m_mytree = new TTree("mytree", "mytree");
   CHECK( histSvc()->regTree("/ANALYSIS/mytree", m_mytree) );
 
   m_mytree->Branch("RunNumber", &m_runNumber);
   m_mytree->Branch("EventNumber", &m_eventNumber);
 
-  m_mytree->Branch("PDGTruthMatchType", &m_pdgTruthMatchType);
+  if(m_isSignal)
+  {
+    m_mytree->Branch("PDGTruthMatchType", &m_pdgTruthMatchType);
 
-  m_mytree->Branch("TruthHiggsPt", &m_truthHiggsPt);
-  m_mytree->Branch("TruthHiggsEta", &m_truthHiggsEta);
-  m_mytree->Branch("TruthHiggsPhi", &m_truthHiggsPhi);
-  m_mytree->Branch("TruthHiggsE", &m_truthHiggsE);
+    m_mytree->Branch("TruthHiggsPt", &m_truthHiggsPt);
+    m_mytree->Branch("TruthHiggsEta", &m_truthHiggsEta);
+    m_mytree->Branch("TruthHiggsPhi", &m_truthHiggsPhi);
+    m_mytree->Branch("TruthHiggsE", &m_truthHiggsE);
 
-  m_mytree->Branch("TruthHadTauPt", &m_truthHadTauPt);
-  m_mytree->Branch("TruthHadTauEta", &m_truthHadTauEta);
-  m_mytree->Branch("TruthHadTauPhi", &m_truthHadTauPhi);
-  m_mytree->Branch("TruthHadTauE", &m_truthHadTauE);
-  m_mytree->Branch("TruthHadTauPdgId", &m_truthHadTauPdgId);
-  m_mytree->Branch("TruthHadTauVisPt", &m_truthHadTauVisPt);
-  m_mytree->Branch("TruthHadTauVisEta", &m_truthHadTauVisEta);
-  m_mytree->Branch("TruthHadTauVisPhi", &m_truthHadTauVisPhi);
-  m_mytree->Branch("TruthHadTauVisM", &m_truthHadTauVisM);
+    m_mytree->Branch("TruthHadTauPt", &m_truthHadTauPt);
+    m_mytree->Branch("TruthHadTauEta", &m_truthHadTauEta);
+    m_mytree->Branch("TruthHadTauPhi", &m_truthHadTauPhi);
+    m_mytree->Branch("TruthHadTauE", &m_truthHadTauE);
+    m_mytree->Branch("TruthHadTauPdgId", &m_truthHadTauPdgId);
 
-  m_mytree->Branch("TruthLepTauPt", &m_truthLepTauPt);
-  m_mytree->Branch("TruthLepTauEta", &m_truthLepTauEta);
-  m_mytree->Branch("TruthLepTauPhi", &m_truthLepTauPhi);
-  m_mytree->Branch("TruthLepTauE", &m_truthLepTauE);
-  m_mytree->Branch("TruthLepTauPdgId", &m_truthLepTauPdgId);
+    m_mytree->Branch("TruthHadTauVisPt", &m_truthHadTauVisPt);
+    m_mytree->Branch("TruthHadTauVisEta", &m_truthHadTauVisEta);
+    m_mytree->Branch("TruthHadTauVisPhi", &m_truthHadTauVisPhi);
+    m_mytree->Branch("TruthHadTauVisM", &m_truthHadTauVisM);
 
-  m_mytree->Branch("TruthFinalLeptonPt", &m_truthFinalLeptonPt);
-  m_mytree->Branch("TruthFinalLeptonEta", &m_truthFinalLeptonEta);
-  m_mytree->Branch("TruthFinalLeptonPhi", &m_truthFinalLeptonPhi);
-  m_mytree->Branch("TruthFinalLeptonE", &m_truthFinalLeptonE);
-  m_mytree->Branch("TruthFinalLeptonPdgId", &m_truthFinalLeptonPdgId);
+    m_mytree->Branch("TruthLepTauPt", &m_truthLepTauPt);
+    m_mytree->Branch("TruthLepTauEta", &m_truthLepTauEta);
+    m_mytree->Branch("TruthLepTauPhi", &m_truthLepTauPhi);
+    m_mytree->Branch("TruthLepTauE", &m_truthLepTauE);
+    m_mytree->Branch("TruthLepTauPdgId", &m_truthLepTauPdgId);
+
+    m_mytree->Branch("TruthFinalLeptonPt", &m_truthFinalLeptonPt);
+    m_mytree->Branch("TruthFinalLeptonEta", &m_truthFinalLeptonEta);
+    m_mytree->Branch("TruthFinalLeptonPhi", &m_truthFinalLeptonPhi);
+    m_mytree->Branch("TruthFinalLeptonE", &m_truthFinalLeptonE);
+    m_mytree->Branch("TruthFinalLeptonPdgId", &m_truthFinalLeptonPdgId);
+
+    m_mytree->Branch("TruthDiTauVisPt", &m_truthDiTauVisPt);
+    m_mytree->Branch("TruthDiTauVisEta", &m_truthDiTauVisEta);
+    m_mytree->Branch("TruthDiTauVisPhi", &m_truthDiTauVisPhi);
+    m_mytree->Branch("TruthDiTauVisE", &m_truthDiTauVisE);
+  }
 
   m_mytree->Branch("NDiTau", &m_nDiTaus);
   m_diTauPt = new std::vector<float>();
@@ -213,7 +222,6 @@ StatusCode DiTauAnalysis :: initialize ()
   m_mytree->Branch("MuTight", &m_muTight);
 
   // TauTruthMatching
-  //CHECK(m_tauTruthMatchingTool.retrieve());
   m_tauTruthMatchingTool = new TauAnalysisTools::TauTruthMatchingTool("TauTruthMatchingTool");
   CHECK(m_tauTruthMatchingTool->initialize());
   CHECK(m_tauTruthMatchingTool->setProperty("WriteTruthTaus", true));
@@ -224,37 +232,21 @@ StatusCode DiTauAnalysis :: initialize ()
 
   m_hadMuBuilder = new DiTauRec::HadMuBuilder("HadMuBuilder");
   CHECK(m_hadMuBuilder->initialize());
-/*
+
   // Initialize origin correction
-  //ToolHandleArray<IJetConstituentModifier> modifiers;
-  ANA_MSG_INFO("modifiers: " << modifiers);
-  std::cout << "modifiers: " << modifiers << std::endl;
-  ANA_MSG_INFO("modifiers id: " << typeid(modifiers).name());
-  //ToolHandleArray<IJetConstituentModifier> new_modifiers = modifiers;
+  ToolHandleArray<IJetConstituentModifier> modifiers;
 
   // CaloClusterOrigin
   CaloClusterConstituentsOrigin* m_pCaloClusterConstituentsOrigin = new CaloClusterConstituentsOrigin("CaloClusterConstituentsOrigin");
   CHECK( m_pCaloClusterConstituentsOrigin->setProperty("InputType",xAOD::Type::CaloCluster) );
   CHECK( m_pCaloClusterConstituentsOrigin->initialize() );
-  ANA_MSG_INFO("caloclus id: " << typeid(m_pCaloClusterConstituentsOrigin).name());
-  ANA_MSG_INFO("caloclus toolhandle id: " << typeid(ToolHandle<IJetConstituentModifier>(m_pCaloClusterConstituentsOrigin)).name());
 
   modifiers.push_back(ToolHandle<IJetConstituentModifier>(m_pCaloClusterConstituentsOrigin));
-  ANA_MSG_INFO("modifiers: " << modifiers);
-  std::cout << "modifiers: " << modifiers << std::endl;
-  ANA_MSG_INFO("modifiers id: " << typeid(modifiers).name());
-  ANA_MSG_INFO("Here");
 
   // Initialize cluster sequence
   JetConstituentModSequence jJetConstituentModSequence("JetConstituentModSequence");
-  ANA_MSG_INFO("Here");
   CHECK( jJetConstituentModSequence.setProperty("InputContainer","CaloCalTopoClusters") );
-  ANA_MSG_INFO("Here");
   CHECK( jJetConstituentModSequence.setProperty("OutputContainer","LCOriginTopoClusters") );
-  ANA_MSG_INFO("Here");
-  ANA_MSG_INFO("OutputContainer property");
-  std::cout << "OutputContainer property" << std::endl;
-  std::cout << "OutputContainer property: " << jJetConstituentModSequence.getProperty("OutputContainer") << std::endl;
   CHECK( jJetConstituentModSequence.setProperty("InputType",xAOD::Type::CaloCluster) );
   CHECK( jJetConstituentModSequence.setProperty("Modifiers", modifiers) );
   CHECK( jJetConstituentModSequence.initialize() );
@@ -262,7 +254,7 @@ StatusCode DiTauAnalysis :: initialize ()
   //Override the event store hash for the LCOriginTopoClusters
   //xAOD::EventFormat* ef = const_cast< xAOD::EventFormat* >( xEvent.inputEventFormat() );
   //ef->add( xAOD::EventFormatElement( "LCOriginTopoClusters", "xAOD::CaloClusterContainer", "", 0x1bccf189 ) );
-*/
+
   // DiTauTruthMatchingTool
   m_diTauTruthMatchingTool = new TauAnalysisTools::DiTauTruthMatchingTool("DiTauTruthMatchingTool");
   CHECK(m_diTauTruthMatchingTool->setProperty("WriteTruthTaus", true));
@@ -326,18 +318,7 @@ StatusCode DiTauAnalysis :: execute ()
 
   const xAOD::TruthParticleContainer* truthTaus = nullptr;
   ANA_CHECK( evtStore()->retrieve( truthTaus, "TruthTaus" ) );
-/*
-  const xAOD::TruthParticleContainer* myTruthTaus = nullptr;
 
-  // Filter truth taus to only those coming from the tau Higgs
-  for (auto truth_tau: *truthTaus) {
-    xAOD::TruthParticle* parent_tau = truth_tau->parent(0);
-    int parent_pdg = parent_tau->pdgId();
-    if (parent_pdg == 25 || parent_pdg == 15 || parent_pdg == -15) {
-      myTruthTaus->push_back(parent_tau);
-    }
-  }
-*/
   const xAOD::ElectronContainer* electrons = nullptr;
   ANA_CHECK( evtStore()->retrieve( electrons, "Electrons" ) );
 
@@ -410,6 +391,7 @@ StatusCode DiTauAnalysis :: execute ()
   m_truthHadTauPhi = 0;
   m_truthHadTauE = 0;
   m_truthHadTauPdgId = 0;
+
   m_truthHadTauVisPt = 0;
   m_truthHadTauVisEta = 0;
   m_truthHadTauVisPhi = 0;
@@ -426,6 +408,11 @@ StatusCode DiTauAnalysis :: execute ()
   m_truthFinalLeptonPhi = 0;
   m_truthFinalLeptonE = 0;
   m_truthFinalLeptonPdgId = 0;
+
+  m_truthDiTauVisPt = 0;
+  m_truthDiTauVisEta = 0;
+  m_truthDiTauVisPhi = 0;
+  m_truthDiTauVisE = 0;
 
   m_nDiTaus = 0;
   m_diTauPt->clear();
@@ -495,84 +482,88 @@ StatusCode DiTauAnalysis :: execute ()
   bool has_anti_b = 0;
   bool has_tau_higgs = 0;
   bool has_b_higgs = 0;
-  for (auto truth_particle: *truthParticles) {
-    int pdg_id = truth_particle->pdgId();
-    if (pdg_id == 25) {
-      has_tau = 0;
-      has_anti_tau = 0;
-      has_b = 0;
-      has_anti_b = 0;
-      unsigned int nchildren = truth_particle->nChildren();
+
+  if(m_isSignal)
+  {
+    for (auto truth_particle: *truthParticles) {
+      int pdg_id = truth_particle->pdgId();
+      if (pdg_id == 25) {
+        has_tau = 0;
+        has_anti_tau = 0;
+        has_b = 0;
+        has_anti_b = 0;
+        unsigned int nchildren = truth_particle->nChildren();
+        for (unsigned int i=0; i<nchildren; i++) {
+          const xAOD::TruthParticle* child = truth_particle->child(i);
+          int child_id = child->pdgId();
+          if (child_id == 15) {
+            ANA_MSG_INFO("TruthParticle pt: " << child->pt());
+            has_tau = 1;
+          }
+          else if (child_id == -15) {
+            ANA_MSG_INFO("TruthParticle pt: " << child->pt());
+            has_anti_tau = 1;
+          }
+          else if (child_id == 5) {
+            has_b = 1;
+          }
+          else if (child_id == -5) {
+            has_anti_b = 1;
+          }
+        }
+        if (has_tau && has_anti_tau) {
+          truth_tau_higgs = truth_particle;  
+          has_tau_higgs = 1;
+        }
+        else if (has_b && has_anti_b) {
+          truth_b_higgs = truth_particle;
+          has_b_higgs = 1;
+        }
+      }
+    }
+
+    for (auto truth_tau : *truthTaus) {
+      const xAOD::TruthParticle* tau_parent = truth_tau->parent(0);
+      if (!tau_parent) {
+        continue;
+      }
+      int parent_pdg = tau_parent->pdgId();
+      if (parent_pdg != 25 && parent_pdg != 15 && parent_pdg != -15) {
+        continue;
+      }
+      has_lepton = 0;
+      unsigned int nchildren = truth_tau->nChildren();
       for (unsigned int i=0; i<nchildren; i++) {
-        const xAOD::TruthParticle* child = truth_particle->child(i);
+        const xAOD::TruthParticle* child = truth_tau->child(i);
         int child_id = child->pdgId();
-        if (child_id == 15) {
-          ANA_MSG_INFO("TruthParticle pt: " << child->pt());
-          has_tau = 1;
-        }
-        else if (child_id == -15) {
-          ANA_MSG_INFO("TruthParticle pt: " << child->pt());
-          has_anti_tau = 1;
-        }
-        else if (child_id == 5) {
-          has_b = 1;
-        }
-        else if (child_id == -5) {
-          has_anti_b = 1;
+        if (child_id == 11 || child_id == -11 || child_id == 13 || child_id == -13) {
+          has_lepton = 1;
         }
       }
-      if (has_tau && has_anti_tau) {
-        truth_tau_higgs = truth_particle;  
-        has_tau_higgs = 1;
+      if (has_lepton) {
+        has_leptonic_tau = 1;
+        truth_leptonic_tau = truth_tau;
       }
-      else if (has_b && has_anti_b) {
-        truth_b_higgs = truth_particle;
-        has_b_higgs = 1;
+      else {
+        has_hadronic_tau = 1;
+        truth_hadronic_tau = truth_tau;
       }
     }
-  }
 
-  for (auto truth_tau : *truthTaus) {
-    const xAOD::TruthParticle* tau_parent = truth_tau->parent(0);
-    if (!tau_parent) {
-      continue;
-    }
-    int parent_pdg = tau_parent->pdgId();
-    if (parent_pdg != 25 && parent_pdg != 15 && parent_pdg != -15) {
-      continue;
-    }
-    has_lepton = 0;
-    unsigned int nchildren = truth_tau->nChildren();
-    for (unsigned int i=0; i<nchildren; i++) {
-      const xAOD::TruthParticle* child = truth_tau->child(i);
-      int child_id = child->pdgId();
-      if (child_id == 11 || child_id == -11 || child_id == 13 || child_id == -13) {
-        has_lepton = 1;
-      }
-    }
-    if (has_lepton) {
-      has_leptonic_tau = 1;
-      truth_leptonic_tau = truth_tau;
-    }
-    else {
-      has_hadronic_tau = 1;
-      truth_hadronic_tau = truth_tau;
-    }
-  }
-
-  if (has_leptonic_tau) {
-    unsigned int nchildren = truth_leptonic_tau->nChildren();
-    for (unsigned int i=0; i<nchildren; i++) {
-      const xAOD::TruthParticle* child = truth_leptonic_tau->child(i);
-      int child_id = child->pdgId();
-      if (child_id == 11 || child_id == -11 || child_id == 13 || child_id == -13) {
-        has_final_lepton = 1;
-        truth_final_lepton = child;
+    if (has_leptonic_tau) {
+      unsigned int nchildren = truth_leptonic_tau->nChildren();
+      for (unsigned int i=0; i<nchildren; i++) {
+        const xAOD::TruthParticle* child = truth_leptonic_tau->child(i);
+        int child_id = child->pdgId();
+        if (child_id == 11 || child_id == -11 || child_id == 13 || child_id == -13) {
+          has_final_lepton = 1;
+          truth_final_lepton = child;
+        }
       }
     }
   }
   
-  if (has_tau_higgs && has_b_higgs && has_hadronic_tau && has_leptonic_tau && has_final_lepton) {
+  if ((has_tau_higgs && has_b_higgs && has_hadronic_tau && has_leptonic_tau && has_final_lepton) || !m_isSignal) {
     bool fill_yn = 1;
 
     // Let's do this thing
@@ -580,72 +571,75 @@ StatusCode DiTauAnalysis :: execute ()
     m_runNumber = eventInfo->runNumber();
     m_eventNumber = eventInfo->eventNumber();
 
-    int final_lepton_id = truth_final_lepton->pdgId();
-    // Values match up with other TruthMatch variable
-    // 0 = no match  1 = dihad (N/A here)  2 = hadel  3 = hadmu
-    if (final_lepton_id == 11 || final_lepton_id == -11) {
-      m_pdgTruthMatchType = 2; 
-    } 
-    else if ( final_lepton_id == 13 || final_lepton_id == -13) {
-      m_pdgTruthMatchType = 3;
-    }
-
-    // Truth Higgs decaying to taus
-    m_truthHiggsPt = truth_tau_higgs->pt();
-    m_truthHiggsEta = truth_tau_higgs->eta();
-    m_truthHiggsPhi = truth_tau_higgs->phi();
-    m_truthHiggsE = truth_tau_higgs->e();
-
-    // Define accessor for hadronic tau visible variables
-    static SG::AuxElement::Accessor<double> accPtVis("pt_vis");
-    static SG::AuxElement::Accessor<double> accEtaVis("eta_vis");
-    static SG::AuxElement::Accessor<double> accPhiVis("phi_vis");
-    static SG::AuxElement::Accessor<double> accMVis("m_vis");
-
-    // Truth hadronic tau
-    m_truthHadTauPt = truth_hadronic_tau->pt();
-    m_truthHadTauEta = truth_hadronic_tau->eta();
-    m_truthHadTauPhi = truth_hadronic_tau->phi();
-    m_truthHadTauE = truth_hadronic_tau->e();
-    m_truthHadTauPdgId = truth_hadronic_tau->pdgId();
-/*
-    float min_pt_diff = 100000;
-    const xAOD::TruthParticle* truthtaus_match = nullptr;
-    for (auto truth_tau: *truthTaus) {
-      float pt_diff = abs( truth_tau->pt() - truth_hadronic_tau->pt() );
-      if (pt_diff < min_pt_diff) {
-        min_pt_diff = pt_diff;
-        truthtaus_match = truth_tau;
-      }
-    }
-*/
-
-    // If we can't find truthtau or the visible variables for hadronic truth tau, don't use this event
-    if (truth_hadronic_tau != nullptr) {
-      if (!accPtVis.isAvailable(*truth_hadronic_tau) || !accEtaVis.isAvailable(*truth_hadronic_tau) || !accPhiVis.isAvailable(*truth_hadronic_tau) || !accMVis.isAvailable(*truth_hadronic_tau)) {
-        fill_yn = 0;
+    if(m_isSignal)
+    {
+      int final_lepton_id = truth_final_lepton->pdgId();
+      // Values match up with other TruthMatch variable
+      // 0 = no match  1 = dihad (N/A here)  2 = hadel  3 = hadmu
+      if (final_lepton_id == 11 || final_lepton_id == -11) {
+        m_pdgTruthMatchType = 2; 
       } 
-      else {
-        m_truthHadTauVisPt = accPtVis(*truth_hadronic_tau);
-        m_truthHadTauVisEta = accEtaVis(*truth_hadronic_tau);
-        m_truthHadTauVisPhi = accPhiVis(*truth_hadronic_tau);
-        m_truthHadTauVisM = accMVis(*truth_hadronic_tau);
+      else if ( final_lepton_id == 13 || final_lepton_id == -13) {
+        m_pdgTruthMatchType = 3;
       }
+
+      // Truth Higgs decaying to taus
+      m_truthHiggsPt = truth_tau_higgs->pt();
+      m_truthHiggsEta = truth_tau_higgs->eta();
+      m_truthHiggsPhi = truth_tau_higgs->phi();
+      m_truthHiggsE = truth_tau_higgs->e();
+
+      // Define accessor for hadronic tau visible variables
+      static SG::AuxElement::Accessor<double> accPtVis("pt_vis");
+      static SG::AuxElement::Accessor<double> accEtaVis("eta_vis");
+      static SG::AuxElement::Accessor<double> accPhiVis("phi_vis");
+      static SG::AuxElement::Accessor<double> accMVis("m_vis");
+
+      // Truth hadronic tau
+      m_truthHadTauPt = truth_hadronic_tau->pt();
+      m_truthHadTauEta = truth_hadronic_tau->eta();
+      m_truthHadTauPhi = truth_hadronic_tau->phi();
+      m_truthHadTauE = truth_hadronic_tau->e();
+      m_truthHadTauPdgId = truth_hadronic_tau->pdgId();
+
+      // If we can't find truthtau or the visible variables for hadronic truth tau, don't use this event
+      TLorentzVector vis_had_tau_tlv;
+      if (truth_hadronic_tau != nullptr) {
+        if (!accPtVis.isAvailable(*truth_hadronic_tau) || !accEtaVis.isAvailable(*truth_hadronic_tau) || !accPhiVis.isAvailable(*truth_hadronic_tau) || !accMVis.isAvailable(*truth_hadronic_tau)) {
+          fill_yn = 0;
+        } 
+        else {
+          m_truthHadTauVisPt = accPtVis(*truth_hadronic_tau);
+          m_truthHadTauVisEta = accEtaVis(*truth_hadronic_tau);
+          m_truthHadTauVisPhi = accPhiVis(*truth_hadronic_tau);
+          m_truthHadTauVisM = accMVis(*truth_hadronic_tau);
+          vis_had_tau_tlv.SetPtEtaPhiM(m_truthHadTauVisPt, m_truthHadTauVisEta, m_truthHadTauVisPhi, m_truthHadTauVisM);
+        }
+      }
+
+      // Truth leptonic tau
+      m_truthLepTauPt = truth_leptonic_tau->pt();
+      m_truthLepTauEta = truth_leptonic_tau->eta();
+      m_truthLepTauPhi = truth_leptonic_tau->phi();
+      m_truthLepTauE = truth_leptonic_tau->e();
+      m_truthLepTauPdgId = truth_leptonic_tau->pdgId();
+
+      // Truth final lepton
+      m_truthFinalLeptonPt = truth_final_lepton->pt();
+      m_truthFinalLeptonEta = truth_final_lepton->eta();
+      m_truthFinalLeptonPhi = truth_final_lepton->phi();
+      m_truthFinalLeptonE = truth_final_lepton->e();
+      TLorentzVector truth_final_lepton_tlv;
+      truth_final_lepton_tlv.SetPtEtaPhiE(m_truthFinalLeptonPt, m_truthFinalLeptonEta, m_truthFinalLeptonPhi, m_truthFinalLeptonE);
+      m_truthFinalLeptonPdgId = truth_final_lepton->pdgId();
+
+      // Truth Visible Ditau
+      TLorentzVector truth_ditau_vis_tlv = vis_had_tau_tlv + truth_final_lepton_tlv;
+      m_truthDiTauVisPt = truth_ditau_vis_tlv.Pt();
+      m_truthDiTauVisEta = truth_ditau_vis_tlv.Eta();
+      m_truthDiTauVisPhi = truth_ditau_vis_tlv.Phi();
+      m_truthDiTauVisE = truth_ditau_vis_tlv.E();
     }
-
-    // Truth leptonic tau
-    m_truthLepTauPt = truth_leptonic_tau->pt();
-    m_truthLepTauEta = truth_leptonic_tau->eta();
-    m_truthLepTauPhi = truth_leptonic_tau->phi();
-    m_truthLepTauE = truth_leptonic_tau->e();
-    m_truthLepTauPdgId = truth_leptonic_tau->pdgId();
-
-    // Truth final lepton
-    m_truthFinalLeptonPt = truth_final_lepton->pt();
-    m_truthFinalLeptonEta = truth_final_lepton->eta();
-    m_truthFinalLeptonPhi = truth_final_lepton->phi();
-    m_truthFinalLeptonE = truth_final_lepton->e();
-    m_truthFinalLeptonPdgId = truth_final_lepton->pdgId();
 
     // Reconstructed hadhad ditaus
     for (auto ditau: *ditaus) {
@@ -663,54 +657,55 @@ StatusCode DiTauAnalysis :: execute ()
       m_hadElDiTauEta->push_back(hadelditau->eta());
       m_hadElDiTauPhi->push_back(hadelditau->phi());
 
-      CHECK(m_hadElDiTauIDVarCalculator->execute(*hadelditau));
-      
-      //if(hadel){
-      // this is to reproduce the same value as the DiTauIDVarCalculator did before a bug was fixed.
-      // when the BDT is retrained with the results from the fixed DiTauIDVarCalculator this must be deleted
-      static const SG::AuxElement::Accessor< int >   acc_el_IDSelection           ( "el_IDSelection" );
-      static const SG::AuxElement::Accessor< int >   acc_tau_leadingElIDSelection ( "tau_leadingElIDSelection" );
-      static const SG::AuxElement::Decorator< int >  dec_el_IDSelection           ( "el_IDSelection" );
-      static const SG::AuxElement::Decorator< int >  dec_tau_leadingElIDSelection ( "tau_leadingElIDSelection" );
-      
-      if(acc_el_IDSelection(*hadelditau) == 4)
-        dec_el_IDSelection(*hadelditau) = 5;
-      if(acc_el_IDSelection(*hadelditau) == 1)
-        dec_el_IDSelection(*hadelditau) = 3;
-      if(acc_el_IDSelection(*hadelditau) == 2)
-        dec_el_IDSelection(*hadelditau) = 3;
-      
-      if(acc_tau_leadingElIDSelection(*hadelditau) == 4)
-        dec_tau_leadingElIDSelection(*hadelditau) = 5;
-      if(acc_tau_leadingElIDSelection(*hadelditau) == 1)
-        dec_tau_leadingElIDSelection(*hadelditau) = 3;
-      if(acc_tau_leadingElIDSelection(*hadelditau) == 2)
-        dec_tau_leadingElIDSelection(*hadelditau) = 3;
-      //}
+      if(m_isSignal)
+      {
+        CHECK(m_hadElDiTauIDVarCalculator->execute(*hadelditau));
+        
+        // this is to reproduce the same value as the DiTauIDVarCalculator did before a bug was fixed.
+        // when the BDT is retrained with the results from the fixed DiTauIDVarCalculator this must be deleted
+        static const SG::AuxElement::Accessor< int >   acc_el_IDSelection           ( "el_IDSelection" );
+        static const SG::AuxElement::Accessor< int >   acc_tau_leadingElIDSelection ( "tau_leadingElIDSelection" );
+        static const SG::AuxElement::Decorator< int >  dec_el_IDSelection           ( "el_IDSelection" );
+        static const SG::AuxElement::Decorator< int >  dec_tau_leadingElIDSelection ( "tau_leadingElIDSelection" );
+        
+        if(acc_el_IDSelection(*hadelditau) == 4)
+          dec_el_IDSelection(*hadelditau) = 5;
+        if(acc_el_IDSelection(*hadelditau) == 1)
+          dec_el_IDSelection(*hadelditau) = 3;
+        if(acc_el_IDSelection(*hadelditau) == 2)
+          dec_el_IDSelection(*hadelditau) = 3;
+        
+        if(acc_tau_leadingElIDSelection(*hadelditau) == 4)
+          dec_tau_leadingElIDSelection(*hadelditau) = 5;
+        if(acc_tau_leadingElIDSelection(*hadelditau) == 1)
+          dec_tau_leadingElIDSelection(*hadelditau) = 3;
+        if(acc_tau_leadingElIDSelection(*hadelditau) == 2)
+          dec_tau_leadingElIDSelection(*hadelditau) = 3;
     
-      CHECK(m_hadElDiTauDiscrTool->execute(*hadelditau));
-      CHECK(m_hadElDiTauWPDecorator->execute(*hadelditau));
-      double bdt = hadelditau->auxdata<double>("JetBDT");
-      double flat_bdt = hadelditau->auxdata<double>("JetBDTFlat");
-      m_hadElDiTauBDTScore->push_back(bdt);
-      m_hadElDiTauFlatBDTScore->push_back(flat_bdt);
-      
-      m_diTauTruthMatchingTool->getTruth(*hadelditau);
-      // 0 = no match  1 = dihad  2 = hadel  3 = hadmu
-      unsigned int truth_match_type = 0;
-      if (hadelditau->auxdata<char>((const char*)("IsTruthHadronic"))){
-        truth_match_type = 1;
-        m_truthMatchedHadHad++;
+        CHECK(m_hadElDiTauDiscrTool->execute(*hadelditau));
+        CHECK(m_hadElDiTauWPDecorator->execute(*hadelditau));
+        double bdt = hadelditau->auxdata<double>("JetBDT");
+        double flat_bdt = hadelditau->auxdata<double>("JetBDTFlat");
+        m_hadElDiTauBDTScore->push_back(bdt);
+        m_hadElDiTauFlatBDTScore->push_back(flat_bdt);
+        
+        m_diTauTruthMatchingTool->getTruth(*hadelditau);
+        // 0 = no match  1 = dihad  2 = hadel  3 = hadmu
+        unsigned int truth_match_type = 0;
+        if (hadelditau->auxdata<char>((const char*)("IsTruthHadronic"))){
+          truth_match_type = 1;
+          m_truthMatchedHadHad++;
+        }
+        if (hadelditau->auxdata<char>((const char*)("IsTruthHadEl"))){
+          truth_match_type = 2;
+          m_truthMatchedHadEl++;
+        }
+        if (hadelditau->auxdata<char>((const char*)("IsTruthHadMu"))){
+          truth_match_type = 3;
+          m_truthMatchedHadMu++;
+        }
+        m_hadElDiTauTruthMatchType->push_back(truth_match_type);
       }
-      if (hadelditau->auxdata<char>((const char*)("IsTruthHadEl"))){
-        truth_match_type = 2;
-        m_truthMatchedHadEl++;
-      }
-      if (hadelditau->auxdata<char>((const char*)("IsTruthHadMu"))){
-        truth_match_type = 3;
-        m_truthMatchedHadMu++;
-      }
-      m_hadElDiTauTruthMatchType->push_back(truth_match_type);
     }
 
     ANA_MSG_INFO("Starting hadmus");
@@ -721,36 +716,37 @@ StatusCode DiTauAnalysis :: execute ()
       m_hadMuDiTauEta->push_back(hadmuditau->eta());
       m_hadMuDiTauPhi->push_back(hadmuditau->phi());
 
-      /*
-      ANA_MSG_INFO("IDVarCalculator");
-      ANA_MSG_INFO(m_hadMuDiTauIDVarCalculator);
-      CHECK(m_hadMuDiTauIDVarCalculator->execute(*hadmuditau));
+      if(m_isSignal)
+      {
+        ANA_MSG_INFO("IDVarCalculator");
+        ANA_MSG_INFO(m_hadMuDiTauIDVarCalculator);
+        CHECK(m_hadMuDiTauIDVarCalculator->execute(*hadmuditau));
 
-      ANA_MSG_INFO("DiscrTool");
-      CHECK(m_hadMuDiTauDiscrTool->execute(*hadmuditau));
-      ANA_MSG_INFO("WPDecorator");
-      CHECK(m_hadMuDiTauWPDecorator->execute(*hadmuditau));
-      double bdt = hadmuditau->auxdata<double>("JetBDT");
-      double flat_bdt = hadmuditau->auxdata<double>("JetBDTFlat");
-      m_hadMuDiTauBDTScore->push_back(bdt);
-      m_hadMuDiTauFlatBDTScore->push_back(flat_bdt);
+        ANA_MSG_INFO("DiscrTool");
+        CHECK(m_hadMuDiTauDiscrTool->execute(*hadmuditau));
+        ANA_MSG_INFO("WPDecorator");
+        CHECK(m_hadMuDiTauWPDecorator->execute(*hadmuditau));
+        double bdt = hadmuditau->auxdata<double>("JetBDT");
+        double flat_bdt = hadmuditau->auxdata<double>("JetBDTFlat");
+        m_hadMuDiTauBDTScore->push_back(bdt);
+        m_hadMuDiTauFlatBDTScore->push_back(flat_bdt);
 
-      m_diTauTruthMatchingTool->getTruth(*hadmuditau);
-      unsigned int truth_match_type = 0;
-      if (hadmuditau->auxdata<char>((const char*)("IsTruthHadronic"))){
-        truth_match_type = 1;
-        m_truthMatchedHadHad++;
+        m_diTauTruthMatchingTool->getTruth(*hadmuditau);
+        unsigned int truth_match_type = 0;
+        if (hadmuditau->auxdata<char>((const char*)("IsTruthHadronic"))){
+          truth_match_type = 1;
+          m_truthMatchedHadHad++;
+        }
+        if (hadmuditau->auxdata<char>((const char*)("IsTruthHadEl"))){
+          truth_match_type = 2;
+          m_truthMatchedHadEl++;
+        }
+        if (hadmuditau->auxdata<char>((const char*)("IsTruthHadMu"))){
+          truth_match_type = 3;
+          m_truthMatchedHadMu++;
+        }
+        m_hadMuDiTauTruthMatchType->push_back(truth_match_type);
       }
-      if (hadmuditau->auxdata<char>((const char*)("IsTruthHadEl"))){
-        truth_match_type = 2;
-        m_truthMatchedHadEl++;
-      }
-      if (hadmuditau->auxdata<char>((const char*)("IsTruthHadMu"))){
-        truth_match_type = 3;
-        m_truthMatchedHadMu++;
-      }
-      m_hadMuDiTauTruthMatchType->push_back(truth_match_type);
-      */
     }
     ANA_MSG_INFO("Done with hadmus");
 
