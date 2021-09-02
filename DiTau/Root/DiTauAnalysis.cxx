@@ -338,44 +338,7 @@ StatusCode DiTauAnalysis :: execute ()
   ANA_CHECK( m_hadMuBuilder->execute() );
   const xAOD::DiTauJetContainer* hadmuditaus = nullptr;
   ANA_CHECK( evtStore()->retrieve( hadmuditaus, "DiTauJetsHadMu" ) );
-  /*
-  for (auto ditau: *ditaus) {
-    m_diTauTruthMatchingTool->getTruth(*ditau);
-    if (ditau->auxdata<char>((const char*)("IsTruthHadronic"))){
-      m_truthMatchedHadHad++;
-    }
-    if (ditau->auxdata<char>((const char*)("IsTruthHadEl"))){
-      m_truthMatchedHadEl++;
-    }
-    if (ditau->auxdata<char>((const char*)("IsTruthHadMu"))){
-      m_truthMatchedHadMu++;
-    }
-  }
-  for (auto ditau: *hadelditaus) {
-    m_diTauTruthMatchingTool->getTruth(*ditau);
-    if (ditau->auxdata<char>((const char*)("IsTruthHadronic"))){
-      m_truthMatchedHadHad++;
-    }
-    if (ditau->auxdata<char>((const char*)("IsTruthHadEl"))){
-      m_truthMatchedHadEl++;
-    }
-    if (ditau->auxdata<char>((const char*)("IsTruthHadMu"))){
-      m_truthMatchedHadMu++;
-    }
-  }
-  for (auto ditau: *hadmuditaus) {
-    m_diTauTruthMatchingTool->getTruth(*ditau);
-    if (ditau->auxdata<char>((const char*)("IsTruthHadronic"))){
-      m_truthMatchedHadHad++;
-    }
-    if (ditau->auxdata<char>((const char*)("IsTruthHadEl"))){
-      m_truthMatchedHadEl++;
-    }
-    if (ditau->auxdata<char>((const char*)("IsTruthHadMu"))){
-      m_truthMatchedHadMu++;
-    }
-  }
-  */
+
   m_runNumber = 0;
   m_eventNumber = 0;
 
