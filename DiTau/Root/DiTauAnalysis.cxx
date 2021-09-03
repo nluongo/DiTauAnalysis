@@ -2,8 +2,11 @@
 
 #include <xAODEventInfo/EventInfo.h>
 
+#include "xAODCaloEvent/CaloClusterContainer.h"
+
 #include "AsgTools/ToolHandle.h"
 #include "AsgTools/ToolHandleArray.h"
+#include "AsgTools/AsgToolConfig.h"
 
 #include "xAODTruth/TruthParticle.h"
 #include "xAODTruth/TruthParticleContainer.h"
@@ -16,9 +19,6 @@
 #include "xAODTau/DiTauJet.h"
 #include "xAODTau/DiTauJetContainer.h"
 
-//#include "JetInterface/IJetConstituentModifier.h"
-//#include "JetRecTools/JetConstituentModSequence.h"
-
 #include "TFile.h"
 
 #include <typeinfo>
@@ -26,7 +26,15 @@
 
 DiTauAnalysis :: DiTauAnalysis (const std::string& name,
                                   ISvcLocator *pSvcLocator)
-    : EL::AnaAlgorithm (name, pSvcLocator)
+    : EL::AnaAlgorithm (name, pSvcLocator),
+    m_diTauTruthMatchingTool ("DiTauTruthMatchingTool", this),
+    m_hadElDiTauIDVarCalculator ("DiTauIDVarCalculator/HadElDiTauIDVarCalculator", this),
+    m_hadMuDiTauIDVarCalculator ("DiTauIDVarCalculator/HadMuDiTauIDVarCalculator", this),
+    m_hadElDiTauDiscrTool ("DiTauDiscriminantTool/HadElDiTauDiscrTool", this),
+    m_hadMuDiTauDiscrTool ("DiTauDiscriminantTool/HadMuDiTauDiscrTool", this),
+    m_hadElDiTauWPDecorator ("DiTauWPDecorator/HadElDiTauWPDecorator", this),
+    m_hadMuDiTauWPDecorator ("DiTauWPDecorator/HadMuDiTauWPDecorator", this),
+    m_jetConstituentModSequence("JetConstituentModSequence", this)
 {
   // Here you put any code for the base initialization of variables,
   // e.g. initialize all pointers to 0.  This is also where you
@@ -35,6 +43,14 @@ DiTauAnalysis :: DiTauAnalysis (const std::string& name,
   // rather go into the initialize() function.
   
   declareProperty( "isSignal" , m_isSignal=true );
+  declareProperty( "diTauTruthMatchingTool", m_diTauTruthMatchingTool, "the DiTauTruthMatchingTool");
+  declareProperty( "hadElDiTauIDVarCalculator", m_hadElDiTauIDVarCalculator, "the hadElDiTauIDVarCalculator");
+  declareProperty( "hadMuDiTauIDVarCalculator", m_hadMuDiTauIDVarCalculator, "the hadMuDiTauIDVarCalculator");
+  declareProperty( "hadElDiTauDiscrTool", m_hadElDiTauDiscrTool, "the hadElDiTauDiscriminantTool");
+  declareProperty( "hadMuDiTauDiscrTool", m_hadMuDiTauDiscrTool, "the hadMuDiTauDiscriminantTool");
+  declareProperty( "hadElDiTauWPDecorator", m_hadElDiTauWPDecorator, "the hadElDiTauWPDecorator");
+  declareProperty( "hadMuDiTauWPDecorator", m_hadMuDiTauWPDecorator, "the hadMuDiTauWPDecorator");
+  declareProperty( "jetConstituentModSequence", m_jetConstituentModSequence, "the jetConstituentModSequence");
 }
 
 DiTauAnalysis :: ~DiTauAnalysis () {
@@ -89,7 +105,7 @@ StatusCode DiTauAnalysis :: initialize ()
   // beginning on each worker node, e.g. create histograms and output
   // trees.  This method gets called before any input files are
   // connected.
-  ANA_MSG_INFO("in initialize test");
+  ANA_MSG_INFO("in initialize");
 
   m_mytree = new TTree("mytree", "mytree");
   CHECK( histSvc()->regTree("/ANALYSIS/mytree", m_mytree) );
@@ -221,11 +237,6 @@ StatusCode DiTauAnalysis :: initialize ()
   m_muTight = new std::vector<unsigned int>();
   m_mytree->Branch("MuTight", &m_muTight);
 
-  // TauTruthMatching
-  m_tauTruthMatchingTool = new TauAnalysisTools::TauTruthMatchingTool("TauTruthMatchingTool");
-  CHECK(m_tauTruthMatchingTool->initialize());
-  CHECK(m_tauTruthMatchingTool->setProperty("WriteTruthTaus", true));
-
   // Builders
   m_hadElBuilder = new DiTauRec::HadElBuilder("HadElBuilder");
   CHECK(m_hadElBuilder->initialize());
@@ -233,66 +244,30 @@ StatusCode DiTauAnalysis :: initialize ()
   m_hadMuBuilder = new DiTauRec::HadMuBuilder("HadMuBuilder");
   CHECK(m_hadMuBuilder->initialize());
 
-  // Initialize origin correction
-  ToolHandleArray<IJetConstituentModifier> modifiers;
+  // JetConstituentModSequence
+  ANA_CHECK(m_jetConstituentModSequence.retrieve());
 
-  // CaloClusterOrigin
-  CaloClusterConstituentsOrigin* m_pCaloClusterConstituentsOrigin = new CaloClusterConstituentsOrigin("CaloClusterConstituentsOrigin");
-  CHECK( m_pCaloClusterConstituentsOrigin->setProperty("InputType",xAOD::Type::CaloCluster) );
-  CHECK( m_pCaloClusterConstituentsOrigin->initialize() );
-
-  modifiers.push_back(ToolHandle<IJetConstituentModifier>(m_pCaloClusterConstituentsOrigin));
-
-  // Initialize cluster sequence
-  JetConstituentModSequence jJetConstituentModSequence("JetConstituentModSequence");
-  CHECK( jJetConstituentModSequence.setProperty("InputContainer","CaloCalTopoClusters") );
-  CHECK( jJetConstituentModSequence.setProperty("OutputContainer","LCOriginTopoClusters") );
-  CHECK( jJetConstituentModSequence.setProperty("InputType",xAOD::Type::CaloCluster) );
-  CHECK( jJetConstituentModSequence.setProperty("Modifiers", modifiers) );
-  CHECK( jJetConstituentModSequence.initialize() );
+  //const xAOD::CaloClusterContainer* lc_container = nullptr;
+  //ANA_CHECK( evtStore()->retrieve( lc_container, "LCOriginTopoClusters" ) );
 
   //Override the event store hash for the LCOriginTopoClusters
-  //xAOD::EventFormat* ef = const_cast< xAOD::EventFormat* >( xEvent.inputEventFormat() );
-  //ef->add( xAOD::EventFormatElement( "LCOriginTopoClusters", "xAOD::CaloClusterContainer", "", 0x1bccf189 ) );
+  //m_ef = const_cast< xAOD::EventFormat* >( xEvent.inputEventFormat() );
+  //m_ef->add( xAOD::EventFormatElement( "LCOriginTopoClusters", "xAOD::CaloClusterContainer", "", 0x1bccf189 ) );
 
   // DiTauTruthMatchingTool
-  m_diTauTruthMatchingTool = new TauAnalysisTools::DiTauTruthMatchingTool("DiTauTruthMatchingTool");
-  CHECK(m_diTauTruthMatchingTool->setProperty("WriteTruthTaus", true));
-  CHECK(m_diTauTruthMatchingTool->setProperty("TruthMuonContainerName", "MuonTruthParticles"));
-  CHECK(m_diTauTruthMatchingTool->setProperty("TruthElectronContainerName", "egammaTruthParticles"));
-  CHECK(m_diTauTruthMatchingTool->initialize());
-  ANA_MSG_INFO(m_diTauTruthMatchingTool);
+  ANA_CHECK(m_diTauTruthMatchingTool.retrieve());
 
   // DiTauIDVarCalculators
-  m_hadElDiTauIDVarCalculator = new tauRecTools::DiTauIDVarCalculator("HadElDiTauIdVarCalculator");
-  m_hadElDiTauIDVarCalculator->setProperty("DiTauDecayChannel", "HadEl");
-  CHECK(m_hadElDiTauIDVarCalculator->initialize());
-
-  m_hadMuDiTauIDVarCalculator = new tauRecTools::DiTauIDVarCalculator("HadMuDiTauIdVarCalculator");
-  m_hadMuDiTauIDVarCalculator->setProperty("DiTauDecayChannel", "HadMu");
-  CHECK(m_hadMuDiTauIDVarCalculator->initialize());
+  ANA_CHECK(m_hadElDiTauIDVarCalculator.retrieve());
+  ANA_CHECK(m_hadMuDiTauIDVarCalculator.retrieve());
 
   // DiTauDiscriminantTools
-  m_hadElDiTauDiscrTool = new tauRecTools::DiTauDiscriminantTool("HadElDiTauDiscrTool");
-  m_hadElDiTauDiscrTool->setProperty("DiTauDecayChannel", "HadEl");
-  m_hadElDiTauDiscrTool->setProperty("WeightsFile", "/eos/user/n/nicholas/SWAN_projects/DiTauReco/DiTauLepHadExample/weight_files/bdt_hadel_v9.root");
-  CHECK(m_hadElDiTauDiscrTool->initialize());
-
-  m_hadMuDiTauDiscrTool = new tauRecTools::DiTauDiscriminantTool("HadMuDiTauDiscrTool");
-  m_hadMuDiTauDiscrTool->setProperty("DiTauDecayChannel", "HadMu");
-  m_hadMuDiTauDiscrTool->setProperty("WeightsFile", "/eos/user/n/nicholas/SWAN_projects/DiTauReco/DiTauLepHadExample/weight_files/bdt_hadmu_v18.root");
-  CHECK(m_hadMuDiTauDiscrTool->initialize());
+  ANA_CHECK(m_hadElDiTauDiscrTool.retrieve());
+  ANA_CHECK(m_hadMuDiTauDiscrTool.retrieve());
 
   // DiTauWPDecorators
-  m_hadElDiTauWPDecorator = new tauRecTools::DiTauWPDecorator("HadElDiTauWPDecorator");
-  m_hadElDiTauWPDecorator->setProperty("DiTauDecayChannel", "HadEl");
-  m_hadElDiTauWPDecorator->setProperty("flatteningFile", "/eos/user/n/nicholas/SWAN_projects/DiTauReco/DiTauLepHadExample/weight_files/tuner_hadel_v9.root");
-  m_hadElDiTauWPDecorator->initialize();
-
-  m_hadMuDiTauWPDecorator = new tauRecTools::DiTauWPDecorator("HadMuDiTauWPDecorator");
-  m_hadMuDiTauWPDecorator->setProperty("DiTauDecayChannel", "HadMu");
-  m_hadMuDiTauWPDecorator->setProperty("flatteningFile", "/eos/user/n/nicholas/SWAN_projects/DiTauReco/DiTauLepHadExample/weight_files/tuner_hadmu_v18.root");
-  m_hadMuDiTauWPDecorator->initialize();
+  ANA_CHECK(m_hadElDiTauWPDecorator.retrieve());
+  ANA_CHECK(m_hadMuDiTauWPDecorator.retrieve());
 
   return StatusCode::SUCCESS;
 }

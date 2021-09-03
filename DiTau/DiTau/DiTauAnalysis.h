@@ -3,6 +3,10 @@
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
 
+#include "AsgTools/ToolHandle.h"
+
+#include "xAODEventFormat/EventFormat.h"
+
 #include "DiTauRec/HadElBuilder.h"
 #include "DiTauRec/HadMuBuilder.h"
 
@@ -10,13 +14,16 @@
 #include "tauRecTools/DiTauIDVarCalculator.h"
 #include "tauRecTools/DiTauWPDecorator.h"
 #include "tauRecTools/BuildTruthTaus.h"
+#include "tauRecTools/IDiTauToolBase.h"
 
 #include "TauAnalysisTools/DiTauTruthMatchingTool.h"
+#include "TauAnalysisTools/IDiTauTruthMatchingTool.h"
 #include "TauAnalysisTools/TauTruthMatchingTool.h"
 
 #include "JetRecTools/CaloClusterConstituentsOrigin.h"
-#include "JetInterface/IJetConstituentModifier.h"
 #include "JetRecTools/JetConstituentModSequence.h" 
+#include "JetInterface/IJetConstituentModifier.h"
+#include "JetInterface/IJetExecuteTool.h"
 
 class DiTauAnalysis : public EL::AnaAlgorithm
 {
@@ -41,25 +48,26 @@ private:
   TFile* m_myfile = 0;
   TTree* m_mytree = 0;
 
-  TauAnalysisTools::TauTruthMatchingTool* m_tauTruthMatchingTool;
+  xAOD::EventFormat* m_ef;
 
-  tauRecTools::DiTauIDVarCalculator* m_hadElDiTauIDVarCalculator;
-  tauRecTools::DiTauDiscriminantTool* m_hadElDiTauDiscrTool;
-  tauRecTools::DiTauWPDecorator* m_hadElDiTauWPDecorator;
+  //TauAnalysisTools::TauTruthMatchingTool* m_tauTruthMatchingTool;
 
-  tauRecTools::DiTauIDVarCalculator* m_hadMuDiTauIDVarCalculator;
-  tauRecTools::DiTauDiscriminantTool* m_hadMuDiTauDiscrTool;
-  tauRecTools::DiTauWPDecorator* m_hadMuDiTauWPDecorator;
+  ToolHandle<tauRecTools::IDiTauToolBase> m_hadElDiTauIDVarCalculator;
+  ToolHandle<tauRecTools::IDiTauToolBase> m_hadMuDiTauIDVarCalculator;
 
-  tauRecTools::BuildTruthTaus* m_buildTruthTaus;
+  ToolHandle<tauRecTools::IDiTauToolBase> m_hadElDiTauDiscrTool;
+  ToolHandle<tauRecTools::IDiTauToolBase> m_hadMuDiTauDiscrTool;
+
+  ToolHandle<tauRecTools::IDiTauToolBase> m_hadElDiTauWPDecorator;
+  ToolHandle<tauRecTools::IDiTauToolBase> m_hadMuDiTauWPDecorator;
 
   DiTauRec::ILepHadBuilder* m_hadElBuilder;
   DiTauRec::ILepHadBuilder* m_hadMuBuilder;
 
-  TauAnalysisTools::DiTauTruthMatchingTool* m_diTauTruthMatchingTool;
+  ToolHandle<TauAnalysisTools::IDiTauTruthMatchingTool> m_diTauTruthMatchingTool;
   
-  ToolHandleArray<IJetConstituentModifier> modifiers;
-  CaloClusterConstituentsOrigin* m_pCaloClusterConstituentsOrigin;
+  ToolHandle<IJetConstituentModifier> m_pCaloClusterConstituentsOrigin;
+  ToolHandle<IJetExecuteTool> m_jetConstituentModSequence;
 
   unsigned int m_eventsPassed = 0;
   unsigned int m_pdgTruthMatchType = 0;

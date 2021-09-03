@@ -59,12 +59,57 @@ jps.AthenaCommonFlags.HistOutputs = ["ANALYSIS:"+outName]
 #from AnaAlgorithm.DualUseConfig import createAlgorithm
 #alg = createAlgorithm ( 'DiTauAnalysis', 'AnalysisAlg' )
 from AthenaCommon import CfgMgr
+from AnaAlgorithm.DualUseConfig import addPrivateTool
 algClass = getattr(CfgMgr, 'DiTauAnalysis')
 alg = algClass('AnalysisAlg')
 
 # later on we'll add some configuration options for our algorithm that go here
 #alg.outName = outName
 alg.isSignal = isSignal
+
+# DiTauTruthMatchingTool configuration
+addPrivateTool( alg, 'diTauTruthMatchingTool', 'TauAnalysisTools::DiTauTruthMatchingTool')
+alg.diTauTruthMatchingTool.WriteTruthTaus = 1
+alg.diTauTruthMatchingTool.TruthMuonContainerName = 'MuonTruthParticles'
+alg.diTauTruthMatchingTool.TruthElectronContainerName = 'egammaTruthParticles'
+
+# DiTauIDVarCalculator configuration
+addPrivateTool( alg, 'hadElDiTauIDVarCalculator', 'tauRecTools::DiTauIDVarCalculator')
+alg.hadElDiTauIDVarCalculator.DiTauDecayChannel = 'HadEl'
+
+addPrivateTool( alg, 'hadMuDiTauIDVarCalculator', 'tauRecTools::DiTauIDVarCalculator')
+alg.hadMuDiTauIDVarCalculator.DiTauDecayChannel = 'HadMu'
+
+# DiTauDiscriminantTool configuration
+addPrivateTool( alg, 'hadElDiTauDiscrTool', 'tauRecTools::DiTauDiscriminantTool')
+alg.hadElDiTauDiscrTool.DiTauDecayChannel = 'HadEl'
+alg.hadElDiTauDiscrTool.WeightsFile = '/eos/user/n/nicholas/SWAN_projects/DiTauReco/DiTauLepHadExample/weight_files/bdt_hadel_v9.root'
+
+addPrivateTool( alg, 'hadMuDiTauDiscrTool', 'tauRecTools::DiTauDiscriminantTool')
+alg.hadMuDiTauDiscrTool.DiTauDecayChannel = 'HadMu'
+alg.hadMuDiTauDiscrTool.WeightsFile = '/eos/user/n/nicholas/SWAN_projects/DiTauReco/DiTauLepHadExample/weight_files/bdt_hadmu_v18.root'
+
+# DiTauWPDecorator configuration
+addPrivateTool( alg, 'hadElDiTauWPDecorator', 'tauRecTools::DiTauWPDecorator')
+alg.hadElDiTauWPDecorator.DiTauDecayChannel = 'HadEl'
+alg.hadElDiTauWPDecorator.flatteningFile = '/eos/user/n/nicholas/SWAN_projects/DiTauReco/DiTauLepHadExample/weight_files/tuner_hadel_v9.root'
+
+addPrivateTool( alg, 'hadMuDiTauWPDecorator', 'tauRecTools::DiTauWPDecorator')
+alg.hadMuDiTauWPDecorator.DiTauDecayChannel = 'HadMu'
+alg.hadMuDiTauWPDecorator.flatteningFile = '/eos/user/n/nicholas/SWAN_projects/DiTauReco/DiTauLepHadExample/weight_files/tuner_hadmu_v18.root'
+
+from AthenaCommon.AppMgr import ToolSvc
+from JetRecTools.JetRecToolsConf import CaloClusterConstituentsOrigin
+
+clusterOrigin = CaloClusterConstituentsOrigin("CaloClusterConstitOrigin",
+                                              InputType=1)
+ToolSvc += clusterOrigin
+
+addPrivateTool( alg, 'jetConstituentModSequence', 'JetConstituentModSequence')
+alg.jetConstituentModSequence.InputContainer = 'CaloCalTopoClusters'
+alg.jetConstituentModSequence.OutputContainer = 'LCOriginTopoClusters'
+alg.jetConstituentModSequence.InputType = 1
+alg.jetConstituentModSequence.Modifiers = [clusterOrigin]
 
 # Add our algorithm to the main alg sequence
 athAlgSeq += alg
