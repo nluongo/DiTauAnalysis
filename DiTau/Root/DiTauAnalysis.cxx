@@ -189,6 +189,7 @@ StatusCode DiTauAnalysis :: initialize ()
   m_hadMuDiTauTruthMatchType = new std::vector<unsigned int>();
   m_mytree->Branch("HadMuDiTauTruthMatchType", &m_hadMuDiTauTruthMatchType);
 
+  // Taus
   m_mytree->Branch("NTau", &m_nTaus);
   m_tauPt = new std::vector<float>();
   m_mytree->Branch("TauPt", &m_tauPt);
@@ -198,29 +199,57 @@ StatusCode DiTauAnalysis :: initialize ()
   m_mytree->Branch("TauPhi", &m_tauPhi);
   m_tauE = new std::vector<float>();
   m_mytree->Branch("TauE", &m_tauE);
-  m_tauLoose = new std::vector<unsigned int>();
-  m_mytree->Branch("TauLoose", &m_tauLoose);
-  m_tauMedium = new std::vector<unsigned int>();
-  m_mytree->Branch("TauMedium", &m_tauMedium);
-  m_tauTight = new std::vector<unsigned int>();
-  m_mytree->Branch("TauTight", &m_tauTight);
+  m_mytree->Branch("LeadingTauPt", &m_leadingTauPt);
+  m_mytree->Branch("LeadingTauEta", &m_leadingTauEta);
+  m_mytree->Branch("LeadingTauPhi", &m_leadingTauPhi);
+  m_mytree->Branch("LeadingTauE", &m_leadingTauE);
 
-  m_mytree->Branch("NEle", &m_nElectrons);
-  m_elePt = new std::vector<float>();
-  m_mytree->Branch("ElePt", &m_elePt);
-  m_eleEta = new std::vector<float>();
-  m_mytree->Branch("EleEta", &m_eleEta);
-  m_elePhi = new std::vector<float>();
-  m_mytree->Branch("ElePhi", &m_elePhi);
-  m_eleE = new std::vector<float>();
-  m_mytree->Branch("EleE", &m_eleE);
-  m_eleLoose = new std::vector<unsigned int>();
-  m_mytree->Branch("EleLoose", &m_eleLoose);
-  m_eleMedium = new std::vector<unsigned int>();
-  m_mytree->Branch("EleMedium", &m_eleMedium);
-  m_eleTight = new std::vector<unsigned int>();
-  m_mytree->Branch("EleTight", &m_eleTight);
+  // Loose taus
+  m_mytree->Branch("NTauLoose", &m_nTausLoose);
+  m_tauLoosePt = new std::vector<float>();
+  m_mytree->Branch("TauLoosePt", &m_tauLoosePt);
+  m_tauLooseEta = new std::vector<float>();
+  m_mytree->Branch("TauLooseEta", &m_tauLooseEta);
+  m_tauLoosePhi = new std::vector<float>();
+  m_mytree->Branch("TauLoosePhi", &m_tauLoosePhi);
+  m_tauLooseE = new std::vector<float>();
+  m_mytree->Branch("TauLooseE", &m_tauLooseE);
+  m_mytree->Branch("LeadingTauLoosePt", &m_leadingTauLoosePt);
+  m_mytree->Branch("LeadingTauLooseEta", &m_leadingTauLooseEta);
+  m_mytree->Branch("LeadingTauLoosePhi", &m_leadingTauLoosePhi);
+  m_mytree->Branch("LeadingTauLooseE", &m_leadingTauLooseE);
 
+  // Medium taus
+  m_mytree->Branch("NTauMedium", &m_nTausMedium);
+  m_tauMediumPt = new std::vector<float>();
+  m_mytree->Branch("TauMediumPt", &m_tauMediumPt);
+  m_tauMediumEta = new std::vector<float>();
+  m_mytree->Branch("TauMediumEta", &m_tauMediumEta);
+  m_tauMediumPhi = new std::vector<float>();
+  m_mytree->Branch("TauMediumPhi", &m_tauMediumPhi);
+  m_tauMediumE = new std::vector<float>();
+  m_mytree->Branch("TauMediumE", &m_tauMediumE);
+  m_mytree->Branch("LeadingTauMediumPt", &m_leadingTauMediumPt);
+  m_mytree->Branch("LeadingTauMediumEta", &m_leadingTauMediumEta);
+  m_mytree->Branch("LeadingTauMediumPhi", &m_leadingTauMediumPhi);
+  m_mytree->Branch("LeadingTauMediumE", &m_leadingTauMediumE);
+
+  // Tight taus
+  m_mytree->Branch("NTauTight", &m_nTausTight);
+  m_tauTightPt = new std::vector<float>();
+  m_mytree->Branch("TauTightPt", &m_tauTightPt);
+  m_tauTightEta = new std::vector<float>();
+  m_mytree->Branch("TauTightEta", &m_tauTightEta);
+  m_tauTightPhi = new std::vector<float>();
+  m_mytree->Branch("TauTightPhi", &m_tauTightPhi);
+  m_tauTightE = new std::vector<float>();
+  m_mytree->Branch("TauTightE", &m_tauTightE);
+  m_mytree->Branch("LeadingTauTightPt", &m_leadingTauTightPt);
+  m_mytree->Branch("LeadingTauTightEta", &m_leadingTauTightEta);
+  m_mytree->Branch("LeadingTauTightPhi", &m_leadingTauTightPhi);
+  m_mytree->Branch("LeadingTauTightE", &m_leadingTauTightE);
+
+  // Muons
   m_mytree->Branch("NMu", &m_nMuons);
   m_muPt = new std::vector<float>();
   m_mytree->Branch("MuPt", &m_muPt);
@@ -230,12 +259,154 @@ StatusCode DiTauAnalysis :: initialize ()
   m_mytree->Branch("MuPhi", &m_muPhi);
   m_muE = new std::vector<float>();
   m_mytree->Branch("MuE", &m_muE);
-  m_muLoose = new std::vector<unsigned int>();
-  m_mytree->Branch("MuLoose", &m_muLoose);
-  m_muMedium = new std::vector<unsigned int>();
-  m_mytree->Branch("MuMedium", &m_muMedium);
-  m_muTight = new std::vector<unsigned int>();
-  m_mytree->Branch("MuTight", &m_muTight);
+  m_mytree->Branch("LeadingMuPt", &m_leadingMuPt);
+  m_mytree->Branch("LeadingMuEta", &m_leadingMuEta);
+  m_mytree->Branch("LeadingMuPhi", &m_leadingMuPhi);
+  m_mytree->Branch("LeadingMuE", &m_leadingMuE);
+
+  // Loose muons
+  m_mytree->Branch("NMuLoose", &m_nMuonsLoose);
+  m_muLoosePt = new std::vector<float>();
+  m_mytree->Branch("MuLoosePt", &m_muLoosePt);
+  m_muLooseEta = new std::vector<float>();
+  m_mytree->Branch("MuLooseEta", &m_muLooseEta);
+  m_muLoosePhi = new std::vector<float>();
+  m_mytree->Branch("MuLoosePhi", &m_muLoosePhi);
+  m_muLooseE = new std::vector<float>();
+  m_mytree->Branch("MuLooseE", &m_muLooseE);
+  m_mytree->Branch("LeadingMuLoosePt", &m_leadingMuLoosePt);
+  m_mytree->Branch("LeadingMuLooseEta", &m_leadingMuLooseEta);
+  m_mytree->Branch("LeadingMuLoosePhi", &m_leadingMuLoosePhi);
+  m_mytree->Branch("LeadingMuLooseE", &m_leadingMuLooseE);
+
+  // Medium muons
+  m_mytree->Branch("NMuMedium", &m_nMuonsMedium);
+  m_muMediumPt = new std::vector<float>();
+  m_mytree->Branch("MuMediumPt", &m_muMediumPt);
+  m_muMediumEta = new std::vector<float>();
+  m_mytree->Branch("MuMediumEta", &m_muMediumEta);
+  m_muMediumPhi = new std::vector<float>();
+  m_mytree->Branch("MuMediumPhi", &m_muMediumPhi);
+  m_muMediumE = new std::vector<float>();
+  m_mytree->Branch("MuMediumE", &m_muMediumE);
+  m_mytree->Branch("LeadingMuMediumPt", &m_leadingMuMediumPt);
+  m_mytree->Branch("LeadingMuMediumEta", &m_leadingMuMediumEta);
+  m_mytree->Branch("LeadingMuMediumPhi", &m_leadingMuMediumPhi);
+  m_mytree->Branch("LeadingMuMediumE", &m_leadingMuMediumE);
+
+  // Tight muons
+  m_mytree->Branch("NMuTight", &m_nMuonsTight);
+  m_muTightPt = new std::vector<float>();
+  m_mytree->Branch("MuTightPt", &m_muTightPt);
+  m_muTightEta = new std::vector<float>();
+  m_mytree->Branch("MuTightEta", &m_muTightEta);
+  m_muTightPhi = new std::vector<float>();
+  m_mytree->Branch("MuTightPhi", &m_muTightPhi);
+  m_muTightE = new std::vector<float>();
+  m_mytree->Branch("MuTightE", &m_muTightE);
+  m_mytree->Branch("LeadingMuTightPt", &m_leadingMuTightPt);
+  m_mytree->Branch("LeadingMuTightEta", &m_leadingMuTightEta);
+  m_mytree->Branch("LeadingMuTightPhi", &m_leadingMuTightPhi);
+  m_mytree->Branch("LeadingMuTightE", &m_leadingMuTightE);
+
+  // Electrons
+  m_mytree->Branch("NEle", &m_nElectrons);
+  m_elePt = new std::vector<float>();
+  m_mytree->Branch("ElePt", &m_elePt);
+  m_eleEta = new std::vector<float>();
+  m_mytree->Branch("EleEta", &m_eleEta);
+  m_elePhi = new std::vector<float>();
+  m_mytree->Branch("ElePhi", &m_elePhi);
+  m_eleE = new std::vector<float>();
+  m_mytree->Branch("EleE", &m_eleE);
+  m_mytree->Branch("LeadingElePt", &m_leadingElePt);
+  m_mytree->Branch("LeadingEleEta", &m_leadingEleEta);
+  m_mytree->Branch("LeadingElePhi", &m_leadingElePhi);
+  m_mytree->Branch("LeadingEleE", &m_leadingEleE);
+
+  // Loose electrons
+  m_mytree->Branch("NEleLoose", &m_nElectronsLoose);
+  m_eleLoosePt = new std::vector<float>();
+  m_mytree->Branch("EleLoosePt", &m_eleLoosePt);
+  m_eleLooseEta = new std::vector<float>();
+  m_mytree->Branch("EleLooseEta", &m_eleLooseEta);
+  m_eleLoosePhi = new std::vector<float>();
+  m_mytree->Branch("EleLoosePhi", &m_eleLoosePhi);
+  m_eleLooseE = new std::vector<float>();
+  m_mytree->Branch("EleLooseE", &m_eleLooseE);
+  m_mytree->Branch("LeadingEleLoosePt", &m_leadingEleLoosePt);
+  m_mytree->Branch("LeadingEleLooseEta", &m_leadingEleLooseEta);
+  m_mytree->Branch("LeadingEleLoosePhi", &m_leadingEleLoosePhi);
+  m_mytree->Branch("LeadingEleLooseE", &m_leadingEleLooseE);
+
+  // Medium electrons
+  m_mytree->Branch("NEleMedium", &m_nElectronsMedium);
+  m_eleMediumPt = new std::vector<float>();
+  m_mytree->Branch("EleMediumPt", &m_eleMediumPt);
+  m_eleMediumEta = new std::vector<float>();
+  m_mytree->Branch("EleMediumEta", &m_eleMediumEta);
+  m_eleMediumPhi = new std::vector<float>();
+  m_mytree->Branch("EleMediumPhi", &m_eleMediumPhi);
+  m_eleMediumE = new std::vector<float>();
+  m_mytree->Branch("EleMediumE", &m_eleMediumE);
+  m_mytree->Branch("LeadingEleMediumPt", &m_leadingEleMediumPt);
+  m_mytree->Branch("LeadingEleMediumEta", &m_leadingEleMediumEta);
+  m_mytree->Branch("LeadingEleMediumPhi", &m_leadingEleMediumPhi);
+  m_mytree->Branch("LeadingEleMediumE", &m_leadingEleMediumE);
+
+  // Tight electrons
+  m_mytree->Branch("NEleTight", &m_nElectronsTight);
+  m_eleTightPt = new std::vector<float>();
+  m_mytree->Branch("EleTightPt", &m_eleTightPt);
+  m_eleTightEta = new std::vector<float>();
+  m_mytree->Branch("EleTightEta", &m_eleTightEta);
+  m_eleTightPhi = new std::vector<float>();
+  m_mytree->Branch("EleTightPhi", &m_eleTightPhi);
+  m_eleTightE = new std::vector<float>();
+  m_mytree->Branch("EleTightE", &m_eleTightE);
+  m_mytree->Branch("LeadingEleTightPt", &m_leadingEleTightPt);
+  m_mytree->Branch("LeadingEleTightEta", &m_leadingEleTightEta);
+  m_mytree->Branch("LeadingEleTightPhi", &m_leadingEleTightPhi);
+  m_mytree->Branch("LeadingEleTightE", &m_leadingEleTightE);
+
+  // Jets
+  m_mytree->Branch("NJet", &m_nJets);
+  m_jetPt = new std::vector<float>();
+  m_mytree->Branch("JetPt", &m_jetPt);
+  m_jetEta = new std::vector<float>();
+  m_mytree->Branch("JetEta", &m_jetEta);
+  m_jetPhi = new std::vector<float>();
+  m_mytree->Branch("JetPhi", &m_jetPhi);
+  m_jetE = new std::vector<float>();
+  m_mytree->Branch("JetE", &m_jetE);
+  m_mytree->Branch("LeadingJetPt", &m_leadingJetPt);
+  m_mytree->Branch("LeadingJetEta", &m_leadingJetEta);
+  m_mytree->Branch("LeadingJetPhi", &m_leadingJetPhi);
+  m_mytree->Branch("LeadingJetE", &m_leadingJetE);
+  m_mytree->Branch("SubleadingJetPt", &m_subleadingJetPt);
+  m_mytree->Branch("SubleadingJetEta", &m_subleadingJetEta);
+  m_mytree->Branch("SubleadingJetPhi", &m_subleadingJetPhi);
+  m_mytree->Branch("SubleadingJetE", &m_subleadingJetE);
+
+  // Large-R jets
+  m_mytree->Branch("NJet", &m_nLargeRJets);
+  m_lRJetPt = new std::vector<float>();
+  m_mytree->Branch("LargeRlRJetPt", &m_lRJetPt);
+  m_lRJetEta = new std::vector<float>();
+  m_mytree->Branch("LargeRlRJetEta", &m_lRJetEta);
+  m_lRJetPhi = new std::vector<float>();
+  m_mytree->Branch("LargeRlRJetPhi", &m_lRJetPhi);
+  m_lRJetE = new std::vector<float>();
+  m_mytree->Branch("LargeRlRJetE", &m_lRJetE);
+  m_mytree->Branch("LeadingLargeRJetPt", &m_leadingLRJetPt);
+  m_mytree->Branch("LeadingLargeRJetEta", &m_leadingLRJetEta);
+  m_mytree->Branch("LeadingLargeRJetPhi", &m_leadingLRJetPhi);
+  m_mytree->Branch("LeadingLargeRJetE", &m_leadingLRJetE);
+  m_mytree->Branch("SubleadingLargeRJetPt", &m_subleadingLRJetPt);
+  m_mytree->Branch("SubleadingLargeRJetEta", &m_subleadingLRJetEta);
+  m_mytree->Branch("SubleadingLargeRJetPhi", &m_subleadingLRJetPhi);
+  m_mytree->Branch("SubleadingLargeRJetE", &m_subleadingLRJetE);
+
 
   // Builders
   m_hadElBuilder = new DiTauRec::HadElBuilder("HadElBuilder");
@@ -302,6 +473,12 @@ StatusCode DiTauAnalysis :: execute ()
 
   const xAOD::TauJetContainer* taus = nullptr;
   ANA_CHECK( evtStore()->retrieve( taus, "TauJets" ) );
+
+  const xAOD::JetContainer* jets = nullptr;
+  ANA_CHECK( evtStore()->retrieve( jets, "AntiKt4LCTopoJets" ) );
+
+  const xAOD::JetContainer* largerjets = nullptr;
+  ANA_CHECK( evtStore()->retrieve( largerjets, "HLT_xAOD__JetContainer_a10r_tcemsubjesFS" ) );
 
   const xAOD::DiTauJetContainer* ditaus = nullptr;
   ANA_CHECK( evtStore()->retrieve( ditaus, "DiTauJets" ) );
@@ -374,42 +551,183 @@ StatusCode DiTauAnalysis :: execute ()
   m_hadMuDiTauFlatBDTScore->clear();
   m_hadMuDiTauTruthMatchType->clear();
 
+  // Taus
   m_nTaus = 0;
   m_tauPt->clear();
   m_tauEta->clear();
   m_tauPhi->clear();
   m_tauE->clear();
-  m_tauLoose->clear();
-  m_tauMedium->clear();
-  m_tauTight->clear();
+  m_leadingTauPt = 0;
+  m_leadingTauEta = 0;
+  m_leadingTauPhi = 0;
+  m_leadingTauE = 0;
 
+  // Loose taus
+  m_nTausLoose = 0;
+  m_tauLoosePt->clear();
+  m_tauLooseEta->clear();
+  m_tauLoosePhi->clear();
+  m_tauLooseE->clear();
+  m_leadingTauLoosePt = 0;
+  m_leadingTauLooseEta = 0;
+  m_leadingTauLoosePhi = 0;
+  m_leadingTauLooseE = 0;
+
+  // Medium taus
+  m_nTausMedium = 0;
+  m_tauMediumPt->clear();
+  m_tauMediumEta->clear();
+  m_tauMediumPhi->clear();
+  m_tauMediumE->clear();
+  m_leadingTauMediumPt = 0;
+  m_leadingTauMediumEta = 0;
+  m_leadingTauMediumPhi = 0;
+  m_leadingTauMediumE = 0;
+
+  // Tight taus
+  m_nTausTight = 0;
+  m_tauTightPt->clear();
+  m_tauTightEta->clear();
+  m_tauTightPhi->clear();
+  m_tauTightE->clear();
+  m_leadingTauTightPt = 0;
+  m_leadingTauTightEta = 0;
+  m_leadingTauTightPhi = 0;
+  m_leadingTauTightE = 0;
+
+  // Muons
   m_nMuons = 0;
   m_muPt->clear();
   m_muEta->clear();
   m_muPhi->clear();
   m_muE->clear();
-  m_muLoose->clear();
-  m_muMedium->clear();
-  m_muTight->clear();
+  m_leadingMuPt = 0;
+  m_leadingMuEta = 0;
+  m_leadingMuPhi = 0;
+  m_leadingMuE = 0;
 
+  // Loose muons
+  m_nMuonsLoose = 0;
+  m_muLoosePt->clear();
+  m_muLooseEta->clear();
+  m_muLoosePhi->clear();
+  m_muLooseE->clear();
+  m_leadingMuLoosePt = 0;
+  m_leadingMuLooseEta = 0;
+  m_leadingMuLoosePhi = 0;
+  m_leadingMuLooseE = 0;
+
+  // Medium muons
+  m_nMuonsMedium = 0;
+  m_muMediumPt->clear();
+  m_muMediumEta->clear();
+  m_muMediumPhi->clear();
+  m_muMediumE->clear();
+  m_leadingMuMediumPt = 0;
+  m_leadingMuMediumEta = 0;
+  m_leadingMuMediumPhi = 0;
+  m_leadingMuMediumE = 0;
+
+  // Tight muons
+  m_nMuonsTight = 0;
+  m_muTightPt->clear();
+  m_muTightEta->clear();
+  m_muTightPhi->clear();
+  m_muTightE->clear();
+  m_leadingMuTightPt = 0;
+  m_leadingMuTightEta = 0;
+  m_leadingMuTightPhi = 0;
+  m_leadingMuTightE = 0;
+
+  // Electrons
   m_nElectrons = 0;
   m_elePt->clear();
   m_eleEta->clear();
   m_elePhi->clear();
   m_eleE->clear();
-  m_eleLoose->clear();
-  m_eleMedium->clear();
-  m_eleTight->clear();
+  m_leadingElePt = 0;
+  m_leadingEleEta = 0;
+  m_leadingElePhi = 0;
+  m_leadingEleE = 0;
 
-  const xAOD::TruthParticle* truth_tau_higgs = nullptr;
+  // Loose electrons
+  m_nElectronsLoose = 0;
+  m_eleLoosePt->clear();
+  m_eleLooseEta->clear();
+  m_eleLoosePhi->clear();
+  m_eleLooseE->clear();
+  m_leadingEleLoosePt = 0;
+  m_leadingEleLooseEta = 0;
+  m_leadingEleLoosePhi = 0;
+  m_leadingEleLooseE = 0;
+
+  // Medium electrons
+  m_nElectronsMedium = 0;
+  m_eleMediumPt->clear();
+  m_eleMediumEta->clear();
+  m_eleMediumPhi->clear();
+  m_eleMediumE->clear();
+  m_leadingEleMediumPt = 0;
+  m_leadingEleMediumEta = 0;
+  m_leadingEleMediumPhi = 0;
+  m_leadingEleMediumE = 0;
+
+  // Tight electrons
+  m_nElectronsTight = 0;
+  m_eleTightPt->clear();
+  m_eleTightEta->clear();
+  m_eleTightPhi->clear();
+  m_eleTightE->clear();
+  m_leadingEleTightPt = 0;
+  m_leadingEleTightEta = 0;
+  m_leadingEleTightPhi = 0;
+  m_leadingEleTightE = 0;
+
+  // Jets
+  m_nJets = 0;
+  m_jetPt->clear();
+  m_jetEta->clear();
+  m_jetPhi->clear();
+  m_jetE->clear();
+  m_leadingJetPt = 0;
+  m_leadingJetEta = 0;
+  m_leadingJetPhi = 0;
+  m_leadingJetE = 0;
+  m_subleadingJetPt = 0;
+  m_subleadingJetEta = 0;
+  m_subleadingJetPhi = 0;
+  m_subleadingJetE = 0;
+
+  // Large-R Jets
+  m_nLargeRJets = 0;
+  m_lRJetPt->clear();
+  m_lRJetEta->clear();
+  m_lRJetPhi->clear();
+  m_lRJetE->clear();
+  m_leadingLRJetPt = 0;
+  m_leadingLRJetEta = 0;
+  m_leadingLRJetPhi = 0;
+  m_leadingLRJetE = 0;
+  m_leadingLRJetM = 0;
+  m_subleadingLRJetPt = 0;
+  m_subleadingLRJetEta = 0;
+  m_subleadingLRJetPhi = 0;
+  m_subleadingLRJetE = 0;
+  m_subleadingLRJetM = 0;
+
+  const xAOD::TruthParticle* truth_jet_higgs = nullptr;
   const xAOD::TruthParticle* truth_b_higgs = nullptr;
-  const xAOD::TruthParticle* truth_tau = nullptr;
-  const xAOD::TruthParticle* truth_anti_tau = nullptr;
-  const xAOD::TruthParticle* truth_leptonic_tau = nullptr;
-  const xAOD::TruthParticle* truth_hadronic_tau = nullptr;
+  const xAOD::TruthParticle* truth_jet = nullptr;
+  const xAOD::TruthParticle* truth_anti_jet = nullptr;
+  const xAOD::TruthParticle* truth_leptonic_jet = nullptr;
+  const xAOD::TruthParticle* truth_jet_higgs = nullptr;
+  const xAOD::TruthParticle* truth_b_higgs = nullptr;
+  const xAOD::TruthParticle* truth_jet = nullptr;
+  const xAOD::TruthParticle* truth_anti_jet = nullptr;
+  const xAOD::TruthParticle* truth_leptonic_jet = nullptr;
+  const xAOD::TruthParticle* truth_hadronic_jet = nullptr;
   const xAOD::TruthParticle* truth_final_lepton = nullptr;
   
-
   bool has_tau = 0;
   bool has_anti_tau = 0;
   bool has_lepton = 0;
@@ -660,6 +978,7 @@ StatusCode DiTauAnalysis :: execute ()
         ANA_MSG_INFO(m_hadMuDiTauIDVarCalculator);
         CHECK(m_hadMuDiTauIDVarCalculator->execute(*hadmuditau));
 
+        /*
         ANA_MSG_INFO("DiscrTool");
         CHECK(m_hadMuDiTauDiscrTool->execute(*hadmuditau));
         ANA_MSG_INFO("WPDecorator");
@@ -668,6 +987,7 @@ StatusCode DiTauAnalysis :: execute ()
         double flat_bdt = hadmuditau->auxdata<double>("JetBDTFlat");
         m_hadMuDiTauBDTScore->push_back(bdt);
         m_hadMuDiTauFlatBDTScore->push_back(flat_bdt);
+        */
 
         m_diTauTruthMatchingTool->getTruth(*hadmuditau);
         unsigned int truth_match_type = 0;

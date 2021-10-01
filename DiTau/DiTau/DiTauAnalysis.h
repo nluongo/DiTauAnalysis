@@ -176,10 +176,6 @@ private:
   float m_leadingTauTightPhi = 0;
   float m_leadingTauTightE = 0;
 
-  std::vector<unsigned int> *m_tauLoose = nullptr;
-  std::vector<unsigned int> *m_tauMedium = nullptr;
-  std::vector<unsigned int> *m_tauTight = nullptr;
-
   // Muons
   unsigned int m_nMuons = 0;
   std::vector<float> *m_muPt = nullptr;
@@ -224,10 +220,6 @@ private:
   float m_leadingMuTightPhi = 0;
   float m_leadingMuTightE = 0;
 
-  std::vector<unsigned int> *m_muLoose = nullptr;
-  std::vector<unsigned int> *m_muMedium = nullptr;
-  std::vector<unsigned int> *m_muTight = nullptr;
-
   // Electrons
   unsigned int m_nElectrons = 0;
   std::vector<float> *m_elePt = nullptr;
@@ -271,10 +263,6 @@ private:
   float m_leadingEleTightEta = 0;
   float m_leadingEleTightPhi = 0;
   float m_leadingEleTightE = 0;
-
-  std::vector<unsigned int> *m_eleLoose = nullptr;
-  std::vector<unsigned int> *m_eleMedium = nullptr;
-  std::vector<unsigned int> *m_eleTight = nullptr;
 
   // Jets
   unsigned int m_nJets = 0;
