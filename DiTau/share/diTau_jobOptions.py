@@ -1,11 +1,23 @@
 #See: https://twiki.cern.ch/twiki/bin/viewauth/AtlasComputing/SoftwareTutorialxAODAnalysisInCMake for more details about anything here
-
 from glob import glob
+'''
+import argparse
 
+parser = argparse.ArgumentParser()
+parser.add_argument('sample', type=str, default='X2000AOD')
+parser.add_argument('--nevents', type=int, default=10000)
+args = vars(parser.parse_args())
+sample = args['sample']
+nevents = args['--nevents']
+print('Sample: {}'.format(sample))
+print('NEvents: {}'.format(nevents))
+'''
 print('In jobOptions')
 
-sample = 'X2000AOD'
-
+if sample == 'X1600AOD':
+    myFiles = glob('/eos/user/n/nicholas/SWAN_projects/DiTauReco/samples/user.nicholas.mc16_13TeV.450166.MadGraphHerwig7EvtGen_PDF23LO_X1600tohh_bbtautau_lephad.recon.AOD.e8317_s3126_r10724_der1632783813/*')
+    outName = 'ditau_450166_X1600tohh_bbtautau_lephad.recon.AOD.ntuple.root'
+    isSignal = 1
 if sample == 'X2000AOD':
     myFiles = glob('/eos/user/n/nicholas/SWAN_projects/DiTauReco/samples/mc16_13TeV.450524.MadGraphPythia8EvtGen_A14NNPDF23LO_X2000tohh_bbtautau_lephad.recon.AOD.e7244_s3126_r10201/*')
     outName = 'ditau_450524_X2000tohh_bbtautau_lephad.recon.AOD.ntuple.root'
@@ -13,6 +25,10 @@ if sample == 'X2000AOD':
 elif sample == 'X2000ESD':
     myFiles = glob('/eos/user/n/nicholas/SWAN_projects/bbtautau/run3Trigger/r3athanalysis/samples/mc16_13TeV.450524.MadGraphPythia8EvtGen_A14NNPDF23LO_X2000tohh_bbtautau_lephad.recon.ESD.e7244_e5984_s3126_r12406/*')
     outName = 'ditau_450524_X2000tohh_bbtautau_lephad.recon.ESD.ntuple.root'
+    isSignal = 1
+elif sample == 'X1600DAOD':
+    myFiles = glob('/eos/user/n/nicholas/SWAN_projects/DiTauReco/samples/mc16_13TeV.450166.MadGraphHerwig7EvtGen_PDF23LO_X1600tohh_bbtautau_lephad.deriv.DAOD_HIGG4D2.e8317_e5984_s3126_r9364_r9315_p3978/*')
+    outName = 'ditau_450166_X1600tohh_bbtautau_lephad.deriv.DAOD.ntuple.root'
     isSignal = 1
 elif sample == 'Z+jets':
     myFiles = glob('/eos/user/n/nicholas/SWAN_projects/DiTauReco/samples/mc16_13TeV.364139.Sherpa_221_NNPDF30NNLO_Ztautau_MAXHTPTV280_500_BFilter.recon.AOD.e5313_s3126_r10201/*')
@@ -115,7 +131,7 @@ alg.jetConstituentModSequence.Modifiers = [clusterOrigin]
 athAlgSeq += alg
 
 # limit the number of events (for testing purposes)
-theApp.EvtMax = -1
+theApp.EvtMax = 10005
 
 #MessageSvc.OutputLevel = 1
 
