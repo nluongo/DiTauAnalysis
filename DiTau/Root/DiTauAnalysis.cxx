@@ -416,7 +416,7 @@ StatusCode DiTauAnalysis :: initialize ()
   m_mytree->Branch("SubleadingJetE", &m_subleadingJetE);
 
   // Large-R jets
-  m_mytree->Branch("NJet", &m_nLargeRJets);
+  m_mytree->Branch("NLargeRJet", &m_nLargeRJets);
   m_lRJetPt = new std::vector<float>();
   m_mytree->Branch("LargeRJetPt", &m_lRJetPt);
   m_lRJetEta = new std::vector<float>();
@@ -509,7 +509,7 @@ StatusCode DiTauAnalysis :: execute ()
   ANA_CHECK( evtStore()->retrieve( jets, "AntiKt4LCTopoJets" ) );
 
   const xAOD::JetContainer* largerjets = nullptr;
-  ANA_CHECK( evtStore()->retrieve( largerjets, "HLT_xAOD__JetContainer_a10r_tcemsubjesFS" ) );
+  ANA_CHECK( evtStore()->retrieve( largerjets, "HLT_xAOD__JetContainer_a10r_tcemsubjesISFS" ) );
 
   const xAOD::DiTauJetContainer* ditaus = nullptr;
   ANA_CHECK( evtStore()->retrieve( ditaus, "DiTauJets" ) );
