@@ -18,7 +18,7 @@ if sample == 'X1600AOD':
     myFiles = glob('/eos/user/n/nicholas/SWAN_projects/DiTauReco/samples/user.nicholas.mc16_13TeV.450166.MadGraphHerwig7EvtGen_PDF23LO_X1600tohh_bbtautau_lephad.recon.AOD.e8317_s3126_r10724_der1632783813/*')
     outName = 'ditau_450166_X1600tohh_bbtautau_lephad.recon.AOD.ntuple.root'
     isSignal = 1
-if sample == 'X2000AOD':
+elif sample == 'X2000AOD':
     myFiles = glob('/eos/user/n/nicholas/SWAN_projects/DiTauReco/samples/mc16_13TeV.450524.MadGraphPythia8EvtGen_A14NNPDF23LO_X2000tohh_bbtautau_lephad.recon.AOD.e7244_s3126_r10201/*')
     outName = 'ditau_450524_X2000tohh_bbtautau_lephad.recon.AOD.ntuple.root'
     isSignal = 1
@@ -99,20 +99,46 @@ alg.hadMuDiTauIDVarCalculator.DiTauDecayChannel = 'HadMu'
 # DiTauDiscriminantTool configuration
 addPrivateTool( alg, 'hadElDiTauDiscrTool', 'tauRecTools::DiTauDiscriminantTool')
 alg.hadElDiTauDiscrTool.DiTauDecayChannel = 'HadEl'
-alg.hadElDiTauDiscrTool.WeightsFile = '/eos/user/n/nicholas/SWAN_projects/DiTauReco/DiTauLepHadExample/weight_files/bdt_hadel_v9.root'
+alg.hadElDiTauDiscrTool.WeightsFile = 'weight_files/bdt_hadel_v9.root'
 
 addPrivateTool( alg, 'hadMuDiTauDiscrTool', 'tauRecTools::DiTauDiscriminantTool')
 alg.hadMuDiTauDiscrTool.DiTauDecayChannel = 'HadMu'
-alg.hadMuDiTauDiscrTool.WeightsFile = '/eos/user/n/nicholas/SWAN_projects/DiTauReco/DiTauLepHadExample/weight_files/bdt_hadmu_v18.root'
+alg.hadMuDiTauDiscrTool.WeightsFile = 'weight_files/bdt_hadmu_v18.root'
 
 # DiTauWPDecorator configuration
 addPrivateTool( alg, 'hadElDiTauWPDecorator', 'tauRecTools::DiTauWPDecorator')
 alg.hadElDiTauWPDecorator.DiTauDecayChannel = 'HadEl'
-alg.hadElDiTauWPDecorator.flatteningFile = '/eos/user/n/nicholas/SWAN_projects/DiTauReco/DiTauLepHadExample/weight_files/tuner_hadel_v9.root'
+alg.hadElDiTauWPDecorator.flatteningFile = 'weight_files/tuner_hadel_v9.root'
 
 addPrivateTool( alg, 'hadMuDiTauWPDecorator', 'tauRecTools::DiTauWPDecorator')
 alg.hadMuDiTauWPDecorator.DiTauDecayChannel = 'HadMu'
-alg.hadMuDiTauWPDecorator.flatteningFile = '/eos/user/n/nicholas/SWAN_projects/DiTauReco/DiTauLepHadExample/weight_files/tuner_hadmu_v18.root'
+alg.hadMuDiTauWPDecorator.flatteningFile = 'weight_files/tuner_hadmu_v18.root'
+
+# Electron likelihood tools
+addPrivateTool( alg, 'asgElectronVeryLooseLikelihoodTool', 'AsgElectronLikelihoodTool')
+alg.asgElectronVeryLooseLikelihoodTool.primaryVertexContainer = 'PrimaryVertices'
+alg.asgElectronVeryLooseLikelihoodTool.ConfigFile = 'ElectronPhotonSelectorTools/offline/mc16_20170828/ElectronLikelihoodVeryLooseOfflineConfig2017_Smooth.conf'
+
+addPrivateTool( alg, 'asgElectronLooseLikelihoodTool', 'AsgElectronLikelihoodTool')
+alg.asgElectronLooseLikelihoodTool.primaryVertexContainer = 'PrimaryVertices'
+alg.asgElectronLooseLikelihoodTool.ConfigFile = 'ElectronPhotonSelectorTools/offline/mc16_20170828/ElectronLikelihoodLooseOfflineConfig2017_Smooth.conf'
+
+addPrivateTool( alg, 'asgElectronMediumLikelihoodTool', 'AsgElectronLikelihoodTool')
+alg.asgElectronMediumLikelihoodTool.primaryVertexContainer = 'PrimaryVertices'
+alg.asgElectronMediumLikelihoodTool.ConfigFile = 'ElectronPhotonSelectorTools/offline/mc16_20170828/ElectronLikelihoodMediumOfflineConfig2017_Smooth.conf'
+
+addPrivateTool( alg, 'asgElectronTightLikelihoodTool', 'AsgElectronLikelihoodTool')
+alg.asgElectronTightLikelihoodTool.primaryVertexContainer = 'PrimaryVertices'
+alg.asgElectronTightLikelihoodTool.ConfigFile = 'ElectronPhotonSelectorTools/offline/mc16_20170828/ElectronLikelihoodTightOfflineConfig2017_Smooth.conf'
+
+# BTagging Tool
+addPrivateTool( alg, 'bTaggingSelectionTool', 'BTaggingSelectionTool')
+alg.bTaggingSelectionTool.TaggerName = 'DL1'
+alg.bTaggingSelectionTool.OperatingPoint = 'FixedCutBEff_77'
+alg.bTaggingSelectionTool.JetAuthor = 'AntiKt4EMTopoJets'
+alg.bTaggingSelectionTool.FlvTagCutDefinitionsFileName = 'xAODBTaggingEfficiency/13TeV/2017-21-13TeV-MC16-CDI-2018-02-09_v1.root'
+alg.bTaggingSelectionTool.MinPt = 20000
+#alg.bTaggingSelectionTool.Scheme = 'FixedCut'
 
 from AthenaCommon.AppMgr import ToolSvc
 from JetRecTools.JetRecToolsConf import CaloClusterConstituentsOrigin

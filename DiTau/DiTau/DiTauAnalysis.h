@@ -20,10 +20,14 @@
 #include "TauAnalysisTools/IDiTauTruthMatchingTool.h"
 #include "TauAnalysisTools/TauTruthMatchingTool.h"
 
+#include "EgammaAnalysisInterfaces/IAsgElectronLikelihoodTool.h"
+
 #include "JetRecTools/CaloClusterConstituentsOrigin.h"
 #include "JetRecTools/JetConstituentModSequence.h" 
 #include "JetInterface/IJetConstituentModifier.h"
 #include "JetInterface/IJetExecuteTool.h"
+
+#include "FTagAnalysisInterfaces/IBTaggingSelectionTool.h"
 
 class DiTauAnalysis : public EL::AnaAlgorithm
 {
@@ -65,9 +69,16 @@ private:
   DiTauRec::ILepHadBuilder* m_hadMuBuilder;
 
   ToolHandle<TauAnalysisTools::IDiTauTruthMatchingTool> m_diTauTruthMatchingTool;
+
+  ToolHandle<IAsgElectronLikelihoodTool> m_checkEleVeryLooseLH;
+  ToolHandle<IAsgElectronLikelihoodTool> m_checkEleLooseLH;
+  ToolHandle<IAsgElectronLikelihoodTool> m_checkEleMediumLH;
+  ToolHandle<IAsgElectronLikelihoodTool> m_checkEleTightLH;
   
   ToolHandle<IJetConstituentModifier> m_pCaloClusterConstituentsOrigin;
   ToolHandle<IJetExecuteTool> m_jetConstituentModSequence;
+
+  ToolHandle<IBTaggingSelectionTool> m_bTaggingSelectionTool;
 
   unsigned int m_eventsPassed = 0;
   unsigned int m_pdgTruthMatchType = 0;
@@ -105,6 +116,8 @@ private:
   float m_truthFinalLeptonE = 0;
   int m_truthFinalLeptonPdgId = 0;
 
+  float m_truthHadTauVisFinalLeptondR = 0;
+
   float m_truthDiTauVisPt = 0;
   float m_truthDiTauVisEta = 0;
   float m_truthDiTauVisPhi = 0;
@@ -120,17 +133,43 @@ private:
   std::vector<float> *m_hadElDiTauPt = nullptr;
   std::vector<float> *m_hadElDiTauEta = nullptr;
   std::vector<float> *m_hadElDiTauPhi = nullptr;
+  std::vector<float> *m_hadElDiTauM = nullptr;
   std::vector<float> *m_hadElDiTauBDTScore = nullptr;
+  float m_bestHadElDiTauBDTScore = 0;
   std::vector<float> *m_hadElDiTauFlatBDTScore = nullptr;
   std::vector<unsigned int> *m_hadElDiTauTruthMatchType = nullptr;
+  unsigned int m_nHadElTaus = 0;
+  std::vector<float> *m_hadElTauPt = nullptr;
+  std::vector<float> *m_hadElTauEta = nullptr;
+  std::vector<float> *m_hadElTauPhi = nullptr;
+  std::vector<float> *m_hadElTauE = nullptr;
+  unsigned int m_nHadElElectrons = 0;
+  std::vector<float> *m_hadElElectronPt = nullptr;
+  std::vector<float> *m_hadElElectronEta = nullptr;
+  std::vector<float> *m_hadElElectronPhi = nullptr;
+  std::vector<float> *m_hadElElectronE = nullptr;
+  std::vector<float> *m_hadElDiTaudR = nullptr;
 
   unsigned int m_nHadMuDiTaus = 0;
   std::vector<float> *m_hadMuDiTauPt = nullptr;
   std::vector<float> *m_hadMuDiTauEta = nullptr;
   std::vector<float> *m_hadMuDiTauPhi = nullptr;
+  std::vector<float> *m_hadMuDiTauM = nullptr;
   std::vector<float> *m_hadMuDiTauBDTScore = nullptr;
+  float m_bestHadMuDiTauBDTScore = 0;
   std::vector<float> *m_hadMuDiTauFlatBDTScore = nullptr;
   std::vector<unsigned int> *m_hadMuDiTauTruthMatchType = nullptr;
+  unsigned int m_nHadMuTaus = 0;
+  std::vector<float> *m_hadMuTauPt = nullptr;
+  std::vector<float> *m_hadMuTauEta = nullptr;
+  std::vector<float> *m_hadMuTauPhi = nullptr;
+  std::vector<float> *m_hadMuTauE = nullptr;
+  unsigned int m_nHadMuMuons = 0;
+  std::vector<float> *m_hadMuMuonPt = nullptr;
+  std::vector<float> *m_hadMuMuonEta = nullptr;
+  std::vector<float> *m_hadMuMuonPhi = nullptr;
+  std::vector<float> *m_hadMuMuonE = nullptr;
+  std::vector<float> *m_hadMuDiTaudR = nullptr;
 
   // Taus
   unsigned int m_nTaus = 0;
@@ -138,10 +177,29 @@ private:
   std::vector<float> *m_tauEta = nullptr;
   std::vector<float> *m_tauPhi = nullptr;
   std::vector<float> *m_tauE = nullptr;
+  //std::vector<TLorentzVector> *m_tauP4 = nullptr;
   float m_leadingTauPt = 0;
   float m_leadingTauEta = 0;
   float m_leadingTauPhi = 0;
   float m_leadingTauE = 0;
+
+  float m_bestTauPt = 0;
+  float m_bestTauEta = 0;
+  float m_bestTauPhi = 0;
+  float m_bestTauE = 0;
+
+  float m_tauRecoTruthMindR = 0;
+
+  // Very Loose taus
+  unsigned int m_nTausVeryLoose = 0;
+  std::vector<float> *m_tauVeryLoosePt = nullptr;
+  std::vector<float> *m_tauVeryLooseEta = nullptr;
+  std::vector<float> *m_tauVeryLoosePhi = nullptr;
+  std::vector<float> *m_tauVeryLooseE = nullptr;
+  float m_leadingTauVeryLoosePt = 0;
+  float m_leadingTauVeryLooseEta = 0;
+  float m_leadingTauVeryLoosePhi = 0;
+  float m_leadingTauVeryLooseE = 0;
 
   // Loose taus
   unsigned int m_nTausLoose = 0;
@@ -187,6 +245,8 @@ private:
   float m_leadingMuPhi = 0;
   float m_leadingMuE = 0;
 
+  float m_muRecoTruthMindR = 0;
+
   // Loose muons
   unsigned int m_nMuonsLoose = 0;
   std::vector<float> *m_muLoosePt = nullptr;
@@ -231,6 +291,24 @@ private:
   float m_leadingElePhi = 0;
   float m_leadingEleE = 0;
 
+  float m_bestElePt = 0;
+  float m_bestEleEta = 0;
+  float m_bestElePhi = 0;
+  float m_bestEleE = 0;
+
+  float m_eleRecoTruthMindR = 0;
+
+  // Very Loose electrons
+  unsigned int m_nElectronsVeryLoose = 0;
+  std::vector<float> *m_eleVeryLoosePt = nullptr;
+  std::vector<float> *m_eleVeryLooseEta = nullptr;
+  std::vector<float> *m_eleVeryLoosePhi = nullptr;
+  std::vector<float> *m_eleVeryLooseE = nullptr;
+  float m_leadingEleVeryLoosePt = 0;
+  float m_leadingEleVeryLooseEta = 0;
+  float m_leadingEleVeryLoosePhi = 0;
+  float m_leadingEleVeryLooseE = 0;
+
   // Loose electrons
   unsigned int m_nElectronsLoose = 0;
   std::vector<float> *m_eleLoosePt = nullptr;
@@ -264,12 +342,38 @@ private:
   float m_leadingEleTightPhi = 0;
   float m_leadingEleTightE = 0;
 
+  // Tau-Ele ditau system
+  std::vector<float> *m_tauEleLoosePt = nullptr;
+  std::vector<float> *m_tauEleLooseEta = nullptr;
+  std::vector<float> *m_tauEleLoosePhi = nullptr;
+  std::vector<float> *m_tauEleLooseE = nullptr;
+  std::vector<float> *m_tauEleLooseM = nullptr;
+  std::vector<float> *m_tauEleLoosedR = nullptr;
+
+  // Chosen Tau-Ele system
+  float m_chosenTauPt = 0;
+  float m_chosenTauEta = 0;
+  float m_chosenTauPhi = 0;
+  float m_chosenTauE = 0;
+  float m_chosenElePt = 0;
+  float m_chosenEleEta = 0;
+  float m_chosenElePhi = 0;
+  float m_chosenEleE = 0;
+  float m_chosenTauElePt = 0;
+  float m_chosenTauEleEta = 0;
+  float m_chosenTauElePhi = 0;
+  float m_chosenTauEleE = 0;
+  float m_chosenTauEleM = 0;
+  float m_chosenTauEledR = 0;
+
   // Jets
   unsigned int m_nJets = 0;
   std::vector<float> *m_jetPt = nullptr;
   std::vector<float> *m_jetEta = nullptr;
   std::vector<float> *m_jetPhi = nullptr;
   std::vector<float> *m_jetE = nullptr;
+  std::vector<float> *m_jetBTagAccept = nullptr;
+  unsigned int m_nJetsBTagged = 0;
   float m_leadingJetPt = 0;
   float m_leadingJetEta = 0;
   float m_leadingJetPhi = 0;
@@ -279,6 +383,7 @@ private:
   float m_subleadingJetPhi = 0;
   float m_subleadingJetE = 0;
 
+  // Large-R Jets
   unsigned int m_nLargeRJets = 0;
   std::vector<float> *m_lRJetPt = nullptr;
   std::vector<float> *m_lRJetEta = nullptr;
@@ -296,6 +401,48 @@ private:
   float m_subleadingLRJetE = 0;
   float m_subleadingLRJetM = 0;
 
+  float m_largeRJetdR = 0;
+  float m_largeRJetdEta = 0;
+  float m_largeRJetdPhi = 0;
+  float m_largeRJetdPt = 0;
+
+  // Tau large-R jet
+  float m_tauLRJetPt = 0;
+  float m_tauLRJetEta = 0;
+  float m_tauLRJetPhi = 0;
+  float m_tauLRJetE = 0;
+  float m_tauLRJetM = 0;
+  float m_tauLRJetEleLoosedR = 0;
+
+  // b large-R jet
+  float m_bLRJetPt = 0;
+  float m_bLRJetEta = 0;
+  float m_bLRJetPhi = 0;
+  float m_bLRJetE = 0;
+  float m_bLRJetM = 0;
+  float m_bLRJetEleLoosedR = 0;
+
+  // Closest and subclosest taus to tau large-R jet
+  float m_closestTauPt = 0;
+  float m_closestTauEta = 0;
+  float m_closestTauPhi = 0;
+  float m_closestTauE = 0;
+  float m_closestTauLRJetdR = 0;
+  float m_closestTauEleLooseM = 0;
+
+  float m_subclosestTauPt = 0;
+  float m_subclosestTauEta = 0;
+  float m_subclosestTauPhi = 0;
+  float m_subclosestTauE = 0;
+  float m_subclosestTauLRJetdR = 0;
+  float m_subclosestTauEleLooseM = 0;
+
+  // Large-R X
+  float m_largeRXPt = 0;
+  float m_largeRXEta = 0;
+  float m_largeRXPhi = 0;
+  float m_largeRXE = 0;
+  float m_largeRXM = 0;
 };
 
 #endif
