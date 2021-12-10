@@ -14,7 +14,11 @@ print('NEvents: {}'.format(nevents))
 '''
 print('In jobOptions')
 
-if sample == 'X1600AOD':
+if sample == 'X1000AOD':
+    myFiles = glob('/eos/user/n/nicholas/SWAN_projects/DiTauReco/samples/mc16_13TeV.450522.MadGraphPythia8EvtGen_A14NNPDF23LO_X1000tohh_bbtautau_lephad.recon.AOD.e7244_s3126_r10201/*')
+    outName = 'ditau_450522_X1000tohh_bbtautau_lephad.recon.AOD.ntuple.root'
+    isSignal = 1
+elif sample == 'X1600AOD':
     myFiles = glob('/eos/user/n/nicholas/SWAN_projects/DiTauReco/samples/user.nicholas.mc16_13TeV.450166.MadGraphHerwig7EvtGen_PDF23LO_X1600tohh_bbtautau_lephad.recon.AOD.e8317_s3126_r10724_der1632783813/*')
     outName = 'ditau_450166_X1600tohh_bbtautau_lephad.recon.AOD.ntuple.root'
     isSignal = 1
@@ -140,6 +144,11 @@ alg.bTaggingSelectionTool.FlvTagCutDefinitionsFileName = 'xAODBTaggingEfficiency
 alg.bTaggingSelectionTool.MinPt = 20000
 #alg.bTaggingSelectionTool.Scheme = 'FixedCut'
 
+# MissingMassCalculator
+addPrivateTool( alg, 'missingMassTool', 'MissingMassTool')
+alg.missingMassTool.CalibSet = '2016MC15C'
+alg.missingMassTool.Decorate = True
+
 from AthenaCommon.AppMgr import ToolSvc
 from JetRecTools.JetRecToolsConf import CaloClusterConstituentsOrigin
 
@@ -157,7 +166,7 @@ alg.jetConstituentModSequence.Modifiers = [clusterOrigin]
 athAlgSeq += alg
 
 # limit the number of events (for testing purposes)
-theApp.EvtMax = -1
+theApp.EvtMax = 20000
 
 #MessageSvc.OutputLevel = 1
 

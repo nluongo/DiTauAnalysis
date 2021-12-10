@@ -29,6 +29,8 @@
 
 #include "FTagAnalysisInterfaces/IBTaggingSelectionTool.h"
 
+#include "DiTauMassTools/IMissingMassTool.h"
+
 class DiTauAnalysis : public EL::AnaAlgorithm
 {
 public:
@@ -79,6 +81,8 @@ private:
   ToolHandle<IJetExecuteTool> m_jetConstituentModSequence;
 
   ToolHandle<IBTaggingSelectionTool> m_bTaggingSelectionTool;
+    
+  ToolHandle<IMissingMassTool> m_missingMassTool;
 
   unsigned int m_eventsPassed = 0;
   unsigned int m_pdgTruthMatchType = 0;
@@ -366,6 +370,9 @@ private:
   float m_chosenTauEleM = 0;
   float m_chosenTauEledR = 0;
 
+  // Resolved analysis values
+  float m_resolvedMissingMass = 0;
+
   // Jets
   unsigned int m_nJets = 0;
   std::vector<float> *m_jetPt = nullptr;
@@ -373,7 +380,6 @@ private:
   std::vector<float> *m_jetPhi = nullptr;
   std::vector<float> *m_jetE = nullptr;
   std::vector<float> *m_jetBTagAccept = nullptr;
-  unsigned int m_nJetsBTagged = 0;
   float m_leadingJetPt = 0;
   float m_leadingJetEta = 0;
   float m_leadingJetPhi = 0;
@@ -382,6 +388,21 @@ private:
   float m_subleadingJetEta = 0;
   float m_subleadingJetPhi = 0;
   float m_subleadingJetE = 0;
+
+  // B-tagged Jets
+  unsigned int m_nBTagJets = 0;
+  std::vector<float> *m_bTagJetPt = nullptr;
+  std::vector<float> *m_bTagJetEta = nullptr;
+  std::vector<float> *m_bTagJetPhi = nullptr;
+  std::vector<float> *m_bTagJetE = nullptr;
+  float m_leadingBTagJetPt = 0;
+  float m_leadingBTagJetEta = 0;
+  float m_leadingBTagJetPhi = 0;
+  float m_leadingBTagJetE = 0;
+  float m_subleadingBTagJetPt = 0;
+  float m_subleadingBTagJetEta = 0;
+  float m_subleadingBTagJetPhi = 0;
+  float m_subleadingBTagJetE = 0;
 
   // Large-R Jets
   unsigned int m_nLargeRJets = 0;

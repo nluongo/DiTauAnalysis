@@ -5,7 +5,7 @@ atlas_subdir (DiTau)
 atlas_add_library (DiTauLib
   DiTau/*.h Root/*.cxx
   PUBLIC_HEADERS DiTau
-  LINK_LIBRARIES AnaAlgorithmLib tauRecToolsLib AsgTools DiTauRec TauAnalysisToolsLib JetRecToolsLib JetInterface xAODEventFormat xAODCaloEvent EgammaAnalysisInterfacesLib FTagAnalysisInterfacesLib)
+  LINK_LIBRARIES AnaAlgorithmLib tauRecToolsLib AsgTools DiTauRec TauAnalysisToolsLib JetRecToolsLib JetInterface xAODEventFormat xAODCaloEvent EgammaAnalysisInterfacesLib FTagAnalysisInterfacesLib DiTauMassToolsLib)
 
 if (XAOD_STANDALONE)
   # Add the dictionary (for AnalysisBase only):
