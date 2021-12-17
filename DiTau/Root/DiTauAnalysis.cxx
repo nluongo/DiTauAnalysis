@@ -739,10 +739,10 @@ StatusCode DiTauAnalysis :: execute ()
   ANA_CHECK( evtStore()->retrieve( taus, "TauJets" ) );
 
   const xAOD::JetContainer* jets = nullptr;
-  ANA_CHECK( evtStore()->retrieve( jets, "AntiKt4EMTopoJets" ) );
+  ANA_CHECK( evtStore()->retrieve( jets, "AntiKt4EMTopoJets_BTagging201810" ) );
 
   const xAOD::JetContainer* largerjets = nullptr;
-  ANA_CHECK( evtStore()->retrieve( largerjets, "HLT_xAOD__JetContainer_a10r_tcemsubjesISFS" ) );
+  ANA_CHECK( evtStore()->retrieve( largerjets, "AntiKt10LCTopoJets" ) );
 
   const xAOD::DiTauJetContainer* ditaus = nullptr;
   ANA_CHECK( evtStore()->retrieve( ditaus, "DiTauJets" ) );
@@ -1449,7 +1449,6 @@ StatusCode DiTauAnalysis :: execute ()
 
       if(m_isSignal)
       {
-        /*
         ANA_MSG_INFO("IDVarCalculator");
         ANA_MSG_INFO(m_hadMuDiTauIDVarCalculator);
         CHECK(m_hadMuDiTauIDVarCalculator->execute(*hadmuditau));
@@ -1467,7 +1466,6 @@ StatusCode DiTauAnalysis :: execute ()
         {
           m_bestHadMuDiTauBDTScore = bdt;
         }
-        */
 
         m_diTauTruthMatchingTool->getTruth(*hadmuditau);
         unsigned int truth_match_type = 0;
