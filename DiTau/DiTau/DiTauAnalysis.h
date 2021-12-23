@@ -93,6 +93,16 @@ private:
   unsigned int m_runNumber = 0;
   unsigned long long m_eventNumber = 0;
 
+  float m_truthBPt = 0;
+  float m_truthBEta = 0;
+  float m_truthBPhi = 0;
+  float m_truthBE = 0;
+
+  float m_truthAntiBPt = 0;
+  float m_truthAntiBEta = 0;
+  float m_truthAntiBPhi = 0;
+  float m_truthAntiBE = 0;
+
   float m_truthHiggsPt = 0;
   float m_truthHiggsEta = 0;
   float m_truthHiggsPhi = 0;
@@ -186,11 +196,6 @@ private:
   float m_leadingTauEta = 0;
   float m_leadingTauPhi = 0;
   float m_leadingTauE = 0;
-
-  float m_bestTauPt = 0;
-  float m_bestTauEta = 0;
-  float m_bestTauPhi = 0;
-  float m_bestTauE = 0;
 
   float m_tauRecoTruthMindR = 0;
 
@@ -295,11 +300,6 @@ private:
   float m_leadingElePhi = 0;
   float m_leadingEleE = 0;
 
-  float m_bestElePt = 0;
-  float m_bestEleEta = 0;
-  float m_bestElePhi = 0;
-  float m_bestEleE = 0;
-
   float m_eleRecoTruthMindR = 0;
 
   // Very Loose electrons
@@ -370,6 +370,26 @@ private:
   float m_chosenTauEleM = 0;
   float m_chosenTauEledR = 0;
 
+  // Tau-Mu ditau system
+  std::vector<float> *m_tauMuTightPt = nullptr;
+  std::vector<float> *m_tauMuTightEta = nullptr;
+  std::vector<float> *m_tauMuTightPhi = nullptr;
+  std::vector<float> *m_tauMuTightE = nullptr;
+  std::vector<float> *m_tauMuTightM = nullptr;
+  std::vector<float> *m_tauMuTightdR = nullptr;
+
+  // Chosen Tau-Mu system
+  float m_chosenMuPt = 0;
+  float m_chosenMuEta = 0;
+  float m_chosenMuPhi = 0;
+  float m_chosenMuE = 0;
+  float m_chosenTauMuPt = 0;
+  float m_chosenTauMuEta = 0;
+  float m_chosenTauMuPhi = 0;
+  float m_chosenTauMuE = 0;
+  float m_chosenTauMuM = 0;
+  float m_chosenTauMudR = 0;
+
   // Resolved analysis values
   float m_resolvedMissingMass = 0;
 
@@ -434,6 +454,7 @@ private:
   float m_tauLRJetE = 0;
   float m_tauLRJetM = 0;
   float m_tauLRJetEleLoosedR = 0;
+  float m_tauLRJetMuTightdR = 0;
 
   // b large-R jet
   float m_bLRJetPt = 0;
@@ -442,21 +463,7 @@ private:
   float m_bLRJetE = 0;
   float m_bLRJetM = 0;
   float m_bLRJetEleLoosedR = 0;
-
-  // Closest and subclosest taus to tau large-R jet
-  float m_closestTauPt = 0;
-  float m_closestTauEta = 0;
-  float m_closestTauPhi = 0;
-  float m_closestTauE = 0;
-  float m_closestTauLRJetdR = 0;
-  float m_closestTauEleLooseM = 0;
-
-  float m_subclosestTauPt = 0;
-  float m_subclosestTauEta = 0;
-  float m_subclosestTauPhi = 0;
-  float m_subclosestTauE = 0;
-  float m_subclosestTauLRJetdR = 0;
-  float m_subclosestTauEleLooseM = 0;
+  float m_bLRJetMuTightdR = 0;
 
   // Large-R X
   float m_largeRXPt = 0;

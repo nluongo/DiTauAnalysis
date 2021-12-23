@@ -14,17 +14,34 @@ print('NEvents: {}'.format(nevents))
 '''
 print('In jobOptions')
 
-if sample == 'X1000AOD':
+daod_template = '/eos/user/n/nicholas/SWAN_projects/Derivation/run/DAOD_HIGGBOOSTEDLH.{}.DAOD_HIGGBOOSTEDLH.pool.root'
+ntuple_template = '{}.ntuple.root'
+
+if sample == 'X1000DAOD':
+    sample_name = '450522_X1000_bbtautau_lephad'
+    daod_path = daod_template.format(sample_name)
+    myFiles = glob(daod_path)
+    outName = ntuple_template.format(sample_name)
+    isSignal = 1
+elif sample == 'X1000AOD':
     myFiles = glob('/eos/user/n/nicholas/SWAN_projects/DiTauReco/samples/mc16_13TeV.450522.MadGraphPythia8EvtGen_A14NNPDF23LO_X1000tohh_bbtautau_lephad.recon.AOD.e7244_s3126_r10201/*')
     outName = 'ditau_450522_X1000tohh_bbtautau_lephad.recon.AOD.ntuple.root'
+    isSignal = 1
+elif sample == 'X1600DAOD':
+    sample_name = '450166_X1600_bbtautau_lephad'
+    daod_path = daod_template.format(sample_name)
+    myFiles = glob(daod_path)
+    outName = ntuple_template.format(sample_name)
     isSignal = 1
 elif sample == 'X1600AOD':
     myFiles = glob('/eos/user/n/nicholas/SWAN_projects/DiTauReco/samples/user.nicholas.mc16_13TeV.450166.MadGraphHerwig7EvtGen_PDF23LO_X1600tohh_bbtautau_lephad.recon.AOD.e8317_s3126_r10724_der1632783813/*')
     outName = 'ditau_450166_X1600tohh_bbtautau_lephad.recon.AOD.ntuple.root'
     isSignal = 1
 elif sample == 'X2000DAOD':
-    myFiles = glob('/eos/user/n/nicholas/SWAN_projects/Derivation/samples/DAOD_HIGGBOOSTEDLH.output.pool.root')
-    outName = 'ditau_450524_X2000tohh_bbtautau_lephad.recon.DAOD_HIGGBOOSTEDLH.ntuple.root'
+    sample_name = '450524_X2000_bbtautau_lephad'
+    daod_path = daod_template.format(sample_name)
+    myFiles = glob(daod_path)
+    outName = ntuple_template.format(sample_name)
     isSignal = 1
 elif sample == 'X2000AOD':
     myFiles = glob('/eos/user/n/nicholas/SWAN_projects/DiTauReco/samples/mc16_13TeV.450524.MadGraphPythia8EvtGen_A14NNPDF23LO_X2000tohh_bbtautau_lephad.recon.AOD.e7244_s3126_r10201/*')
@@ -34,25 +51,32 @@ elif sample == 'X2000ESD':
     myFiles = glob('/eos/user/n/nicholas/SWAN_projects/bbtautau/run3Trigger/r3athanalysis/samples/mc16_13TeV.450524.MadGraphPythia8EvtGen_A14NNPDF23LO_X2000tohh_bbtautau_lephad.recon.ESD.e7244_e5984_s3126_r12406/*')
     outName = 'ditau_450524_X2000tohh_bbtautau_lephad.recon.ESD.ntuple.root'
     isSignal = 1
-elif sample == 'X1600DAOD':
-    myFiles = glob('/eos/user/n/nicholas/SWAN_projects/DiTauReco/samples/mc16_13TeV.450166.MadGraphHerwig7EvtGen_PDF23LO_X1600tohh_bbtautau_lephad.deriv.DAOD_HIGG4D2.e8317_e5984_s3126_r9364_r9315_p3978/*')
-    outName = 'ditau_450166_X1600tohh_bbtautau_lephad.deriv.DAOD.ntuple.root'
-    isSignal = 1
+elif sample == 'Z+jetsDAOD':
+    sample_name = '364139_Ztautau_BFilter'
+    daod_path = daod_template.format(sample_name)
+    myFiles = glob(daod_path)
+    outName = ntuple_template.format(sample_name)
+    isSignal = 0
 elif sample == 'Z+jets':
     myFiles = glob('/eos/user/n/nicholas/SWAN_projects/DiTauReco/samples/mc16_13TeV.364139.Sherpa_221_NNPDF30NNLO_Ztautau_MAXHTPTV280_500_BFilter.recon.AOD.e5313_s3126_r10201/*')
     outName = 'background_364139_Ztautau_MAXHTPTV280_500_BFilter.recon.AOD.ntuple.root'
+    isSignal = 0
+elif sample == 'ttbarDAOD':
+    sample_name = '410470_ttbar_hdamp258p75_nonallhad'
+    daod_path = daod_template.format(sample_name)
+    myFiles = glob(daod_path)
+    outName = ntuple_template.format(sample_name)
     isSignal = 0
 elif sample == 'ttbar':
     myFiles = glob('/eos/user/n/nicholas/SWAN_projects/DiTauReco/samples/mc16_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.recon.AOD.e6337_e5984_s3126_r10201/*')
     outName = 'background_410470_ttbar_nonallhad.recon.AOD.ntuple.root'
     isSignal = 0
+
 #myFiles = glob('/eos/user/n/nicholas/SWAN_projects/DiTauReco/samples/mc16_13TeV.425105.MadGraphPythia8EvtGen_A14NNPDF23LO_RS_G_hh_4tau_c10_M3000.recon.AOD.e6072_s3126_r10724/*.root.1')
 #outName = '../samples/ditau_425105_G_hh_4tau_M3000.recon.AOD.ntuple.root'
 
 #myFiles = glob('/eos/user/n/nicholas/SWAN_projects/DiTauReco/samples/group.perf-tau.425104.MadGraphPythia8EvtGen_A14NNPDF23LO_RS_G_hh_4tau_c10_M2500.R22_NewTunes_EXT0/*')
 #outName = 'ditau_425104_4tau.AOD.ntuple.root'
-
-isESD = 1
 
 #override next line on command line with: --filesInput=XXX
 jps.AthenaCommonFlags.FilesInput = myFiles
@@ -61,20 +85,16 @@ from PyUtils import AthFile
 import AthenaPoolCnvSvc.ReadAthenaPool
 from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
 
-#Specify AccessMode (read mode) ... ClassAccess is good default for xAOD
-if not isESD:
-    jps.AthenaCommonFlags.AccessMode = "ClassAccess" 
-else:
-    #Some database settings, needed for ESD  
-    #from RecExConfig import AutoConfiguration
-    #AutoConfiguration.ConfigureSimulationOrRealData()
-    #AutoConfiguration.ConfigureGeo()
+#Some database settings, needed for ESD  
+#from RecExConfig import AutoConfiguration
+#AutoConfiguration.ConfigureSimulationOrRealData()
+#AutoConfiguration.ConfigureGeo()
 
-    from AthenaCommon.DetFlags import DetFlags
-    DetFlags.detdescr.all_setOff()
-    DetFlags.detdescr.BField_setOn()
-    DetFlags.detdescr.Calo_setOn()
-    #include("RecExCond/AllDet_detDescr.py")
+from AthenaCommon.DetFlags import DetFlags
+DetFlags.detdescr.all_setOff()
+DetFlags.detdescr.BField_setOn()
+DetFlags.detdescr.Calo_setOn()
+#include("RecExCond/AllDet_detDescr.py")
 
 #jps.AthenaCommonFlags.AccessMode = "ClassAccess" 
 jps.AthenaCommonFlags.HistOutputs = ["ANALYSIS:"+outName]
