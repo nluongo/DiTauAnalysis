@@ -49,6 +49,9 @@ private:
   // Configuration, and any other types of variables go here.
   
   bool m_isSignal;
+  bool m_isDAOD;
+  std::string m_jetCollectionName;
+  std::string m_largeRJetCollectionName;
 
   //Create TFile and TTree
   TFile* m_myfile = 0;

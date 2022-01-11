@@ -14,8 +14,22 @@ print('NEvents: {}'.format(nevents))
 '''
 print('In jobOptions')
 
-daod_template = '/eos/user/n/nicholas/SWAN_projects/Derivation/run/DAOD_HIGGBOOSTEDLH.{}.DAOD_HIGGBOOSTEDLH.pool.root'
+daod_template = '/eos/user/n/nicholas/SWAN_projects/Derivation/samples/user.nicholas.{}_DAOD_HIGGBOOSTED_TEST0.pool.root_EXT0/*'
 ntuple_template = '{}.ntuple.root'
+
+daod_jet_name = 'AntiKt4EMTopoJets_BTagging201810'
+daod_largerjet_name = 'AntiKt10LCTopoJets'
+aod_jet_name = 'AntiKt4EMTopoJets'
+aod_largerjet_name = 'HLT_xAOD__JetContainer_a10r_tcemsubjesISFS'
+# Change jet collections to be used based on input format
+if 'DAOD' in sample:
+    jetCollectionName = daod_jet_name
+    largeRJetCollectionName = daod_largerjet_name
+    isDAOD = 1
+else:
+    jetCollectionName = aod_jet_name
+    largeRJetCollectionName = aod_largerjet_name
+    isDAOD = 0 
 
 if sample == 'X1000DAOD':
     sample_name = '450522_X1000_bbtautau_lephad'
@@ -62,7 +76,7 @@ elif sample == 'Z+jets':
     outName = 'background_364139_Ztautau_MAXHTPTV280_500_BFilter.recon.AOD.ntuple.root'
     isSignal = 0
 elif sample == 'ttbarDAOD':
-    sample_name = '410470_ttbar_hdamp258p75_nonallhad'
+    sample_name = '410470_ttbar_nonallhad'
     daod_path = daod_template.format(sample_name)
     myFiles = glob(daod_path)
     outName = ntuple_template.format(sample_name)
@@ -110,6 +124,9 @@ alg = algClass('AnalysisAlg')
 # later on we'll add some configuration options for our algorithm that go here
 #alg.outName = outName
 alg.isSignal = isSignal
+alg.isDAOD = isDAOD
+alg.jetCollectionName = jetCollectionName
+alg.largeRJetCollectionName = largeRJetCollectionName
 
 # DiTauTruthMatchingTool configuration
 addPrivateTool( alg, 'diTauTruthMatchingTool', 'TauAnalysisTools::DiTauTruthMatchingTool')

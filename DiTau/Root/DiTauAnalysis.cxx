@@ -50,6 +50,10 @@ DiTauAnalysis :: DiTauAnalysis (const std::string& name,
   // rather go into the initialize() function.
   
   declareProperty( "isSignal" , m_isSignal=true );
+  declareProperty( "jetCollectionName" , m_jetCollectionName="AntiKt4EMTopoJets_BTagging201810" );
+  declareProperty( "largeRJetCollectionName" , m_largeRJetCollectionName="AntiKt10LCTopoJets" );
+  declareProperty( "isDAOD" , m_isDAOD=true );
+
   declareProperty( "diTauTruthMatchingTool", m_diTauTruthMatchingTool, "the DiTauTruthMatchingTool");
   declareProperty( "hadElDiTauIDVarCalculator", m_hadElDiTauIDVarCalculator, "the hadElDiTauIDVarCalculator");
   declareProperty( "hadMuDiTauIDVarCalculator", m_hadMuDiTauIDVarCalculator, "the hadMuDiTauIDVarCalculator");
@@ -769,10 +773,10 @@ StatusCode DiTauAnalysis :: execute ()
   ANA_CHECK( evtStore()->retrieve( taus, "TauJets" ) );
 
   const xAOD::JetContainer* jets = nullptr;
-  ANA_CHECK( evtStore()->retrieve( jets, "AntiKt4EMTopoJets_BTagging201810" ) );
+  ANA_CHECK( evtStore()->retrieve( jets, m_jetCollectionName ) );
 
   const xAOD::JetContainer* largerjets = nullptr;
-  ANA_CHECK( evtStore()->retrieve( largerjets, "AntiKt10LCTopoJets" ) );
+  ANA_CHECK( evtStore()->retrieve( largerjets, m_largeRJetCollectionName ) );
 
   const xAOD::DiTauJetContainer* ditaus = nullptr;
   ANA_CHECK( evtStore()->retrieve( ditaus, "DiTauJets" ) );
@@ -1276,244 +1280,249 @@ StatusCode DiTauAnalysis :: execute ()
   TLorentzVector truth_final_lepton_p4;
   TLorentzVector truth_hadronic_tau_p4;
 
-  if ((has_tau_higgs && has_b_higgs && has_hadronic_tau && has_leptonic_tau && has_final_lepton) || !m_isSignal) {
-    bool has_visible = 1;
-
-    // Let's do this thing
-    m_eventsPassed++;
-    m_runNumber = eventInfo->runNumber();
-    m_eventNumber = eventInfo->eventNumber();
-
-    if(m_isSignal)
-    {
-      truth_final_lepton_p4 = truth_final_lepton->p4();
-      truth_hadronic_tau_p4 = truth_hadronic_tau->p4();
+  bool do_truth = 0;
+  if (m_isSignal && has_tau_higgs && has_b_higgs && has_hadronic_tau && has_leptonic_tau && has_final_lepton) {
+    do_truth = 1;
+  }
   
-      int final_lepton_id = truth_final_lepton->pdgId();
-      // Values match up with other TruthMatch variable
-      // 0 = no match  1 = dihad (N/A here)  2 = hadel  3 = hadmu
-      if (final_lepton_id == 11 || final_lepton_id == -11) {
-        m_pdgTruthMatchType = 2; 
+  bool has_visible = 1;
+
+  // Let's do this thing
+  m_eventsPassed++;
+  m_runNumber = eventInfo->runNumber();
+  m_eventNumber = eventInfo->eventNumber();
+
+  if(do_truth)
+  {
+    truth_final_lepton_p4 = truth_final_lepton->p4();
+    truth_hadronic_tau_p4 = truth_hadronic_tau->p4();
+  
+    int final_lepton_id = truth_final_lepton->pdgId();
+    // Values match up with other TruthMatch variable
+    // 0 = no match  1 = dihad (N/A here)  2 = hadel  3 = hadmu
+    if (final_lepton_id == 11 || final_lepton_id == -11) {
+      m_pdgTruthMatchType = 2; 
+    } 
+    else if ( final_lepton_id == 13 || final_lepton_id == -13) {
+      m_pdgTruthMatchType = 3;
+    }
+
+    // Truth b
+    m_truthBPt = truth_b->pt() / 1000.;
+    m_truthBEta = truth_b->eta();
+    m_truthBPhi = truth_b->phi();
+    m_truthBE = truth_b->e() / 1000.;
+
+    // Truth anti-b
+    m_truthAntiBPt = truth_anti_b->pt() / 1000.;
+    m_truthAntiBEta = truth_anti_b->eta();
+    m_truthAntiBPhi = truth_anti_b->phi();
+    m_truthAntiBE = truth_anti_b->e() / 1000.;
+
+    // Truth Higgs decaying to taus
+    m_truthHiggsPt = truth_tau_higgs->pt() / 1000.;
+    m_truthHiggsEta = truth_tau_higgs->eta();
+    m_truthHiggsPhi = truth_tau_higgs->phi();
+    m_truthHiggsE = truth_tau_higgs->e() / 1000.;
+
+    // Define accessor for hadronic tau visible variables
+    static SG::AuxElement::Accessor<double> accPtVis("pt_vis");
+    static SG::AuxElement::Accessor<double> accEtaVis("eta_vis");
+    static SG::AuxElement::Accessor<double> accPhiVis("phi_vis");
+    static SG::AuxElement::Accessor<double> accMVis("m_vis");
+
+    // Truth hadronic tau
+    m_truthHadTauPt = truth_hadronic_tau->pt() / 1000.;
+    m_truthHadTauEta = truth_hadronic_tau->eta();
+    m_truthHadTauPhi = truth_hadronic_tau->phi();
+    m_truthHadTauE = truth_hadronic_tau->e() / 1000.;
+    m_truthHadTauPdgId = truth_hadronic_tau->pdgId();
+
+    // If we can't find truthtau or the visible variables for hadronic truth tau, don't try to set
+    if (truth_hadronic_tau != nullptr) {
+      if (!accPtVis.isAvailable(*truth_hadronic_tau) || !accEtaVis.isAvailable(*truth_hadronic_tau) || !accPhiVis.isAvailable(*truth_hadronic_tau) || !accMVis.isAvailable(*truth_hadronic_tau)) {
+        has_visible = 0;
+        m_truthHadTauVisPt = 0;
+        m_truthHadTauVisEta = 0;
+        m_truthHadTauVisPhi = 0;
+        m_truthHadTauVisM = 0;
       } 
-      else if ( final_lepton_id == 13 || final_lepton_id == -13) {
-        m_pdgTruthMatchType = 3;
-      }
-
-      // Truth b
-      m_truthBPt = truth_b->pt() / 1000.;
-      m_truthBEta = truth_b->eta();
-      m_truthBPhi = truth_b->phi();
-      m_truthBE = truth_b->e() / 1000.;
-
-      // Truth anti-b
-      m_truthAntiBPt = truth_anti_b->pt() / 1000.;
-      m_truthAntiBEta = truth_anti_b->eta();
-      m_truthAntiBPhi = truth_anti_b->phi();
-      m_truthAntiBE = truth_anti_b->e() / 1000.;
-
-      // Truth Higgs decaying to taus
-      m_truthHiggsPt = truth_tau_higgs->pt() / 1000.;
-      m_truthHiggsEta = truth_tau_higgs->eta();
-      m_truthHiggsPhi = truth_tau_higgs->phi();
-      m_truthHiggsE = truth_tau_higgs->e() / 1000.;
-
-      // Define accessor for hadronic tau visible variables
-      static SG::AuxElement::Accessor<double> accPtVis("pt_vis");
-      static SG::AuxElement::Accessor<double> accEtaVis("eta_vis");
-      static SG::AuxElement::Accessor<double> accPhiVis("phi_vis");
-      static SG::AuxElement::Accessor<double> accMVis("m_vis");
-
-      // Truth hadronic tau
-      m_truthHadTauPt = truth_hadronic_tau->pt() / 1000.;
-      m_truthHadTauEta = truth_hadronic_tau->eta();
-      m_truthHadTauPhi = truth_hadronic_tau->phi();
-      m_truthHadTauE = truth_hadronic_tau->e() / 1000.;
-      m_truthHadTauPdgId = truth_hadronic_tau->pdgId();
-
-      // If we can't find truthtau or the visible variables for hadronic truth tau, don't try to set
-      if (truth_hadronic_tau != nullptr) {
-        if (!accPtVis.isAvailable(*truth_hadronic_tau) || !accEtaVis.isAvailable(*truth_hadronic_tau) || !accPhiVis.isAvailable(*truth_hadronic_tau) || !accMVis.isAvailable(*truth_hadronic_tau)) {
-          has_visible = 0;
-          m_truthHadTauVisPt = 0;
-          m_truthHadTauVisEta = 0;
-          m_truthHadTauVisPhi = 0;
-          m_truthHadTauVisM = 0;
-        } 
-        else {
-          m_truthHadTauVisPt = accPtVis(*truth_hadronic_tau) / 1000.;
-          m_truthHadTauVisEta = accEtaVis(*truth_hadronic_tau);
-          m_truthHadTauVisPhi = accPhiVis(*truth_hadronic_tau);
-          m_truthHadTauVisM = accMVis(*truth_hadronic_tau) / 1000.;
-          vis_had_tau_p4.SetPtEtaPhiM(m_truthHadTauVisPt, m_truthHadTauVisEta, m_truthHadTauVisPhi, m_truthHadTauVisM);
-        }
-      }
-
-      // Truth leptonic tau
-      m_truthLepTauPt = truth_leptonic_tau->pt() / 1000.;
-      m_truthLepTauEta = truth_leptonic_tau->eta();
-      m_truthLepTauPhi = truth_leptonic_tau->phi();
-      m_truthLepTauE = truth_leptonic_tau->e() / 1000.;
-      m_truthLepTauPdgId = truth_leptonic_tau->pdgId();
-
-      // Truth final lepton
-      m_truthFinalLeptonPt = truth_final_lepton->pt() / 1000.;
-      m_truthFinalLeptonEta = truth_final_lepton->eta();
-      m_truthFinalLeptonPhi = truth_final_lepton->phi();
-      m_truthFinalLeptonE = truth_final_lepton->e() / 1000.;
-      TLorentzVector truth_final_lepton_p4;
-      truth_final_lepton_p4.SetPtEtaPhiE(m_truthFinalLeptonPt, m_truthFinalLeptonEta, m_truthFinalLeptonPhi, m_truthFinalLeptonE);
-      m_truthFinalLeptonPdgId = truth_final_lepton->pdgId();
-
-      // Truth Visible Ditau
-      if (!has_visible) {
-        m_truthDiTauVisPt = 0;
-        m_truthDiTauVisEta = 0;
-        m_truthDiTauVisPhi = 0;
-        m_truthDiTauVisE = 0;
-      }
-      else { 
-        // Truth tau-lepton dR
-        m_truthHadTauVisFinalLeptondR = vis_had_tau_p4.DeltaR(truth_final_lepton_p4);
-        TLorentzVector truth_ditau_vis_p4 = vis_had_tau_p4 + truth_final_lepton_p4;
-        m_truthDiTauVisPt = truth_ditau_vis_p4.Pt();
-        m_truthDiTauVisEta = truth_ditau_vis_p4.Eta();
-        m_truthDiTauVisPhi = truth_ditau_vis_p4.Phi();
-        m_truthDiTauVisE = truth_ditau_vis_p4.E();
+      else {
+        m_truthHadTauVisPt = accPtVis(*truth_hadronic_tau) / 1000.;
+        m_truthHadTauVisEta = accEtaVis(*truth_hadronic_tau);
+        m_truthHadTauVisPhi = accPhiVis(*truth_hadronic_tau);
+        m_truthHadTauVisM = accMVis(*truth_hadronic_tau) / 1000.;
+        vis_had_tau_p4.SetPtEtaPhiM(m_truthHadTauVisPt, m_truthHadTauVisEta, m_truthHadTauVisPhi, m_truthHadTauVisM);
       }
     }
 
-    m_jetConstituentModSequence->execute();
+    // Truth leptonic tau
+    m_truthLepTauPt = truth_leptonic_tau->pt() / 1000.;
+    m_truthLepTauEta = truth_leptonic_tau->eta();
+    m_truthLepTauPhi = truth_leptonic_tau->phi();
+    m_truthLepTauE = truth_leptonic_tau->e() / 1000.;
+    m_truthLepTauPdgId = truth_leptonic_tau->pdgId();
 
-    // Reconstructed hadhad ditaus
-    for (auto ditau: *ditaus) {
-      m_nDiTaus++;
-      m_diTauPt->push_back(ditau->pt() / 1000.);
-      m_diTauEta->push_back(ditau->eta());
-      m_diTauPhi->push_back(ditau->phi());
-      m_nDiTauSubjets->push_back(ditau->nSubjets());
+    // Truth final lepton
+    m_truthFinalLeptonPt = truth_final_lepton->pt() / 1000.;
+    m_truthFinalLeptonEta = truth_final_lepton->eta();
+    m_truthFinalLeptonPhi = truth_final_lepton->phi();
+    m_truthFinalLeptonE = truth_final_lepton->e() / 1000.;
+    TLorentzVector truth_final_lepton_p4;
+    truth_final_lepton_p4.SetPtEtaPhiE(m_truthFinalLeptonPt, m_truthFinalLeptonEta, m_truthFinalLeptonPhi, m_truthFinalLeptonE);
+    m_truthFinalLeptonPdgId = truth_final_lepton->pdgId();
+
+    // Truth Visible Ditau
+    if (!has_visible) {
+      m_truthDiTauVisPt = 0;
+      m_truthDiTauVisEta = 0;
+      m_truthDiTauVisPhi = 0;
+      m_truthDiTauVisE = 0;
     }
+    else { 
+      // Truth tau-lepton dR
+      m_truthHadTauVisFinalLeptondR = vis_had_tau_p4.DeltaR(truth_final_lepton_p4);
+      TLorentzVector truth_ditau_vis_p4 = vis_had_tau_p4 + truth_final_lepton_p4;
+      m_truthDiTauVisPt = truth_ditau_vis_p4.Pt();
+      m_truthDiTauVisEta = truth_ditau_vis_p4.Eta();
+      m_truthDiTauVisPhi = truth_ditau_vis_p4.Phi();
+      m_truthDiTauVisE = truth_ditau_vis_p4.E();
+    }
+  }
 
-    // Reconstructed hadel ditaus
-    m_bestHadElDiTauBDTScore = -1; 
-    for (auto hadelditau: *hadelditaus) {
-      m_nHadElDiTaus++;
-      m_hadElDiTauPt->push_back(hadelditau->pt() / 1000.);
-      m_hadElDiTauEta->push_back(hadelditau->eta());
-      m_hadElDiTauPhi->push_back(hadelditau->phi());
-      m_hadElDiTauM->push_back(hadelditau->m() / 1000.);
+  m_jetConstituentModSequence->execute();
 
-      static const SG::AuxElement::Accessor<float> acc_tau_pt ("tau_pt");
-      static const SG::AuxElement::Accessor<float> acc_tau_eta ("tau_eta");
-      static const SG::AuxElement::Accessor<float> acc_tau_phi ("tau_phi");
-      static const SG::AuxElement::Accessor<float> acc_tau_E ("tau_E");
+  // Reconstructed hadhad ditaus
+  for (auto ditau: *ditaus) {
+    m_nDiTaus++;
+    m_diTauPt->push_back(ditau->pt() / 1000.);
+    m_diTauEta->push_back(ditau->eta());
+    m_diTauPhi->push_back(ditau->phi());
+    m_nDiTauSubjets->push_back(ditau->nSubjets());
+  }
 
-      m_nHadElTaus++;
-      m_hadElTauPt->push_back(acc_tau_pt(*hadelditau) / 1000.);
-      m_hadElTauEta->push_back(acc_tau_eta(*hadelditau));
-      m_hadElTauPhi->push_back(acc_tau_phi(*hadelditau));
-      m_hadElTauE->push_back(acc_tau_E(*hadelditau) / 1000.);
+  // Reconstructed hadel ditaus
+  m_bestHadElDiTauBDTScore = -1; 
+  for (auto hadelditau: *hadelditaus) {
+    m_nHadElDiTaus++;
+    m_hadElDiTauPt->push_back(hadelditau->pt() / 1000.);
+    m_hadElDiTauEta->push_back(hadelditau->eta());
+    m_hadElDiTauPhi->push_back(hadelditau->phi());
+    m_hadElDiTauM->push_back(hadelditau->m() / 1000.);
 
-      static const SG::AuxElement::Accessor<float> acc_el_pt ("electron_pt");
-      static const SG::AuxElement::Accessor<float> acc_el_eta ("electron_eta");
-      static const SG::AuxElement::Accessor<float> acc_el_phi ("electron_phi");
-      static const SG::AuxElement::Accessor<float> acc_el_E ("electron_E");
+    static const SG::AuxElement::Accessor<float> acc_tau_pt ("tau_pt");
+    static const SG::AuxElement::Accessor<float> acc_tau_eta ("tau_eta");
+    static const SG::AuxElement::Accessor<float> acc_tau_phi ("tau_phi");
+    static const SG::AuxElement::Accessor<float> acc_tau_E ("tau_E");
 
-      m_nHadElElectrons++;
-      m_hadElElectronPt->push_back(acc_el_pt(*hadelditau) / 1000.);
-      m_hadElElectronEta->push_back(acc_el_eta(*hadelditau));
-      m_hadElElectronPhi->push_back(acc_el_phi(*hadelditau));
-      m_hadElElectronE->push_back(acc_el_E(*hadelditau) / 1000.);
+    m_nHadElTaus++;
+    m_hadElTauPt->push_back(acc_tau_pt(*hadelditau) / 1000.);
+    m_hadElTauEta->push_back(acc_tau_eta(*hadelditau));
+    m_hadElTauPhi->push_back(acc_tau_phi(*hadelditau));
+    m_hadElTauE->push_back(acc_tau_E(*hadelditau) / 1000.);
 
-      static const SG::AuxElement::Accessor<float> acc_DeltaR ("DeltaR");
-      m_hadElDiTaudR->push_back(acc_DeltaR(*hadelditau));
+    static const SG::AuxElement::Accessor<float> acc_el_pt ("electron_pt");
+    static const SG::AuxElement::Accessor<float> acc_el_eta ("electron_eta");
+    static const SG::AuxElement::Accessor<float> acc_el_phi ("electron_phi");
+    static const SG::AuxElement::Accessor<float> acc_el_E ("electron_E");
 
-      CHECK(m_hadElDiTauIDVarCalculator->execute(*hadelditau));
-      
-      // this is to reproduce the same value as the DiTauIDVarCalculator did before a bug was fixed.
-      // when the BDT is retrained with the results from the fixed DiTauIDVarCalculator this must be deleted
-      static const SG::AuxElement::Accessor< int >   acc_el_IDSelection           ( "el_IDSelection" );
-      static const SG::AuxElement::Accessor< int >   acc_tau_leadingElIDSelection ( "tau_leadingElIDSelection" );
-      static const SG::AuxElement::Decorator< int >  dec_el_IDSelection           ( "el_IDSelection" );
-      static const SG::AuxElement::Decorator< int >  dec_tau_leadingElIDSelection ( "tau_leadingElIDSelection" );
-      
-      if(acc_el_IDSelection(*hadelditau) == 4)
-        dec_el_IDSelection(*hadelditau) = 5;
-      if(acc_el_IDSelection(*hadelditau) == 1)
-        dec_el_IDSelection(*hadelditau) = 3;
-      if(acc_el_IDSelection(*hadelditau) == 2)
-        dec_el_IDSelection(*hadelditau) = 3;
-      
-      if(acc_tau_leadingElIDSelection(*hadelditau) == 4)
-        dec_tau_leadingElIDSelection(*hadelditau) = 5;
-      if(acc_tau_leadingElIDSelection(*hadelditau) == 1)
-        dec_tau_leadingElIDSelection(*hadelditau) = 3;
-      if(acc_tau_leadingElIDSelection(*hadelditau) == 2)
-        dec_tau_leadingElIDSelection(*hadelditau) = 3;
+    m_nHadElElectrons++;
+    m_hadElElectronPt->push_back(acc_el_pt(*hadelditau) / 1000.);
+    m_hadElElectronEta->push_back(acc_el_eta(*hadelditau));
+    m_hadElElectronPhi->push_back(acc_el_phi(*hadelditau));
+    m_hadElElectronE->push_back(acc_el_E(*hadelditau) / 1000.);
+
+    static const SG::AuxElement::Accessor<float> acc_DeltaR ("DeltaR");
+    m_hadElDiTaudR->push_back(acc_DeltaR(*hadelditau));
+
+    CHECK(m_hadElDiTauIDVarCalculator->execute(*hadelditau));
     
-      CHECK(m_hadElDiTauDiscrTool->execute(*hadelditau));
-      CHECK(m_hadElDiTauWPDecorator->execute(*hadelditau));
-      double bdt = hadelditau->auxdata<double>("JetBDT");
-      double flat_bdt = hadelditau->auxdata<double>("JetBDTFlat");
-      m_hadElDiTauBDTScore->push_back(bdt);
-      m_hadElDiTauFlatBDTScore->push_back(flat_bdt);
-        
-      if (bdt > m_bestHadElDiTauBDTScore || m_bestHadElDiTauBDTScore == -1)
-      {
-        m_bestHadElDiTauBDTScore = bdt;
-      }
-
-      if(m_isSignal)
-      {
-        m_diTauTruthMatchingTool->getTruth(*hadelditau);
-        // 0 = no match  1 = dihad  2 = hadel  3 = hadmu
-        unsigned int truth_match_type = 0;
-        if (hadelditau->auxdata<char>((const char*)("IsTruthHadronic"))){
-          truth_match_type = 1;
-          m_truthMatchedHadHad++;
-        }
-        if (hadelditau->auxdata<char>((const char*)("IsTruthHadEl"))){
-          truth_match_type = 2;
-          m_truthMatchedHadEl++;
-        }
-        if (hadelditau->auxdata<char>((const char*)("IsTruthHadMu"))){
-          truth_match_type = 3;
-          m_truthMatchedHadMu++;
-        }
-        m_hadElDiTauTruthMatchType->push_back(truth_match_type);
-      }
+    // this is to reproduce the same value as the DiTauIDVarCalculator did before a bug was fixed.
+    // when the BDT is retrained with the results from the fixed DiTauIDVarCalculator this must be deleted
+    static const SG::AuxElement::Accessor< int >   acc_el_IDSelection           ( "el_IDSelection" );
+    static const SG::AuxElement::Accessor< int >   acc_tau_leadingElIDSelection ( "tau_leadingElIDSelection" );
+    static const SG::AuxElement::Decorator< int >  dec_el_IDSelection           ( "el_IDSelection" );
+    static const SG::AuxElement::Decorator< int >  dec_tau_leadingElIDSelection ( "tau_leadingElIDSelection" );
+    
+    if(acc_el_IDSelection(*hadelditau) == 4)
+      dec_el_IDSelection(*hadelditau) = 5;
+    if(acc_el_IDSelection(*hadelditau) == 1)
+      dec_el_IDSelection(*hadelditau) = 3;
+    if(acc_el_IDSelection(*hadelditau) == 2)
+      dec_el_IDSelection(*hadelditau) = 3;
+    
+    if(acc_tau_leadingElIDSelection(*hadelditau) == 4)
+      dec_tau_leadingElIDSelection(*hadelditau) = 5;
+    if(acc_tau_leadingElIDSelection(*hadelditau) == 1)
+      dec_tau_leadingElIDSelection(*hadelditau) = 3;
+    if(acc_tau_leadingElIDSelection(*hadelditau) == 2)
+      dec_tau_leadingElIDSelection(*hadelditau) = 3;
+  
+    CHECK(m_hadElDiTauDiscrTool->execute(*hadelditau));
+    CHECK(m_hadElDiTauWPDecorator->execute(*hadelditau));
+    double bdt = hadelditau->auxdata<double>("JetBDT");
+    double flat_bdt = hadelditau->auxdata<double>("JetBDTFlat");
+    m_hadElDiTauBDTScore->push_back(bdt);
+    m_hadElDiTauFlatBDTScore->push_back(flat_bdt);
+      
+    if (bdt > m_bestHadElDiTauBDTScore || m_bestHadElDiTauBDTScore == -1)
+    {
+      m_bestHadElDiTauBDTScore = bdt;
     }
 
-    // Reconstructed hadmu ditaus
-    m_bestHadMuDiTauBDTScore = -1; 
-    for (auto hadmuditau: *hadmuditaus) {
-      m_nHadMuDiTaus++;
-      m_hadMuDiTauPt->push_back(hadmuditau->pt() / 1000.);
-      m_hadMuDiTauEta->push_back(hadmuditau->eta());
-      m_hadMuDiTauPhi->push_back(hadmuditau->phi());
-      m_hadMuDiTauM->push_back(hadmuditau->m());
+    if(do_truth)
+    {
+      m_diTauTruthMatchingTool->getTruth(*hadelditau);
+      // 0 = no match  1 = dihad  2 = hadel  3 = hadmu
+      unsigned int truth_match_type = 0;
+      if (hadelditau->auxdata<char>((const char*)("IsTruthHadronic"))){
+        truth_match_type = 1;
+        m_truthMatchedHadHad++;
+      }
+      if (hadelditau->auxdata<char>((const char*)("IsTruthHadEl"))){
+        truth_match_type = 2;
+        m_truthMatchedHadEl++;
+      }
+      if (hadelditau->auxdata<char>((const char*)("IsTruthHadMu"))){
+        truth_match_type = 3;
+        m_truthMatchedHadMu++;
+      }
+      m_hadElDiTauTruthMatchType->push_back(truth_match_type);
+    }
+  }
 
-      static const SG::AuxElement::Accessor<float> acc_tau_pt ("tau_pt");
-      static const SG::AuxElement::Accessor<float> acc_tau_eta ("tau_eta");
-      static const SG::AuxElement::Accessor<float> acc_tau_phi ("tau_phi");
-      static const SG::AuxElement::Accessor<float> acc_tau_E ("tau_E");
+  // Reconstructed hadmu ditaus
+  m_bestHadMuDiTauBDTScore = -1; 
+  for (auto hadmuditau: *hadmuditaus) {
+    m_nHadMuDiTaus++;
+    m_hadMuDiTauPt->push_back(hadmuditau->pt() / 1000.);
+    m_hadMuDiTauEta->push_back(hadmuditau->eta());
+    m_hadMuDiTauPhi->push_back(hadmuditau->phi());
+    m_hadMuDiTauM->push_back(hadmuditau->m());
 
-      m_nHadMuTaus++;
-      m_hadMuTauPt->push_back(acc_tau_pt(*hadmuditau) / 1000.);
-      m_hadMuTauEta->push_back(acc_tau_eta(*hadmuditau));
-      m_hadMuTauPhi->push_back(acc_tau_phi(*hadmuditau));
-      m_hadMuTauE->push_back(acc_tau_E(*hadmuditau) / 1000.);
+    static const SG::AuxElement::Accessor<float> acc_tau_pt ("tau_pt");
+    static const SG::AuxElement::Accessor<float> acc_tau_eta ("tau_eta");
+    static const SG::AuxElement::Accessor<float> acc_tau_phi ("tau_phi");
+    static const SG::AuxElement::Accessor<float> acc_tau_E ("tau_E");
 
-      static const SG::AuxElement::Accessor<float> acc_el_pt ("muon_pt");
-      static const SG::AuxElement::Accessor<float> acc_el_eta ("muon_eta");
-      static const SG::AuxElement::Accessor<float> acc_el_phi ("muon_phi");
-      static const SG::AuxElement::Accessor<float> acc_el_E ("muon_E");
+    m_nHadMuTaus++;
+    m_hadMuTauPt->push_back(acc_tau_pt(*hadmuditau) / 1000.);
+    m_hadMuTauEta->push_back(acc_tau_eta(*hadmuditau));
+    m_hadMuTauPhi->push_back(acc_tau_phi(*hadmuditau));
+    m_hadMuTauE->push_back(acc_tau_E(*hadmuditau) / 1000.);
 
-      m_nHadMuMuons++;
-      m_hadMuMuonPt->push_back(acc_el_pt(*hadmuditau) / 1000.);
-      m_hadMuMuonEta->push_back(acc_el_eta(*hadmuditau));
-      m_hadMuMuonPhi->push_back(acc_el_phi(*hadmuditau));
-      m_hadMuMuonE->push_back(acc_el_E(*hadmuditau) / 1000.);
+    static const SG::AuxElement::Accessor<float> acc_el_pt ("muon_pt");
+    static const SG::AuxElement::Accessor<float> acc_el_eta ("muon_eta");
+    static const SG::AuxElement::Accessor<float> acc_el_phi ("muon_phi");
+    static const SG::AuxElement::Accessor<float> acc_el_E ("muon_E");
 
+    m_nHadMuMuons++;
+    m_hadMuMuonPt->push_back(acc_el_pt(*hadmuditau) / 1000.);
+    m_hadMuMuonEta->push_back(acc_el_eta(*hadmuditau));
+    m_hadMuMuonPhi->push_back(acc_el_phi(*hadmuditau));
+    m_hadMuMuonE->push_back(acc_el_E(*hadmuditau) / 1000.);
+
+    if (m_isDAOD) {
       static const SG::AuxElement::Accessor<float> acc_DeltaR ("DeltaR");
       m_hadMuDiTaudR->push_back(acc_DeltaR(*hadmuditau));
 
@@ -1530,779 +1539,780 @@ StatusCode DiTauAnalysis :: execute ()
       {
         m_bestHadMuDiTauBDTScore = bdt;
       }
+    }
 
-      if(m_isSignal)
-      {
-        m_diTauTruthMatchingTool->getTruth(*hadmuditau);
-        unsigned int truth_match_type = 0;
-        if (hadmuditau->auxdata<char>((const char*)("IsTruthHadronic"))){
-          truth_match_type = 1;
-          m_truthMatchedHadHad++;
+    if(do_truth)
+    {
+      m_diTauTruthMatchingTool->getTruth(*hadmuditau);
+      unsigned int truth_match_type = 0;
+      if (hadmuditau->auxdata<char>((const char*)("IsTruthHadronic"))){
+        truth_match_type = 1;
+        m_truthMatchedHadHad++;
+      }
+      if (hadmuditau->auxdata<char>((const char*)("IsTruthHadEl"))){
+        truth_match_type = 2;
+        m_truthMatchedHadEl++;
+      }
+      if (hadmuditau->auxdata<char>((const char*)("IsTruthHadMu"))){
+        truth_match_type = 3;
+        m_truthMatchedHadMu++;
+      }
+      m_hadMuDiTauTruthMatchType->push_back(truth_match_type);
+    }
+  }
+
+  // Reconstructed taus
+  const xAOD::TauJet* leading_tau = nullptr;
+  const xAOD::TauJet* leading_veryloose_tau = nullptr;
+  const xAOD::TauJet* leading_loose_tau = nullptr;
+  const xAOD::TauJet* leading_medium_tau = nullptr;
+  const xAOD::TauJet* leading_tight_tau = nullptr;
+  float min_tau_truth_dr = -1;
+  for (auto tau: *taus) {
+    m_nTaus++;
+
+    float tau_pt = tau->pt() / 1000.;
+    float tau_eta = tau->eta();
+    float tau_phi = tau->phi();
+    float tau_e = tau->e() / 1000.;
+    TLorentzVector tau_p4 = tau->p4();
+
+    // Calculate dR of closest reco tau to truth
+    if (do_truth) {
+      if (has_visible) {
+        float truth_dr = tau_p4.DeltaR(vis_had_tau_p4);
+        if (min_tau_truth_dr == -1 || truth_dr < min_tau_truth_dr) {
+          min_tau_truth_dr = truth_dr;
         }
-        if (hadmuditau->auxdata<char>((const char*)("IsTruthHadEl"))){
-          truth_match_type = 2;
-          m_truthMatchedHadEl++;
-        }
-        if (hadmuditau->auxdata<char>((const char*)("IsTruthHadMu"))){
-          truth_match_type = 3;
-          m_truthMatchedHadMu++;
-        }
-        m_hadMuDiTauTruthMatchType->push_back(truth_match_type);
       }
     }
 
-    // Reconstructed taus
-    const xAOD::TauJet* leading_tau = nullptr;
-    const xAOD::TauJet* leading_veryloose_tau = nullptr;
-    const xAOD::TauJet* leading_loose_tau = nullptr;
-    const xAOD::TauJet* leading_medium_tau = nullptr;
-    const xAOD::TauJet* leading_tight_tau = nullptr;
-    float min_tau_truth_dr = -1;
+    // All taus
+    m_tauPt->push_back(tau_pt);
+    m_tauEta->push_back(tau_eta);
+    m_tauPhi->push_back(tau_phi);
+    m_tauE->push_back(tau_e);
+    //m_tauP4->push_back(tau_p4);
+    if (tau_pt >= m_leadingTauPt) {
+      leading_tau = tau;
+      m_leadingTauPt = tau_pt;
+      m_leadingTauEta = tau_eta;
+      m_leadingTauPhi = tau_phi;
+      m_leadingTauE = tau_e;
+    }
+    // Very Loose taus
+    if (tau->isTau(xAOD::TauJetParameters::IsTauFlag::JetBDTSigVeryLoose)) {
+      m_nTausVeryLoose++;
+      m_tauVeryLoosePt->push_back(tau_pt);
+      m_tauVeryLooseEta->push_back(tau_eta);
+      m_tauVeryLoosePhi->push_back(tau_phi);
+      m_tauVeryLooseE->push_back(tau_e);
+      if (tau_pt >= m_leadingTauVeryLoosePt) {
+        leading_veryloose_tau = tau;
+        m_leadingTauVeryLoosePt = tau_pt;
+        m_leadingTauVeryLooseEta = tau_eta;
+        m_leadingTauVeryLoosePhi = tau_phi;
+        m_leadingTauVeryLooseE = tau_e;
+      }
+    }
+    // Loose taus
+    if (tau->isTau(xAOD::TauJetParameters::IsTauFlag::JetBDTSigLoose)) {
+      m_nTausLoose++;
+      m_tauLoosePt->push_back(tau_pt);
+      m_tauLooseEta->push_back(tau_eta);
+      m_tauLoosePhi->push_back(tau_phi);
+      m_tauLooseE->push_back(tau_e);
+      if (tau_pt >= m_leadingTauLoosePt) {
+        leading_loose_tau = tau;
+        m_leadingTauLoosePt = tau_pt;
+        m_leadingTauLooseEta = tau_eta;
+        m_leadingTauLoosePhi = tau_phi;
+        m_leadingTauLooseE = tau_e;
+      }
+    }
+    // Medium taus
+    if (tau->isTau(xAOD::TauJetParameters::IsTauFlag::JetBDTSigMedium)) {
+      m_nTausMedium++;
+      m_tauMediumPt->push_back(tau_pt);
+      m_tauMediumEta->push_back(tau_eta);
+      m_tauMediumPhi->push_back(tau_phi);
+      m_tauMediumE->push_back(tau_e);
+      if (tau_pt >= m_leadingTauMediumPt) {
+        leading_medium_tau = tau;
+        m_leadingTauMediumPt = tau_pt;
+        m_leadingTauMediumEta = tau_eta;
+        m_leadingTauMediumPhi = tau_phi;
+        m_leadingTauMediumE = tau_e;
+      }
+    }
+    // Tight taus
+    if (tau->isTau(xAOD::TauJetParameters::IsTauFlag::JetBDTSigTight)) {
+      m_nTausTight++;
+      m_tauTightPt->push_back(tau_pt);
+      m_tauTightEta->push_back(tau_eta);
+      m_tauTightPhi->push_back(tau_phi);
+      m_tauTightE->push_back(tau_e);
+      if (tau_pt >= m_leadingTauTightPt) {
+        leading_tight_tau = tau;
+        m_leadingTauTightPt = tau_pt;
+        m_leadingTauTightEta = tau_eta;
+        m_leadingTauTightPhi = tau_phi;
+        m_leadingTauTightE = tau_e;
+      }
+    }
+  }
+
+  m_tauRecoTruthMindR = min_tau_truth_dr;
+
+  // Reconstructed muons
+  const xAOD::Muon* leading_muon = nullptr;
+  const xAOD::Muon* leading_loose_muon = nullptr;
+  const xAOD::Muon* leading_medium_muon = nullptr;
+  const xAOD::Muon* leading_tight_muon = nullptr;
+  float min_mu_truth_dr = -1;
+  for (auto muon: *muons) {
+    m_nMuons++;
+
+    // Calculate dR of closest reco muon to truth
+    if (do_truth) {
+      TLorentzVector muon_p4 = muon->p4();
+      float truth_dr = muon_p4.DeltaR(truth_final_lepton_p4);
+      if (min_mu_truth_dr == -1 || truth_dr < min_mu_truth_dr) {
+        min_mu_truth_dr = truth_dr;
+      }
+    }
+
+    float muon_pt = muon->pt() / 1000.;
+    float muon_eta = muon->eta();
+    float muon_phi = muon->phi();
+    float muon_e = muon->e() / 1000.;
+    m_muPt->push_back(muon_pt);
+    m_muEta->push_back(muon_eta);
+    m_muPhi->push_back(muon_phi);
+    m_muE->push_back(muon_e);
+    if (muon_pt >= m_leadingMuPt) {
+      leading_muon = muon;
+      m_leadingMuPt = muon_pt;
+      m_leadingMuEta = muon_eta;
+      m_leadingMuPhi = muon_phi;
+      m_leadingMuE = muon_e;
+    }
+    // Muon quality 0=Tight 1=Medium 2=Loose 3=VeryLoose(all)
+    unsigned int muQuality = muon->quality();
+    // Tight muon, fill for all WPs
+    if (muQuality == 0) {
+      // Loose muon
+      m_nMuonsLoose++;
+      m_muLoosePt->push_back(muon_pt);
+      m_muLooseEta->push_back(muon_eta);
+      m_muLoosePhi->push_back(muon_phi);
+      m_muLooseE->push_back(muon_e);
+      if (muon_pt >= m_leadingMuLoosePt) {
+        leading_loose_muon = muon;
+        m_leadingMuLoosePt = muon_pt;
+        m_leadingMuLooseEta = muon_eta;
+        m_leadingMuLoosePhi = muon_phi;
+        m_leadingMuLooseE = muon_e;
+      }
+      // Medium muon
+      m_nMuonsMedium++;
+      m_muMediumPt->push_back(muon_pt);
+      m_muMediumEta->push_back(muon_eta);
+      m_muMediumPhi->push_back(muon_phi);
+      m_muMediumE->push_back(muon_e);
+      if (muon_pt >= m_leadingMuMediumPt) {
+        leading_medium_muon = muon;
+        m_leadingMuMediumPt = muon_pt;
+        m_leadingMuMediumEta = muon_eta;
+        m_leadingMuMediumPhi = muon_phi;
+        m_leadingMuMediumE = muon_e;
+      }
+      // Tight muon
+      m_nMuonsTight++;
+      m_muTightPt->push_back(muon_pt);
+      m_muTightEta->push_back(muon_eta);
+      m_muTightPhi->push_back(muon_phi);
+      m_muTightE->push_back(muon_e);
+      if (muon_pt >= m_leadingMuTightPt) {
+        leading_tight_muon = muon;
+        m_leadingMuTightPt = muon_pt;
+        m_leadingMuTightEta = muon_eta;
+        m_leadingMuTightPhi = muon_phi;
+        m_leadingMuTightE = muon_e;
+      }
+    // Medium muon, fill Medium and Loose
+    } else if (muQuality == 1) {
+      // Loose muon
+      m_nMuonsLoose++;
+      m_muLoosePt->push_back(muon_pt);
+      m_muLooseEta->push_back(muon_eta);
+      m_muLoosePhi->push_back(muon_phi);
+      m_muLooseE->push_back(muon_e);
+      if (muon_pt >= m_leadingMuLoosePt) {
+        leading_loose_muon = muon;
+        m_leadingMuLoosePt = muon_pt;
+        m_leadingMuLooseEta = muon_eta;
+        m_leadingMuLoosePhi = muon_phi;
+        m_leadingMuLooseE = muon_e;
+      }
+      // Medium muon
+      m_nMuonsMedium++;
+      m_muMediumPt->push_back(muon_pt);
+      m_muMediumEta->push_back(muon_eta);
+      m_muMediumPhi->push_back(muon_phi);
+      m_muMediumE->push_back(muon_e);
+      if (muon_pt >= m_leadingMuMediumPt) {
+        leading_medium_muon = muon;
+        m_leadingMuMediumPt = muon_pt;
+        m_leadingMuMediumEta = muon_eta;
+        m_leadingMuMediumPhi = muon_phi;
+        m_leadingMuMediumE = muon_e;
+      }
+    // Loose muon, just Loose
+    } else if (muQuality == 2) {
+      // Loose muon
+      m_nMuonsLoose++;
+      m_muLoosePt->push_back(muon_pt);
+      m_muLooseEta->push_back(muon_eta);
+      m_muLoosePhi->push_back(muon_phi);
+      m_muLooseE->push_back(muon_e);
+      if (muon_pt >= m_leadingMuLoosePt) {
+        leading_loose_muon = muon;
+        m_leadingMuLoosePt = muon_pt;
+        m_leadingMuLooseEta = muon_eta;
+        m_leadingMuLoosePhi = muon_phi;
+        m_leadingMuLooseE = muon_e;
+      }
+    } 
+  }
+
+  m_muRecoTruthMindR = min_mu_truth_dr;
+
+  // Reconstructed electrons
+  const xAOD::Electron* leading_electron = nullptr;
+  const xAOD::Electron* leading_veryloose_electron = nullptr;
+  const xAOD::Electron* leading_loose_electron = nullptr;
+  const xAOD::Electron* leading_medium_electron = nullptr;
+  const xAOD::Electron* leading_tight_electron = nullptr;
+  std::vector<const xAOD::Electron*> loose_electrons;
+  float min_ele_truth_dr = -1;
+  for (auto electron: *electrons) {
+    m_nElectrons++;
+
+    // Calculate dR of closest reco electron to truth
+    if (do_truth) {
+      TLorentzVector electron_p4 = electron->p4();
+      float truth_dr = electron_p4.DeltaR(truth_final_lepton_p4);
+      if (min_ele_truth_dr == -1 || truth_dr < min_ele_truth_dr) {
+        min_ele_truth_dr = truth_dr;
+      }
+    }
+
+    float electron_pt = electron->pt() / 1000.;
+    float electron_eta = electron->eta();
+    float electron_phi = electron->phi();
+    float electron_e = electron->e() / 1000.;
+    m_elePt->push_back(electron_pt);
+    m_eleEta->push_back(electron_eta);
+    m_elePhi->push_back(electron_phi);
+    m_eleE->push_back(electron_e);
+    if (electron_pt >= m_leadingElePt) {
+      leading_electron = electron;
+      m_leadingElePt = electron_pt;
+      m_leadingEleEta = electron_eta;
+      m_leadingElePhi = electron_phi;
+      m_leadingEleE = electron_e;
+    }
+    if (static_cast<int>(m_checkEleVeryLooseLH->accept(electron))) {
+      m_nElectronsVeryLoose++;
+      m_eleVeryLoosePt->push_back(electron_pt);
+      m_eleVeryLooseEta->push_back(electron_eta);
+      m_eleVeryLoosePhi->push_back(electron_phi);
+      m_eleVeryLooseE->push_back(electron_e);
+      if (electron_pt >= m_leadingEleVeryLoosePt) {
+        leading_veryloose_electron = electron;
+        m_leadingEleVeryLoosePt = electron_pt;
+        m_leadingEleVeryLooseEta = electron_eta;
+        m_leadingEleVeryLoosePhi = electron_phi;
+        m_leadingEleVeryLooseE = electron_e;
+      }
+    }
+    if (static_cast<int>(m_checkEleLooseLH->accept(electron))) {
+      m_nElectronsLoose++;
+      loose_electrons.push_back(electron);
+      m_eleLoosePt->push_back(electron_pt);
+      m_eleLooseEta->push_back(electron_eta);
+      m_eleLoosePhi->push_back(electron_phi);
+      m_eleLooseE->push_back(electron_e);
+      if (electron_pt >= m_leadingEleLoosePt) {
+        leading_loose_electron = electron;
+        m_leadingEleLoosePt = electron_pt;
+        m_leadingEleLooseEta = electron_eta;
+        m_leadingEleLoosePhi = electron_phi;
+        m_leadingEleLooseE = electron_e;
+      }
+    }
+    if (static_cast<int>(m_checkEleMediumLH->accept(electron))) {
+      m_nElectronsMedium++;
+      m_eleMediumPt->push_back(electron_pt);
+      m_eleMediumEta->push_back(electron_eta);
+      m_eleMediumPhi->push_back(electron_phi);
+      m_eleMediumE->push_back(electron_e);
+      if (electron_pt >= m_leadingEleMediumPt) {
+        leading_medium_electron = electron;
+        m_leadingEleMediumPt = electron_pt;
+        m_leadingEleMediumEta = electron_eta;
+        m_leadingEleMediumPhi = electron_phi;
+        m_leadingEleMediumE = electron_e;
+      }
+    }
+    if (static_cast<int>(m_checkEleTightLH->accept(electron))) {
+      m_nElectronsTight++;
+      m_eleTightPt->push_back(electron_pt);
+      m_eleTightEta->push_back(electron_eta);
+      m_eleTightPhi->push_back(electron_phi);
+      m_eleTightE->push_back(electron_e);
+      if (electron_pt >= m_leadingEleTightPt) {
+        leading_tight_electron = electron;
+        m_leadingEleTightPt = electron_pt;
+        m_leadingEleTightEta = electron_eta;
+        m_leadingEleTightPhi = electron_phi;
+        m_leadingEleTightE = electron_e;
+      }
+    }
+  }
+
+  m_eleRecoTruthMindR = min_ele_truth_dr;
+
+  // Reconstructed jets
+  // Number of jets > 25 GeV for MMC
+  unsigned int njet25 = 0;
+  for (auto jet: *jets) {
+    m_nJets++;
+    float jet_pt = jet->pt() / 1000.;
+    float jet_eta = jet->eta();
+    float jet_phi = jet->phi();
+    float jet_e = jet->e() / 1000.;
+
+    if (jet_pt > 25.) {
+      njet25++;
+    }
+
+    m_jetPt->push_back(jet_pt);
+    m_jetEta->push_back(jet_eta);
+    m_jetPhi->push_back(jet_phi);
+    m_jetE->push_back(jet_e);
+    if (jet_pt >= m_leadingJetPt) {
+      m_subleadingJetPt = m_leadingJetPt;
+      m_subleadingJetEta = m_leadingJetEta;
+      m_subleadingJetPhi = m_leadingJetPhi;
+      m_subleadingJetE = m_leadingJetE;
+      m_leadingJetPt = jet_pt;
+      m_leadingJetEta = jet_eta;
+      m_leadingJetPhi = jet_phi;
+      m_leadingJetE = jet_e;
+    }
+    else if (jet_pt >= m_subleadingJetPt) {
+      m_subleadingJetPt = jet_pt;
+      m_subleadingJetEta = jet_eta;
+      m_subleadingJetPhi = jet_phi;
+      m_subleadingJetE = jet_e;
+    }
+    bool btag_accept = m_bTaggingSelectionTool->accept(*jet);     
+    m_jetBTagAccept->push_back(btag_accept);
+    if (btag_accept) {
+      m_nBTagJets++;
+      m_bTagJetPt->push_back(jet_pt);
+      m_bTagJetEta->push_back(jet_eta);
+      m_bTagJetPhi->push_back(jet_phi);
+      m_bTagJetE->push_back(jet_e);
+      if (jet_pt >= m_leadingBTagJetPt) {
+        m_subleadingBTagJetPt = m_leadingBTagJetPt;
+        m_subleadingBTagJetEta = m_leadingBTagJetEta;
+        m_subleadingBTagJetPhi = m_leadingBTagJetPhi;
+        m_subleadingBTagJetE = m_leadingBTagJetE;
+        m_leadingBTagJetPt = jet_pt;
+        m_leadingBTagJetEta = jet_eta;
+        m_leadingBTagJetPhi = jet_phi;
+        m_leadingBTagJetE = jet_e;
+      }
+      else if (jet_pt >= m_subleadingBTagJetPt) {
+        m_subleadingBTagJetPt = jet_pt;
+        m_subleadingBTagJetEta = jet_eta;
+        m_subleadingBTagJetPhi = jet_phi;
+        m_subleadingBTagJetE = jet_e;
+      }
+    }
+  }
+
+  // Reconstructed large-R jets
+  const xAOD::Jet* leading_largerjet;
+  const xAOD::Jet* subleading_largerjet;
+  for (auto largerjet: *largerjets) {
+    m_nLargeRJets++;
+    float largerjet_pt = largerjet->pt() / 1000.;
+    float largerjet_eta = largerjet->eta();
+    float largerjet_phi = largerjet->phi();
+    float largerjet_e = largerjet->e() / 1000.;
+    float largerjet_m = largerjet->m() / 1000.;
+    m_lRJetPt->push_back(largerjet_pt);
+    m_lRJetEta->push_back(largerjet_eta);
+    m_lRJetPhi->push_back(largerjet_phi);
+    m_lRJetE->push_back(largerjet_e);
+    m_lRJetM->push_back(largerjet_m);
+    if (largerjet_pt >= m_leadingLRJetPt) {
+      // Leading jet bumped down to subleading
+      subleading_largerjet = leading_largerjet;
+      m_subleadingLRJetPt = m_leadingLRJetPt;
+      m_subleadingLRJetEta = m_leadingLRJetEta;
+      m_subleadingLRJetPhi = m_leadingLRJetPhi;
+      m_subleadingLRJetE = m_leadingLRJetE;
+      m_subleadingLRJetM = m_leadingLRJetM;
+      // New jet moved to leading
+      leading_largerjet = largerjet;
+      m_leadingLRJetPt = largerjet_pt;
+      m_leadingLRJetEta = largerjet_eta;
+      m_leadingLRJetPhi = largerjet_phi;
+      m_leadingLRJetE = largerjet_e;
+      m_leadingLRJetM = largerjet_m;
+    }
+    else if (largerjet_pt >= m_subleadingLRJetPt) {
+      subleading_largerjet = largerjet;
+      m_subleadingLRJetPt = largerjet_pt;
+      m_subleadingLRJetEta = largerjet_eta;
+      m_subleadingLRJetPhi = largerjet_phi;
+      m_subleadingLRJetE = largerjet_e;
+      m_subleadingLRJetM = largerjet_m;
+    }
+  }
+
+  // Fill topological values of two leading large-R jets
+  if (m_nLargeRJets > 1) {
+    TLorentzVector leading_largerjet_p4 = leading_largerjet->p4();
+    TLorentzVector subleading_largerjet_p4 = subleading_largerjet->p4();
+
+    m_largeRJetdR = leading_largerjet_p4.DeltaR(subleading_largerjet_p4);
+    m_largeRJetdEta = std::abs( leading_largerjet_p4.Eta() - subleading_largerjet_p4.Eta() );
+    m_largeRJetdPhi = std::abs( leading_largerjet_p4.DeltaPhi(subleading_largerjet_p4) );
+    m_largeRJetdPt = std::abs( leading_largerjet_p4.Pt() - subleading_largerjet_p4.Pt() ) / 1000.;
+
+    TLorentzVector larger_x_p4 = leading_largerjet_p4 + subleading_largerjet_p4;
+    
+    m_largeRXPt = larger_x_p4.Pt() / 1000.;
+    m_largeRXEta = larger_x_p4.Eta();
+    m_largeRXPhi = larger_x_p4.Phi();
+    m_largeRXE = larger_x_p4.E() / 1000.;
+    m_largeRXM = larger_x_p4.M() / 1000.;
+  }
+
+  // If a loose electron was found, fill values dependent on it
+  if (leading_loose_electron && m_nTaus > 0) {
+    TLorentzVector leading_loose_electron_p4 = leading_loose_electron->p4();
+
     for (auto tau: *taus) {
-      m_nTaus++;
-
-      float tau_pt = tau->pt() / 1000.;
-      float tau_eta = tau->eta();
-      float tau_phi = tau->phi();
-      float tau_e = tau->e() / 1000.;
       TLorentzVector tau_p4 = tau->p4();
+      TLorentzVector tau_loose_electron_p4 = tau_p4 + leading_loose_electron_p4;
 
-      // Calculate dR of closest reco tau to truth
-      if (m_isSignal) {
-        if (has_visible) {
-          float truth_dr = tau_p4.DeltaR(vis_had_tau_p4);
-          if (min_tau_truth_dr == -1 || truth_dr < min_tau_truth_dr) {
-            min_tau_truth_dr = truth_dr;
-          }
-        }
-      }
-
-      // All taus
-      m_tauPt->push_back(tau_pt);
-      m_tauEta->push_back(tau_eta);
-      m_tauPhi->push_back(tau_phi);
-      m_tauE->push_back(tau_e);
-      //m_tauP4->push_back(tau_p4);
-      if (tau_pt >= m_leadingTauPt) {
-        leading_tau = tau;
-        m_leadingTauPt = tau_pt;
-        m_leadingTauEta = tau_eta;
-        m_leadingTauPhi = tau_phi;
-        m_leadingTauE = tau_e;
-      }
-      // Very Loose taus
-      if (tau->isTau(xAOD::TauJetParameters::IsTauFlag::JetBDTSigVeryLoose)) {
-        m_nTausVeryLoose++;
-        m_tauVeryLoosePt->push_back(tau_pt);
-        m_tauVeryLooseEta->push_back(tau_eta);
-        m_tauVeryLoosePhi->push_back(tau_phi);
-        m_tauVeryLooseE->push_back(tau_e);
-        if (tau_pt >= m_leadingTauVeryLoosePt) {
-          leading_veryloose_tau = tau;
-          m_leadingTauVeryLoosePt = tau_pt;
-          m_leadingTauVeryLooseEta = tau_eta;
-          m_leadingTauVeryLoosePhi = tau_phi;
-          m_leadingTauVeryLooseE = tau_e;
-        }
-      }
-      // Loose taus
-      if (tau->isTau(xAOD::TauJetParameters::IsTauFlag::JetBDTSigLoose)) {
-        m_nTausLoose++;
-        m_tauLoosePt->push_back(tau_pt);
-        m_tauLooseEta->push_back(tau_eta);
-        m_tauLoosePhi->push_back(tau_phi);
-        m_tauLooseE->push_back(tau_e);
-        if (tau_pt >= m_leadingTauLoosePt) {
-          leading_loose_tau = tau;
-          m_leadingTauLoosePt = tau_pt;
-          m_leadingTauLooseEta = tau_eta;
-          m_leadingTauLoosePhi = tau_phi;
-          m_leadingTauLooseE = tau_e;
-        }
-      }
-      // Medium taus
-      if (tau->isTau(xAOD::TauJetParameters::IsTauFlag::JetBDTSigMedium)) {
-        m_nTausMedium++;
-        m_tauMediumPt->push_back(tau_pt);
-        m_tauMediumEta->push_back(tau_eta);
-        m_tauMediumPhi->push_back(tau_phi);
-        m_tauMediumE->push_back(tau_e);
-        if (tau_pt >= m_leadingTauMediumPt) {
-          leading_medium_tau = tau;
-          m_leadingTauMediumPt = tau_pt;
-          m_leadingTauMediumEta = tau_eta;
-          m_leadingTauMediumPhi = tau_phi;
-          m_leadingTauMediumE = tau_e;
-        }
-      }
-      // Tight taus
-      if (tau->isTau(xAOD::TauJetParameters::IsTauFlag::JetBDTSigTight)) {
-        m_nTausTight++;
-        m_tauTightPt->push_back(tau_pt);
-        m_tauTightEta->push_back(tau_eta);
-        m_tauTightPhi->push_back(tau_phi);
-        m_tauTightE->push_back(tau_e);
-        if (tau_pt >= m_leadingTauTightPt) {
-          leading_tight_tau = tau;
-          m_leadingTauTightPt = tau_pt;
-          m_leadingTauTightEta = tau_eta;
-          m_leadingTauTightPhi = tau_phi;
-          m_leadingTauTightE = tau_e;
-        }
-      }
+      m_tauEleLoosePt->push_back(tau_loose_electron_p4.Pt() / 1000.);
+      m_tauEleLooseEta->push_back(tau_loose_electron_p4.Eta());
+      m_tauEleLoosePhi->push_back(tau_loose_electron_p4.Phi());
+      m_tauEleLooseE->push_back(tau_loose_electron_p4.E() / 1000.);
+      m_tauEleLooseM->push_back(tau_loose_electron_p4.M() / 1000.);
+      m_tauEleLoosedR->push_back(tau_p4.DeltaR(leading_loose_electron_p4));
     }
 
-    m_tauRecoTruthMindR = min_tau_truth_dr;
-
-    // Reconstructed muons
-    const xAOD::Muon* leading_muon = nullptr;
-    const xAOD::Muon* leading_loose_muon = nullptr;
-    const xAOD::Muon* leading_medium_muon = nullptr;
-    const xAOD::Muon* leading_tight_muon = nullptr;
-    float min_mu_truth_dr = -1;
-    for (auto muon: *muons) {
-      m_nMuons++;
-
-      // Calculate dR of closest reco muon to truth
-      if (m_isSignal) {
-        TLorentzVector muon_p4 = muon->p4();
-        float truth_dr = muon_p4.DeltaR(truth_final_lepton_p4);
-        if (min_mu_truth_dr == -1 || truth_dr < min_mu_truth_dr) {
-          min_mu_truth_dr = truth_dr;
-        }
-      }
-
-      float muon_pt = muon->pt() / 1000.;
-      float muon_eta = muon->eta();
-      float muon_phi = muon->phi();
-      float muon_e = muon->e() / 1000.;
-      m_muPt->push_back(muon_pt);
-      m_muEta->push_back(muon_eta);
-      m_muPhi->push_back(muon_phi);
-      m_muE->push_back(muon_e);
-      if (muon_pt >= m_leadingMuPt) {
-        leading_muon = muon;
-        m_leadingMuPt = muon_pt;
-        m_leadingMuEta = muon_eta;
-        m_leadingMuPhi = muon_phi;
-        m_leadingMuE = muon_e;
-      }
-      // Muon quality 0=Tight 1=Medium 2=Loose 3=VeryLoose(all)
-      unsigned int muQuality = muon->quality();
-      // Tight muon, fill for all WPs
-      if (muQuality == 0) {
-        // Loose muon
-        m_nMuonsLoose++;
-        m_muLoosePt->push_back(muon_pt);
-        m_muLooseEta->push_back(muon_eta);
-        m_muLoosePhi->push_back(muon_phi);
-        m_muLooseE->push_back(muon_e);
-        if (muon_pt >= m_leadingMuLoosePt) {
-          leading_loose_muon = muon;
-          m_leadingMuLoosePt = muon_pt;
-          m_leadingMuLooseEta = muon_eta;
-          m_leadingMuLoosePhi = muon_phi;
-          m_leadingMuLooseE = muon_e;
-        }
-        // Medium muon
-        m_nMuonsMedium++;
-        m_muMediumPt->push_back(muon_pt);
-        m_muMediumEta->push_back(muon_eta);
-        m_muMediumPhi->push_back(muon_phi);
-        m_muMediumE->push_back(muon_e);
-        if (muon_pt >= m_leadingMuMediumPt) {
-          leading_medium_muon = muon;
-          m_leadingMuMediumPt = muon_pt;
-          m_leadingMuMediumEta = muon_eta;
-          m_leadingMuMediumPhi = muon_phi;
-          m_leadingMuMediumE = muon_e;
-        }
-        // Tight muon
-        m_nMuonsTight++;
-        m_muTightPt->push_back(muon_pt);
-        m_muTightEta->push_back(muon_eta);
-        m_muTightPhi->push_back(muon_phi);
-        m_muTightE->push_back(muon_e);
-        if (muon_pt >= m_leadingMuTightPt) {
-          leading_tight_muon = muon;
-          m_leadingMuTightPt = muon_pt;
-          m_leadingMuTightEta = muon_eta;
-          m_leadingMuTightPhi = muon_phi;
-          m_leadingMuTightE = muon_e;
-        }
-      // Medium muon, fill Medium and Loose
-      } else if (muQuality == 1) {
-        // Loose muon
-        m_nMuonsLoose++;
-        m_muLoosePt->push_back(muon_pt);
-        m_muLooseEta->push_back(muon_eta);
-        m_muLoosePhi->push_back(muon_phi);
-        m_muLooseE->push_back(muon_e);
-        if (muon_pt >= m_leadingMuLoosePt) {
-          leading_loose_muon = muon;
-          m_leadingMuLoosePt = muon_pt;
-          m_leadingMuLooseEta = muon_eta;
-          m_leadingMuLoosePhi = muon_phi;
-          m_leadingMuLooseE = muon_e;
-        }
-        // Medium muon
-        m_nMuonsMedium++;
-        m_muMediumPt->push_back(muon_pt);
-        m_muMediumEta->push_back(muon_eta);
-        m_muMediumPhi->push_back(muon_phi);
-        m_muMediumE->push_back(muon_e);
-        if (muon_pt >= m_leadingMuMediumPt) {
-          leading_medium_muon = muon;
-          m_leadingMuMediumPt = muon_pt;
-          m_leadingMuMediumEta = muon_eta;
-          m_leadingMuMediumPhi = muon_phi;
-          m_leadingMuMediumE = muon_e;
-        }
-      // Loose muon, just Loose
-      } else if (muQuality == 2) {
-        // Loose muon
-        m_nMuonsLoose++;
-        m_muLoosePt->push_back(muon_pt);
-        m_muLooseEta->push_back(muon_eta);
-        m_muLoosePhi->push_back(muon_phi);
-        m_muLooseE->push_back(muon_e);
-        if (muon_pt >= m_leadingMuLoosePt) {
-          leading_loose_muon = muon;
-          m_leadingMuLoosePt = muon_pt;
-          m_leadingMuLooseEta = muon_eta;
-          m_leadingMuLoosePhi = muon_phi;
-          m_leadingMuLooseE = muon_e;
-        }
-      } 
-    }
-
-    m_muRecoTruthMindR = min_mu_truth_dr;
-
-    // Reconstructed electrons
-    const xAOD::Electron* leading_electron = nullptr;
-    const xAOD::Electron* leading_veryloose_electron = nullptr;
-    const xAOD::Electron* leading_loose_electron = nullptr;
-    const xAOD::Electron* leading_medium_electron = nullptr;
-    const xAOD::Electron* leading_tight_electron = nullptr;
-    std::vector<const xAOD::Electron*> loose_electrons;
-    float min_ele_truth_dr = -1;
-    for (auto electron: *electrons) {
-      m_nElectrons++;
-
-      // Calculate dR of closest reco electron to truth
-      if (m_isSignal) {
-        TLorentzVector electron_p4 = electron->p4();
-        float truth_dr = electron_p4.DeltaR(truth_final_lepton_p4);
-        if (min_ele_truth_dr == -1 || truth_dr < min_ele_truth_dr) {
-          min_ele_truth_dr = truth_dr;
-        }
-      }
-
-      float electron_pt = electron->pt() / 1000.;
-      float electron_eta = electron->eta();
-      float electron_phi = electron->phi();
-      float electron_e = electron->e() / 1000.;
-      m_elePt->push_back(electron_pt);
-      m_eleEta->push_back(electron_eta);
-      m_elePhi->push_back(electron_phi);
-      m_eleE->push_back(electron_e);
-      if (electron_pt >= m_leadingElePt) {
-        leading_electron = electron;
-        m_leadingElePt = electron_pt;
-        m_leadingEleEta = electron_eta;
-        m_leadingElePhi = electron_phi;
-        m_leadingEleE = electron_e;
-      }
-      if (static_cast<int>(m_checkEleVeryLooseLH->accept(electron))) {
-        m_nElectronsVeryLoose++;
-        m_eleVeryLoosePt->push_back(electron_pt);
-        m_eleVeryLooseEta->push_back(electron_eta);
-        m_eleVeryLoosePhi->push_back(electron_phi);
-        m_eleVeryLooseE->push_back(electron_e);
-        if (electron_pt >= m_leadingEleVeryLoosePt) {
-          leading_veryloose_electron = electron;
-          m_leadingEleVeryLoosePt = electron_pt;
-          m_leadingEleVeryLooseEta = electron_eta;
-          m_leadingEleVeryLoosePhi = electron_phi;
-          m_leadingEleVeryLooseE = electron_e;
-        }
-      }
-      if (static_cast<int>(m_checkEleLooseLH->accept(electron))) {
-        m_nElectronsLoose++;
-        loose_electrons.push_back(electron);
-        m_eleLoosePt->push_back(electron_pt);
-        m_eleLooseEta->push_back(electron_eta);
-        m_eleLoosePhi->push_back(electron_phi);
-        m_eleLooseE->push_back(electron_e);
-        if (electron_pt >= m_leadingEleLoosePt) {
-          leading_loose_electron = electron;
-          m_leadingEleLoosePt = electron_pt;
-          m_leadingEleLooseEta = electron_eta;
-          m_leadingEleLoosePhi = electron_phi;
-          m_leadingEleLooseE = electron_e;
-        }
-      }
-      if (static_cast<int>(m_checkEleMediumLH->accept(electron))) {
-        m_nElectronsMedium++;
-        m_eleMediumPt->push_back(electron_pt);
-        m_eleMediumEta->push_back(electron_eta);
-        m_eleMediumPhi->push_back(electron_phi);
-        m_eleMediumE->push_back(electron_e);
-        if (electron_pt >= m_leadingEleMediumPt) {
-          leading_medium_electron = electron;
-          m_leadingEleMediumPt = electron_pt;
-          m_leadingEleMediumEta = electron_eta;
-          m_leadingEleMediumPhi = electron_phi;
-          m_leadingEleMediumE = electron_e;
-        }
-      }
-      if (static_cast<int>(m_checkEleTightLH->accept(electron))) {
-        m_nElectronsTight++;
-        m_eleTightPt->push_back(electron_pt);
-        m_eleTightEta->push_back(electron_eta);
-        m_eleTightPhi->push_back(electron_phi);
-        m_eleTightE->push_back(electron_e);
-        if (electron_pt >= m_leadingEleTightPt) {
-          leading_tight_electron = electron;
-          m_leadingEleTightPt = electron_pt;
-          m_leadingEleTightEta = electron_eta;
-          m_leadingEleTightPhi = electron_phi;
-          m_leadingEleTightE = electron_e;
-        }
-      }
-    }
-
-    m_eleRecoTruthMindR = min_ele_truth_dr;
-
-    // Reconstructed jets
-    // Number of jets > 25 GeV for MMC
-    unsigned int njet25 = 0;
-    for (auto jet: *jets) {
-      m_nJets++;
-      float jet_pt = jet->pt() / 1000.;
-      float jet_eta = jet->eta();
-      float jet_phi = jet->phi();
-      float jet_e = jet->e() / 1000.;
-
-      if (jet_pt > 25.) {
-        njet25++;
-      }
-
-      m_jetPt->push_back(jet_pt);
-      m_jetEta->push_back(jet_eta);
-      m_jetPhi->push_back(jet_phi);
-      m_jetE->push_back(jet_e);
-      if (jet_pt >= m_leadingJetPt) {
-        m_subleadingJetPt = m_leadingJetPt;
-        m_subleadingJetEta = m_leadingJetEta;
-        m_subleadingJetPhi = m_leadingJetPhi;
-        m_subleadingJetE = m_leadingJetE;
-        m_leadingJetPt = jet_pt;
-        m_leadingJetEta = jet_eta;
-        m_leadingJetPhi = jet_phi;
-        m_leadingJetE = jet_e;
-      }
-      else if (jet_pt >= m_subleadingJetPt) {
-        m_subleadingJetPt = jet_pt;
-        m_subleadingJetEta = jet_eta;
-        m_subleadingJetPhi = jet_phi;
-        m_subleadingJetE = jet_e;
-      }
-      bool btag_accept = m_bTaggingSelectionTool->accept(*jet);     
-      m_jetBTagAccept->push_back(btag_accept);
-      if (btag_accept) {
-        m_nBTagJets++;
-        m_bTagJetPt->push_back(jet_pt);
-        m_bTagJetEta->push_back(jet_eta);
-        m_bTagJetPhi->push_back(jet_phi);
-        m_bTagJetE->push_back(jet_e);
-        if (jet_pt >= m_leadingBTagJetPt) {
-          m_subleadingBTagJetPt = m_leadingBTagJetPt;
-          m_subleadingBTagJetEta = m_leadingBTagJetEta;
-          m_subleadingBTagJetPhi = m_leadingBTagJetPhi;
-          m_subleadingBTagJetE = m_leadingBTagJetE;
-          m_leadingBTagJetPt = jet_pt;
-          m_leadingBTagJetEta = jet_eta;
-          m_leadingBTagJetPhi = jet_phi;
-          m_leadingBTagJetE = jet_e;
-        }
-        else if (jet_pt >= m_subleadingBTagJetPt) {
-          m_subleadingBTagJetPt = jet_pt;
-          m_subleadingBTagJetEta = jet_eta;
-          m_subleadingBTagJetPhi = jet_phi;
-          m_subleadingBTagJetE = jet_e;
-        }
-      }
-    }
-
-    // Reconstructed large-R jets
-    const xAOD::Jet* leading_largerjet;
-    const xAOD::Jet* subleading_largerjet;
-    for (auto largerjet: *largerjets) {
-      m_nLargeRJets++;
-      float largerjet_pt = largerjet->pt() / 1000.;
-      float largerjet_eta = largerjet->eta();
-      float largerjet_phi = largerjet->phi();
-      float largerjet_e = largerjet->e() / 1000.;
-      float largerjet_m = largerjet->m() / 1000.;
-      m_lRJetPt->push_back(largerjet_pt);
-      m_lRJetEta->push_back(largerjet_eta);
-      m_lRJetPhi->push_back(largerjet_phi);
-      m_lRJetE->push_back(largerjet_e);
-      m_lRJetM->push_back(largerjet_m);
-      if (largerjet_pt >= m_leadingLRJetPt) {
-        // Leading jet bumped down to subleading
-        subleading_largerjet = leading_largerjet;
-        m_subleadingLRJetPt = m_leadingLRJetPt;
-        m_subleadingLRJetEta = m_leadingLRJetEta;
-        m_subleadingLRJetPhi = m_leadingLRJetPhi;
-        m_subleadingLRJetE = m_leadingLRJetE;
-        m_subleadingLRJetM = m_leadingLRJetM;
-        // New jet moved to leading
-        leading_largerjet = largerjet;
-        m_leadingLRJetPt = largerjet_pt;
-        m_leadingLRJetEta = largerjet_eta;
-        m_leadingLRJetPhi = largerjet_phi;
-        m_leadingLRJetE = largerjet_e;
-        m_leadingLRJetM = largerjet_m;
-      }
-      else if (largerjet_pt >= m_subleadingLRJetPt) {
-        subleading_largerjet = largerjet;
-        m_subleadingLRJetPt = largerjet_pt;
-        m_subleadingLRJetEta = largerjet_eta;
-        m_subleadingLRJetPhi = largerjet_phi;
-        m_subleadingLRJetE = largerjet_e;
-        m_subleadingLRJetM = largerjet_m;
-      }
-    }
-
-    // Fill topological values of two leading large-R jets
     if (m_nLargeRJets > 1) {
       TLorentzVector leading_largerjet_p4 = leading_largerjet->p4();
       TLorentzVector subleading_largerjet_p4 = subleading_largerjet->p4();
 
-      m_largeRJetdR = leading_largerjet_p4.DeltaR(subleading_largerjet_p4);
-      m_largeRJetdEta = std::abs( leading_largerjet_p4.Eta() - subleading_largerjet_p4.Eta() );
-      m_largeRJetdPhi = std::abs( leading_largerjet_p4.DeltaPhi(subleading_largerjet_p4) );
-      m_largeRJetdPt = std::abs( leading_largerjet_p4.Pt() - subleading_largerjet_p4.Pt() ) / 1000.;
-
-      TLorentzVector larger_x_p4 = leading_largerjet_p4 + subleading_largerjet_p4;
-      
-      m_largeRXPt = larger_x_p4.Pt() / 1000.;
-      m_largeRXEta = larger_x_p4.Eta();
-      m_largeRXPhi = larger_x_p4.Phi();
-      m_largeRXE = larger_x_p4.E() / 1000.;
-      m_largeRXM = larger_x_p4.M() / 1000.;
-    }
-
-    // If a loose electron was found, fill values dependent on it
-    if (leading_loose_electron && m_nTaus > 0) {
-      TLorentzVector leading_loose_electron_p4 = leading_loose_electron->p4();
-
-      for (auto tau: *taus) {
-        TLorentzVector tau_p4 = tau->p4();
-        TLorentzVector tau_loose_electron_p4 = tau_p4 + leading_loose_electron_p4;
-
-        m_tauEleLoosePt->push_back(tau_loose_electron_p4.Pt() / 1000.);
-        m_tauEleLooseEta->push_back(tau_loose_electron_p4.Eta());
-        m_tauEleLoosePhi->push_back(tau_loose_electron_p4.Phi());
-        m_tauEleLooseE->push_back(tau_loose_electron_p4.E() / 1000.);
-        m_tauEleLooseM->push_back(tau_loose_electron_p4.M() / 1000.);
-        m_tauEleLoosedR->push_back(tau_p4.DeltaR(leading_loose_electron_p4));
+      float ele_loose_leading_largerjet_dr = leading_loose_electron_p4.DeltaR(leading_largerjet_p4);
+      float ele_loose_subleading_largerjet_dr = leading_loose_electron_p4.DeltaR(subleading_largerjet_p4);
+      TLorentzVector tau_largerjet_p4;
+      // If the loose electron is closest to the leading large-R jet, then it is the tau jet
+      if (ele_loose_leading_largerjet_dr < ele_loose_subleading_largerjet_dr) {
+        tau_largerjet_p4 = leading_largerjet_p4;
+        m_tauLRJetPt = m_leadingLRJetPt;
+        m_tauLRJetEta = m_leadingLRJetEta;
+        m_tauLRJetPhi = m_leadingLRJetPhi;
+        m_tauLRJetE = m_leadingLRJetE;
+        m_tauLRJetM = m_leadingLRJetM;
+        m_tauLRJetEleLoosedR = ele_loose_leading_largerjet_dr;
+        m_bLRJetPt = m_subleadingLRJetPt;
+        m_bLRJetEta = m_subleadingLRJetEta;
+        m_bLRJetPhi = m_subleadingLRJetPhi;
+        m_bLRJetE = m_subleadingLRJetE;
+        m_bLRJetM = m_subleadingLRJetM;
+        m_bLRJetEleLoosedR = ele_loose_subleading_largerjet_dr;
+      // If closest to the subleading large-R jet, then it is the tau jet
       }
-
-      if (m_nLargeRJets > 1) {
-        TLorentzVector leading_largerjet_p4 = leading_largerjet->p4();
-        TLorentzVector subleading_largerjet_p4 = subleading_largerjet->p4();
-
-        float ele_loose_leading_largerjet_dr = leading_loose_electron_p4.DeltaR(leading_largerjet_p4);
-        float ele_loose_subleading_largerjet_dr = leading_loose_electron_p4.DeltaR(subleading_largerjet_p4);
-        TLorentzVector tau_largerjet_p4;
-        // If the loose electron is closest to the leading large-R jet, then it is the tau jet
-        if (ele_loose_leading_largerjet_dr < ele_loose_subleading_largerjet_dr) {
-          tau_largerjet_p4 = leading_largerjet_p4;
-          m_tauLRJetPt = m_leadingLRJetPt;
-          m_tauLRJetEta = m_leadingLRJetEta;
-          m_tauLRJetPhi = m_leadingLRJetPhi;
-          m_tauLRJetE = m_leadingLRJetE;
-          m_tauLRJetM = m_leadingLRJetM;
-          m_tauLRJetEleLoosedR = ele_loose_leading_largerjet_dr;
-          m_bLRJetPt = m_subleadingLRJetPt;
-          m_bLRJetEta = m_subleadingLRJetEta;
-          m_bLRJetPhi = m_subleadingLRJetPhi;
-          m_bLRJetE = m_subleadingLRJetE;
-          m_bLRJetM = m_subleadingLRJetM;
-          m_bLRJetEleLoosedR = ele_loose_subleading_largerjet_dr;
-        // If closest to the subleading large-R jet, then it is the tau jet
-        }
-        else {
-          m_bLRJetPt = m_leadingLRJetPt;
-          m_bLRJetEta = m_leadingLRJetEta;
-          m_bLRJetPhi = m_leadingLRJetPhi;
-          m_bLRJetE = m_leadingLRJetE;
-          m_bLRJetM = m_leadingLRJetM;
-          m_bLRJetEleLoosedR = ele_loose_leading_largerjet_dr;
-          tau_largerjet_p4 = subleading_largerjet_p4;
-          m_tauLRJetPt = m_subleadingLRJetPt;
-          m_tauLRJetEta = m_subleadingLRJetEta;
-          m_tauLRJetPhi = m_subleadingLRJetPhi;
-          m_tauLRJetE = m_subleadingLRJetE;
-          m_tauLRJetM = m_subleadingLRJetM;
-          m_tauLRJetEleLoosedR = ele_loose_subleading_largerjet_dr;
-        }
+      else {
+        m_bLRJetPt = m_leadingLRJetPt;
+        m_bLRJetEta = m_leadingLRJetEta;
+        m_bLRJetPhi = m_leadingLRJetPhi;
+        m_bLRJetE = m_leadingLRJetE;
+        m_bLRJetM = m_leadingLRJetM;
+        m_bLRJetEleLoosedR = ele_loose_leading_largerjet_dr;
+        tau_largerjet_p4 = subleading_largerjet_p4;
+        m_tauLRJetPt = m_subleadingLRJetPt;
+        m_tauLRJetEta = m_subleadingLRJetEta;
+        m_tauLRJetPhi = m_subleadingLRJetPhi;
+        m_tauLRJetE = m_subleadingLRJetE;
+        m_tauLRJetM = m_subleadingLRJetM;
+        m_tauLRJetEleLoosedR = ele_loose_subleading_largerjet_dr;
       }
     }
+  }
 
-    if (leading_tight_muon && m_nTaus > 0) {
-      TLorentzVector leading_tight_muon_p4 = leading_tight_muon->p4();
+  if (leading_tight_muon && m_nTaus > 0) {
+    TLorentzVector leading_tight_muon_p4 = leading_tight_muon->p4();
 
-      for (auto tau: *taus) {
-        TLorentzVector tau_p4 = tau->p4();
-        TLorentzVector tau_tight_muon_p4 = tau_p4 + leading_tight_muon_p4;
+    for (auto tau: *taus) {
+      TLorentzVector tau_p4 = tau->p4();
+      TLorentzVector tau_tight_muon_p4 = tau_p4 + leading_tight_muon_p4;
 
-        m_tauMuTightPt->push_back(tau_tight_muon_p4.Pt() / 1000.);
-        m_tauMuTightEta->push_back(tau_tight_muon_p4.Eta());
-        m_tauMuTightPhi->push_back(tau_tight_muon_p4.Phi());
-        m_tauMuTightE->push_back(tau_tight_muon_p4.E() / 1000.);
-        m_tauMuTightM->push_back(tau_tight_muon_p4.M() / 1000.);
-        m_tauMuTightdR->push_back(tau_p4.DeltaR(leading_tight_muon_p4));
+      m_tauMuTightPt->push_back(tau_tight_muon_p4.Pt() / 1000.);
+      m_tauMuTightEta->push_back(tau_tight_muon_p4.Eta());
+      m_tauMuTightPhi->push_back(tau_tight_muon_p4.Phi());
+      m_tauMuTightE->push_back(tau_tight_muon_p4.E() / 1000.);
+      m_tauMuTightM->push_back(tau_tight_muon_p4.M() / 1000.);
+      m_tauMuTightdR->push_back(tau_p4.DeltaR(leading_tight_muon_p4));
+    }
+
+    if (m_nLargeRJets > 1) {
+      TLorentzVector leading_largerjet_p4 = leading_largerjet->p4();
+      TLorentzVector subleading_largerjet_p4 = subleading_largerjet->p4();
+
+      float mu_tight_leading_largerjet_dr = leading_tight_muon_p4.DeltaR(leading_largerjet_p4);
+      float mu_tight_subleading_largerjet_dr = leading_tight_muon_p4.DeltaR(subleading_largerjet_p4);
+      TLorentzVector tau_largerjet_p4;
+      // If the loose electron is closest to the leading large-R jet, then it is the tau jet
+      if (mu_tight_leading_largerjet_dr < mu_tight_subleading_largerjet_dr) {
+        tau_largerjet_p4 = leading_largerjet_p4;
+        m_tauLRJetPt = m_leadingLRJetPt;
+        m_tauLRJetEta = m_leadingLRJetEta;
+        m_tauLRJetPhi = m_leadingLRJetPhi;
+        m_tauLRJetE = m_leadingLRJetE;
+        m_tauLRJetM = m_leadingLRJetM;
+        m_tauLRJetMuTightdR = mu_tight_leading_largerjet_dr;
+        m_bLRJetPt = m_subleadingLRJetPt;
+        m_bLRJetEta = m_subleadingLRJetEta;
+        m_bLRJetPhi = m_subleadingLRJetPhi;
+        m_bLRJetE = m_subleadingLRJetE;
+        m_bLRJetM = m_subleadingLRJetM;
+        m_bLRJetMuTightdR = mu_tight_subleading_largerjet_dr;
+      // If closest to the subleading large-R jet, then it is the tau jet
       }
+      else {
+        m_bLRJetPt = m_leadingLRJetPt;
+        m_bLRJetEta = m_leadingLRJetEta;
+        m_bLRJetPhi = m_leadingLRJetPhi;
+        m_bLRJetE = m_leadingLRJetE;
+        m_bLRJetM = m_leadingLRJetM;
+        m_bLRJetMuTightdR = mu_tight_leading_largerjet_dr;
+        tau_largerjet_p4 = subleading_largerjet_p4;
+        m_tauLRJetPt = m_subleadingLRJetPt;
+        m_tauLRJetEta = m_subleadingLRJetEta;
+        m_tauLRJetPhi = m_subleadingLRJetPhi;
+        m_tauLRJetE = m_subleadingLRJetE;
+        m_tauLRJetM = m_subleadingLRJetM;
+        m_tauLRJetMuTightdR = mu_tight_subleading_largerjet_dr;
+      }
+    }      
+  }
 
-      if (m_nLargeRJets > 1) {
-        TLorentzVector leading_largerjet_p4 = leading_largerjet->p4();
-        TLorentzVector subleading_largerjet_p4 = subleading_largerjet->p4();
+  // Define the chosen tau, electron, and muon to make up ditau system. First electron then muon.
+  // Note: Chosen tau will be overwritten but events with loose electron AND tight muon are not placed in either channel
+  TLorentzVector chosen_tau_p4;
+  TLorentzVector chosen_electron_p4;
+  TLorentzVector chosen_muon_p4;
+  bool set_electron = 0;
+  bool set_muon = 0;
+  bool set_tau = 0;
 
-        float mu_tight_leading_largerjet_dr = leading_tight_muon_p4.DeltaR(leading_largerjet_p4);
-        float mu_tight_subleading_largerjet_dr = leading_tight_muon_p4.DeltaR(subleading_largerjet_p4);
-        TLorentzVector tau_largerjet_p4;
-        // If the loose electron is closest to the leading large-R jet, then it is the tau jet
-        if (mu_tight_leading_largerjet_dr < mu_tight_subleading_largerjet_dr) {
-          tau_largerjet_p4 = leading_largerjet_p4;
-          m_tauLRJetPt = m_leadingLRJetPt;
-          m_tauLRJetEta = m_leadingLRJetEta;
-          m_tauLRJetPhi = m_leadingLRJetPhi;
-          m_tauLRJetE = m_leadingLRJetE;
-          m_tauLRJetM = m_leadingLRJetM;
-          m_tauLRJetMuTightdR = mu_tight_leading_largerjet_dr;
-          m_bLRJetPt = m_subleadingLRJetPt;
-          m_bLRJetEta = m_subleadingLRJetEta;
-          m_bLRJetPhi = m_subleadingLRJetPhi;
-          m_bLRJetE = m_subleadingLRJetE;
-          m_bLRJetM = m_subleadingLRJetM;
-          m_bLRJetMuTightdR = mu_tight_subleading_largerjet_dr;
-        // If closest to the subleading large-R jet, then it is the tau jet
-        }
-        else {
-          m_bLRJetPt = m_leadingLRJetPt;
-          m_bLRJetEta = m_leadingLRJetEta;
-          m_bLRJetPhi = m_leadingLRJetPhi;
-          m_bLRJetE = m_leadingLRJetE;
-          m_bLRJetM = m_leadingLRJetM;
-          m_bLRJetMuTightdR = mu_tight_leading_largerjet_dr;
-          tau_largerjet_p4 = subleading_largerjet_p4;
-          m_tauLRJetPt = m_subleadingLRJetPt;
-          m_tauLRJetEta = m_subleadingLRJetEta;
-          m_tauLRJetPhi = m_subleadingLRJetPhi;
-          m_tauLRJetE = m_subleadingLRJetE;
-          m_tauLRJetM = m_subleadingLRJetM;
-          m_tauLRJetMuTightdR = mu_tight_subleading_largerjet_dr;
-        }
-      }      
+  // First find leading loose electron if it exists
+  if (m_nElectronsLoose > 0) {
+    auto el = leading_loose_electron;
+    chosen_electron_p4.SetPtEtaPhiE(el->pt(), el->eta(), el->phi(), el->e());
+    set_electron = 1;
+  }
+
+  // Find closest tau to chosen electron
+  if (set_electron && (m_nTaus > 0)) {
+    float min_dr = 0;
+    for (auto tau: *taus) {
+      TLorentzVector tau_p4 = tau->p4();
+      float dr = chosen_electron_p4.DeltaR(tau_p4);
+      if ((dr < min_dr) || (min_dr == 0)) {
+        chosen_tau_p4.SetPtEtaPhiE(tau->pt(), tau->eta(), tau->phi(), tau->e());
+        set_tau = 1;
+        min_dr = dr;
+      }
     }
+  }
 
-    // Define the chosen tau, electron, and muon to make up ditau system. First electron then muon.
-    // Note: Chosen tau will be overwritten but events with loose electron AND tight muon are not placed in either channel
-    TLorentzVector chosen_tau_p4;
-    TLorentzVector chosen_electron_p4;
-    TLorentzVector chosen_muon_p4;
-    bool set_electron = 0;
-    bool set_muon = 0;
-    bool set_tau = 0;
-
-    // First find leading loose electron if it exists
-    if (m_nElectronsLoose > 0) {
-      auto el = leading_loose_electron;
-      chosen_electron_p4.SetPtEtaPhiE(el->pt(), el->eta(), el->phi(), el->e());
-      set_electron = 1;
-    }
-
-    // Find closest tau to chosen electron
-    if (set_electron && (m_nTaus > 0)) {
+  // If dR between electron and tau is < 0.1, then look for another in 0.1 < dR < 1 and pt > 20 GeV
+  float chosen_dr = 0;
+  unsigned int switched_taus = 0;
+  if (set_electron && set_tau) {
+    chosen_dr = chosen_electron_p4.DeltaR(chosen_tau_p4);
+    if (chosen_dr < 0.1) {
       float min_dr = 0;
-      for (auto tau: *taus) {
-        TLorentzVector tau_p4 = tau->p4();
-        float dr = chosen_electron_p4.DeltaR(tau_p4);
-        if ((dr < min_dr) || (min_dr == 0)) {
-          chosen_tau_p4.SetPtEtaPhiE(tau->pt(), tau->eta(), tau->phi(), tau->e());
-          set_tau = 1;
-          min_dr = dr;
-        }
-      }
-    }
-
-    // If dR between electron and tau is < 0.1, then look for another in 0.1 < dR < 1 and pt > 20 GeV
-    float chosen_dr = 0;
-    unsigned int switched_taus = 0;
-    if (set_electron && set_tau) {
-      chosen_dr = chosen_electron_p4.DeltaR(chosen_tau_p4);
-      if (chosen_dr < 0.1) {
-        float min_dr = 0;
-        for (auto tau: *taus) {
-          TLorentzVector tau_p4 = tau->p4();
-          float tau_pt = tau->pt() / 1000.;
-          float dr = chosen_electron_p4.DeltaR(tau_p4);
-          if (((dr < min_dr) || (min_dr == 0)) && tau_pt > 20. && (dr > 0.1) && (dr < 1.0)) {
-            chosen_tau_p4.SetPtEtaPhiE(tau->pt(), tau->eta(), tau->phi(), tau->e());
-            set_tau = 1;
-            min_dr = dr;
-            switched_taus = 1;
-          }
-        }
-      }
-    } 
-
-    // If no tau found but another loose electron within 1.0 switch to that
-    if (set_electron && set_tau && (chosen_dr < 0.1) && !switched_taus) {
-      float min_dr = 0;
-      for (auto loose_electron: loose_electrons) {
-        TLorentzVector loose_electron_p4 = loose_electron->p4();
-        float dr = chosen_electron_p4.DeltaR(loose_electron_p4);
-        if (((dr < min_dr) || min_dr == 0) && (dr > 0.1) && (dr < 1.0)) {
-          auto el = loose_electron;
-          chosen_electron_p4.SetPtEtaPhiE(el->pt(), el->eta(), el->phi(), el->e());
-          set_electron = 1;
-          min_dr = dr;
-        }
-      } 
-    }
-
-    // If electron and tau still within 0.2 then look to ditau with overlapping electron
-    if (set_electron && set_tau) {
-      chosen_dr = chosen_electron_p4.DeltaR(chosen_tau_p4);
-    }
-    if (set_electron && set_tau && (chosen_dr < 0.2)) {
-      float max_pt = 0;
-      static const SG::AuxElement::Accessor<float> acc_el_pt ("electron_pt");
-      static const SG::AuxElement::Accessor<float> acc_el_eta ("electron_eta");
-      static const SG::AuxElement::Accessor<float> acc_el_phi ("electron_phi");
-      static const SG::AuxElement::Accessor<float> acc_el_E ("electron_E");
-      static const SG::AuxElement::Accessor<float> acc_tau_pt ("tau_pt");
-      static const SG::AuxElement::Accessor<float> acc_tau_eta ("tau_eta");
-      static const SG::AuxElement::Accessor<float> acc_tau_phi ("tau_phi");
-      static const SG::AuxElement::Accessor<float> acc_tau_E ("tau_E");
-      for (auto ditau: *hadelditaus) {
-        float hadel_electron_pt = acc_el_pt(*ditau);
-        float hadel_electron_eta = acc_el_eta(*ditau);
-        float hadel_electron_phi = acc_el_phi(*ditau);
-        float hadel_electron_e = acc_el_E(*ditau);
-        TLorentzVector hadel_electron_p4;
-        hadel_electron_p4.SetPtEtaPhiE(hadel_electron_pt, hadel_electron_eta, hadel_electron_phi, hadel_electron_e);
-        float electrons_dr = chosen_electron_p4.DeltaR(hadel_electron_p4);
-        double ditau_pt = ditau->pt();
-        // Update chosen tau if it's pt is greatest and electrons overlap
-        if (((ditau_pt > max_pt) || max_pt == 0) && (electrons_dr < 0.1)) {
-          float hadel_tau_pt = acc_tau_pt(*ditau);
-          float hadel_tau_eta = acc_tau_eta(*ditau);
-          float hadel_tau_phi = acc_tau_phi(*ditau);
-          float hadel_tau_e = acc_tau_E(*ditau);
-          TLorentzVector hadel_tau_p4;
-          hadel_tau_p4.SetPtEtaPhiE(hadel_tau_pt, hadel_tau_eta, hadel_tau_phi, hadel_tau_e);
-          chosen_tau_p4 = hadel_tau_p4;
-          set_tau = 1;
-          max_pt = ditau_pt;
-        }
-      }
-    }
-
-    // First find leading tight muon if it exists
-    if (m_nMuonsTight > 0) {
-      auto mu = leading_tight_muon;
-      chosen_muon_p4.SetPtEtaPhiE(mu->pt(), mu->eta(), mu->phi(), mu->e());
-      set_muon = 1;
-    }
-
-    // Find leading tau to chosen muon within 0.2 < dR < 1
-    if (set_muon && (m_nTaus > 0)) {
-      float max_pt = 0;
       for (auto tau: *taus) {
         TLorentzVector tau_p4 = tau->p4();
         float tau_pt = tau->pt() / 1000.;
-        float dr = chosen_muon_p4.DeltaR(tau_p4);
-        // Only consider 0.2 < dR < 1 range
-        if ((dr < 0.2) || (dr > 1)) {
-          continue;
-        }
-        // Find leading tau within constraints
-        if ((tau_pt > max_pt) || (max_pt == 0)) {
+        float dr = chosen_electron_p4.DeltaR(tau_p4);
+        if (((dr < min_dr) || (min_dr == 0)) && tau_pt > 20. && (dr > 0.1) && (dr < 1.0)) {
           chosen_tau_p4.SetPtEtaPhiE(tau->pt(), tau->eta(), tau->phi(), tau->e());
           set_tau = 1;
-          max_pt = tau_pt;
+          min_dr = dr;
+          switched_taus = 1;
         }
       }
-    }    
-    
-    if (set_tau) {
-      m_chosenTauPt = chosen_tau_p4.Pt() / 1000.; 
-      m_chosenTauEta = chosen_tau_p4.Eta(); 
-      m_chosenTauPhi = chosen_tau_p4.Phi(); 
-      m_chosenTauE = chosen_tau_p4.E() / 1000.; 
     }
+  } 
 
-    if (set_electron) {
-      m_chosenElePt = chosen_electron_p4.Pt() / 1000.; 
-      m_chosenEleEta = chosen_electron_p4.Eta(); 
-      m_chosenElePhi = chosen_electron_p4.Phi(); 
-      m_chosenEleE = chosen_electron_p4.E() / 1000.; 
-    }
-
-    if (set_muon) {
-      m_chosenMuPt = chosen_muon_p4.Pt() / 1000;
-      m_chosenMuEta = chosen_muon_p4.Eta();
-      m_chosenMuPhi = chosen_muon_p4.Phi();
-      m_chosenMuE = chosen_muon_p4.E() / 1000;
-    }
-
-    if (set_tau && set_electron) {
-      TLorentzVector chosen_tauele_system_p4 = chosen_tau_p4 + chosen_electron_p4;
-      m_chosenTauElePt = chosen_tauele_system_p4.Pt() / 1000.; 
-      m_chosenTauEleEta = chosen_tauele_system_p4.Eta(); 
-      m_chosenTauElePhi = chosen_tauele_system_p4.Phi(); 
-      m_chosenTauEleE = chosen_tauele_system_p4.E() / 1000.; 
-      m_chosenTauEleM = chosen_tauele_system_p4.M() / 1000.; 
-      m_chosenTauEledR = chosen_tau_p4.DeltaR(chosen_electron_p4);
-    }
-
-    if (set_tau && set_muon) {
-      TLorentzVector chosen_taumu_system_p4 = chosen_tau_p4 + chosen_muon_p4;
-      m_chosenTauMuPt = chosen_taumu_system_p4.Pt() / 1000.; 
-      m_chosenTauMuEta = chosen_taumu_system_p4.Eta(); 
-      m_chosenTauMuPhi = chosen_taumu_system_p4.Phi(); 
-      m_chosenTauMuE = chosen_taumu_system_p4.E() / 1000.; 
-      m_chosenTauMuM = chosen_taumu_system_p4.M() / 1000.; 
-      m_chosenTauMudR = chosen_tau_p4.DeltaR(chosen_muon_p4);
-    }
-
-    // Missing Mass Calculator
-    const xAOD::MissingET* met = mets->at(mets->size() - 1);
-
-    //if (leading_tau && leading_electron) {
-    //  CP::CorrectionCode c = m_missingMassTool->apply(*eventInfo, leading_tau, leading_electron, met, njet25); 
-    //}
-
-    // MMC for resolved analysis, will calculate for superset of valid resolved signal events
-    if (leading_tight_electron && leading_tau) {
-      CP::CorrectionCode c = m_missingMassTool->apply(*eventInfo, leading_tau, leading_tight_electron, met, njet25); 
-      m_resolvedMissingMass = eventInfo->auxdata<double>("mmc_mlnu3p_mass");
-    }
-    // Run for muon channel, may override previous, but those events have strong electron and muon and so won't make it into signal anyway
-    if (leading_medium_muon && leading_tau) {
-      CP::CorrectionCode c = m_missingMassTool->apply(*eventInfo, leading_tau, leading_medium_muon, met, njet25); 
-      m_resolvedMissingMass = eventInfo->auxdata<double>("mmc_mlnu3p_mass");
-    }
-
-
-    m_mytree->Fill();
+  // If no tau found but another loose electron within 1.0 switch to that
+  if (set_electron && set_tau && (chosen_dr < 0.1) && !switched_taus) {
+    float min_dr = 0;
+    for (auto loose_electron: loose_electrons) {
+      TLorentzVector loose_electron_p4 = loose_electron->p4();
+      float dr = chosen_electron_p4.DeltaR(loose_electron_p4);
+      if (((dr < min_dr) || min_dr == 0) && (dr > 0.1) && (dr < 1.0)) {
+        auto el = loose_electron;
+        chosen_electron_p4.SetPtEtaPhiE(el->pt(), el->eta(), el->phi(), el->e());
+        set_electron = 1;
+        min_dr = dr;
+      }
+    } 
   }
+
+  // If electron and tau still within 0.2 then look to ditau with overlapping electron
+  if (set_electron && set_tau) {
+    chosen_dr = chosen_electron_p4.DeltaR(chosen_tau_p4);
+  }
+  if (set_electron && set_tau && (chosen_dr < 0.2)) {
+    float max_pt = 0;
+    static const SG::AuxElement::Accessor<float> acc_el_pt ("electron_pt");
+    static const SG::AuxElement::Accessor<float> acc_el_eta ("electron_eta");
+    static const SG::AuxElement::Accessor<float> acc_el_phi ("electron_phi");
+    static const SG::AuxElement::Accessor<float> acc_el_E ("electron_E");
+    static const SG::AuxElement::Accessor<float> acc_tau_pt ("tau_pt");
+    static const SG::AuxElement::Accessor<float> acc_tau_eta ("tau_eta");
+    static const SG::AuxElement::Accessor<float> acc_tau_phi ("tau_phi");
+    static const SG::AuxElement::Accessor<float> acc_tau_E ("tau_E");
+    for (auto ditau: *hadelditaus) {
+      float hadel_electron_pt = acc_el_pt(*ditau);
+      float hadel_electron_eta = acc_el_eta(*ditau);
+      float hadel_electron_phi = acc_el_phi(*ditau);
+      float hadel_electron_e = acc_el_E(*ditau);
+      TLorentzVector hadel_electron_p4;
+      hadel_electron_p4.SetPtEtaPhiE(hadel_electron_pt, hadel_electron_eta, hadel_electron_phi, hadel_electron_e);
+      float electrons_dr = chosen_electron_p4.DeltaR(hadel_electron_p4);
+      double ditau_pt = ditau->pt();
+      // Update chosen tau if it's pt is greatest and electrons overlap
+      if (((ditau_pt > max_pt) || max_pt == 0) && (electrons_dr < 0.1)) {
+        float hadel_tau_pt = acc_tau_pt(*ditau);
+        float hadel_tau_eta = acc_tau_eta(*ditau);
+        float hadel_tau_phi = acc_tau_phi(*ditau);
+        float hadel_tau_e = acc_tau_E(*ditau);
+        TLorentzVector hadel_tau_p4;
+        hadel_tau_p4.SetPtEtaPhiE(hadel_tau_pt, hadel_tau_eta, hadel_tau_phi, hadel_tau_e);
+        chosen_tau_p4 = hadel_tau_p4;
+        set_tau = 1;
+        max_pt = ditau_pt;
+      }
+    }
+  }
+
+  // First find leading tight muon if it exists
+  if (m_nMuonsTight > 0) {
+    auto mu = leading_tight_muon;
+    chosen_muon_p4.SetPtEtaPhiE(mu->pt(), mu->eta(), mu->phi(), mu->e());
+    set_muon = 1;
+  }
+
+  // Find leading tau to chosen muon within 0.2 < dR < 1
+  if (set_muon && (m_nTaus > 0)) {
+    float max_pt = 0;
+    for (auto tau: *taus) {
+      TLorentzVector tau_p4 = tau->p4();
+      float tau_pt = tau->pt() / 1000.;
+      float dr = chosen_muon_p4.DeltaR(tau_p4);
+      // Only consider 0.2 < dR < 1 range
+      if ((dr < 0.2) || (dr > 1)) {
+        continue;
+      }
+      // Find leading tau within constraints
+      if ((tau_pt > max_pt) || (max_pt == 0)) {
+        chosen_tau_p4.SetPtEtaPhiE(tau->pt(), tau->eta(), tau->phi(), tau->e());
+        set_tau = 1;
+        max_pt = tau_pt;
+      }
+    }
+  }    
+  
+  if (set_tau) {
+    m_chosenTauPt = chosen_tau_p4.Pt() / 1000.; 
+    m_chosenTauEta = chosen_tau_p4.Eta(); 
+    m_chosenTauPhi = chosen_tau_p4.Phi(); 
+    m_chosenTauE = chosen_tau_p4.E() / 1000.; 
+  }
+
+  if (set_electron) {
+    m_chosenElePt = chosen_electron_p4.Pt() / 1000.; 
+    m_chosenEleEta = chosen_electron_p4.Eta(); 
+    m_chosenElePhi = chosen_electron_p4.Phi(); 
+    m_chosenEleE = chosen_electron_p4.E() / 1000.; 
+  }
+
+  if (set_muon) {
+    m_chosenMuPt = chosen_muon_p4.Pt() / 1000;
+    m_chosenMuEta = chosen_muon_p4.Eta();
+    m_chosenMuPhi = chosen_muon_p4.Phi();
+    m_chosenMuE = chosen_muon_p4.E() / 1000;
+  }
+
+  if (set_tau && set_electron) {
+    TLorentzVector chosen_tauele_system_p4 = chosen_tau_p4 + chosen_electron_p4;
+    m_chosenTauElePt = chosen_tauele_system_p4.Pt() / 1000.; 
+    m_chosenTauEleEta = chosen_tauele_system_p4.Eta(); 
+    m_chosenTauElePhi = chosen_tauele_system_p4.Phi(); 
+    m_chosenTauEleE = chosen_tauele_system_p4.E() / 1000.; 
+    m_chosenTauEleM = chosen_tauele_system_p4.M() / 1000.; 
+    m_chosenTauEledR = chosen_tau_p4.DeltaR(chosen_electron_p4);
+  }
+
+  if (set_tau && set_muon) {
+    TLorentzVector chosen_taumu_system_p4 = chosen_tau_p4 + chosen_muon_p4;
+    m_chosenTauMuPt = chosen_taumu_system_p4.Pt() / 1000.; 
+    m_chosenTauMuEta = chosen_taumu_system_p4.Eta(); 
+    m_chosenTauMuPhi = chosen_taumu_system_p4.Phi(); 
+    m_chosenTauMuE = chosen_taumu_system_p4.E() / 1000.; 
+    m_chosenTauMuM = chosen_taumu_system_p4.M() / 1000.; 
+    m_chosenTauMudR = chosen_tau_p4.DeltaR(chosen_muon_p4);
+  }
+
+  // Missing Mass Calculator
+  const xAOD::MissingET* met = mets->at(mets->size() - 1);
+
+  //if (leading_tau && leading_electron) {
+  //  CP::CorrectionCode c = m_missingMassTool->apply(*eventInfo, leading_tau, leading_electron, met, njet25); 
+  //}
+
+  // MMC for resolved analysis, will calculate for superset of valid resolved signal events
+  if (leading_tight_electron && leading_tau) {
+    CP::CorrectionCode c = m_missingMassTool->apply(*eventInfo, leading_tau, leading_tight_electron, met, njet25); 
+    m_resolvedMissingMass = eventInfo->auxdata<double>("mmc_mlnu3p_mass");
+  }
+  // Run for muon channel, may override previous, but those events have strong electron and muon and so won't make it into signal anyway
+  if (leading_medium_muon && leading_tau) {
+    CP::CorrectionCode c = m_missingMassTool->apply(*eventInfo, leading_tau, leading_medium_muon, met, njet25); 
+    m_resolvedMissingMass = eventInfo->auxdata<double>("mmc_mlnu3p_mass");
+  }
+
+
+  m_mytree->Fill();
+  
 
   return StatusCode::SUCCESS;
 }
