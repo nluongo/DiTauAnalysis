@@ -14,28 +14,31 @@ print('NEvents: {}'.format(nevents))
 '''
 print('In jobOptions')
 
-daod_template = '/eos/user/n/nicholas/SWAN_projects/Derivation/samples/user.nicholas.{}_DAOD_HIGGBOOSTED_TEST0.pool.root_EXT0/*'
-ntuple_template = '{}.ntuple.root'
+noskim_daod_template = '/eos/user/n/nicholas/SWAN_projects/Derivation/samples/DAOD_HIGGBOOSTED_NOSKIM.{}.pool.root'
+noskim_ntuple_template = '{}.DAOD_HIGGBOOSTEDLH_NOSKIM.ntuple.root'
+daod_template = '/eos/user/n/nicholas/SWAN_projects/Derivation/samples/user.nicholas.{}_DAOD_HIGGBOOSTEDLH_TEST3.pool.root_EXT0/*'
+ntuple_template = '{}.DAOD_HIGGBOOSTEDLH.ntuple.root'
 
 daod_jet_name = 'AntiKt4EMTopoJets_BTagging201810'
 daod_largerjet_name = 'AntiKt10LCTopoJets'
 aod_jet_name = 'AntiKt4EMTopoJets'
 aod_largerjet_name = 'HLT_xAOD__JetContainer_a10r_tcemsubjesISFS'
-# Change jet collections to be used based on input format
+
 if 'DAOD' in sample:
+    isDAOD = 1
+else:
+    isDAOD = 0
+
+# Change jet collections to be used based on input format
+if isDAOD:
     jetCollectionName = daod_jet_name
     largeRJetCollectionName = daod_largerjet_name
-    isDAOD = 1
 else:
     jetCollectionName = aod_jet_name
     largeRJetCollectionName = aod_largerjet_name
-    isDAOD = 0 
 
 if sample == 'X1000DAOD':
     sample_name = '450522_X1000_bbtautau_lephad'
-    daod_path = daod_template.format(sample_name)
-    myFiles = glob(daod_path)
-    outName = ntuple_template.format(sample_name)
     isSignal = 1
 elif sample == 'X1000AOD':
     myFiles = glob('/eos/user/n/nicholas/SWAN_projects/DiTauReco/samples/mc16_13TeV.450522.MadGraphPythia8EvtGen_A14NNPDF23LO_X1000tohh_bbtautau_lephad.recon.AOD.e7244_s3126_r10201/*')
@@ -43,19 +46,13 @@ elif sample == 'X1000AOD':
     isSignal = 1
 elif sample == 'X1600DAOD':
     sample_name = '450166_X1600_bbtautau_lephad'
-    daod_path = daod_template.format(sample_name)
-    myFiles = glob(daod_path)
-    outName = ntuple_template.format(sample_name)
     isSignal = 1
 elif sample == 'X1600AOD':
-    myFiles = glob('/eos/user/n/nicholas/SWAN_projects/DiTauReco/samples/user.nicholas.mc16_13TeV.450166.MadGraphHerwig7EvtGen_PDF23LO_X1600tohh_bbtautau_lephad.recon.AOD.e8317_s3126_r10724_der1632783813/*')
+    myFiles = glob('/eos/user/n/nicholas/SWAN_projects/DiTauReco/samples/mc16_13TeV.450166.MadGraphHerwig7EvtGen_PDF23LO_X1600tohh_bbtautau_lephad.recon.AOD.e8317_s3126_r10201/*')
     outName = 'ditau_450166_X1600tohh_bbtautau_lephad.recon.AOD.ntuple.root'
     isSignal = 1
 elif sample == 'X2000DAOD':
     sample_name = '450524_X2000_bbtautau_lephad'
-    daod_path = daod_template.format(sample_name)
-    myFiles = glob(daod_path)
-    outName = ntuple_template.format(sample_name)
     isSignal = 1
 elif sample == 'X2000AOD':
     myFiles = glob('/eos/user/n/nicholas/SWAN_projects/DiTauReco/samples/mc16_13TeV.450524.MadGraphPythia8EvtGen_A14NNPDF23LO_X2000tohh_bbtautau_lephad.recon.AOD.e7244_s3126_r10201/*')
@@ -67,9 +64,6 @@ elif sample == 'X2000ESD':
     isSignal = 1
 elif sample == 'Z+jetsDAOD':
     sample_name = '364139_Ztautau_BFilter'
-    daod_path = daod_template.format(sample_name)
-    myFiles = glob(daod_path)
-    outName = ntuple_template.format(sample_name)
     isSignal = 0
 elif sample == 'Z+jets':
     myFiles = glob('/eos/user/n/nicholas/SWAN_projects/DiTauReco/samples/mc16_13TeV.364139.Sherpa_221_NNPDF30NNLO_Ztautau_MAXHTPTV280_500_BFilter.recon.AOD.e5313_s3126_r10201/*')
@@ -77,20 +71,20 @@ elif sample == 'Z+jets':
     isSignal = 0
 elif sample == 'ttbarDAOD':
     sample_name = '410470_ttbar_nonallhad'
-    daod_path = daod_template.format(sample_name)
-    myFiles = glob(daod_path)
-    outName = ntuple_template.format(sample_name)
     isSignal = 0
 elif sample == 'ttbar':
     myFiles = glob('/eos/user/n/nicholas/SWAN_projects/DiTauReco/samples/mc16_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.recon.AOD.e6337_e5984_s3126_r10201/*')
     outName = 'background_410470_ttbar_nonallhad.recon.AOD.ntuple.root'
     isSignal = 0
 
-#myFiles = glob('/eos/user/n/nicholas/SWAN_projects/DiTauReco/samples/mc16_13TeV.425105.MadGraphPythia8EvtGen_A14NNPDF23LO_RS_G_hh_4tau_c10_M3000.recon.AOD.e6072_s3126_r10724/*.root.1')
-#outName = '../samples/ditau_425105_G_hh_4tau_M3000.recon.AOD.ntuple.root'
-
-#myFiles = glob('/eos/user/n/nicholas/SWAN_projects/DiTauReco/samples/group.perf-tau.425104.MadGraphPythia8EvtGen_A14NNPDF23LO_RS_G_hh_4tau_c10_M2500.R22_NewTunes_EXT0/*')
-#outName = 'ditau_425104_4tau.AOD.ntuple.root'
+if isDAOD:
+    if noskim:
+        daod_path = noskim_daod_template.format(sample_name) 
+        outName = noskim_ntuple_template.format(sample_name)
+    else:
+        daod_path = daod_template.format(sample_name)
+        outName = ntuple_template.format(sample_name)
+    myFiles = glob(daod_path)
 
 #override next line on command line with: --filesInput=XXX
 jps.AthenaCommonFlags.FilesInput = myFiles
@@ -206,7 +200,7 @@ alg.jetConstituentModSequence.Modifiers = [clusterOrigin]
 athAlgSeq += alg
 
 # limit the number of events (for testing purposes)
-theApp.EvtMax = 20000
+theApp.EvtMax = 100
 
 #MessageSvc.OutputLevel = 1
 
