@@ -106,10 +106,17 @@ private:
   float m_truthAntiBPhi = 0;
   float m_truthAntiBE = 0;
 
-  float m_truthHiggsPt = 0;
-  float m_truthHiggsEta = 0;
-  float m_truthHiggsPhi = 0;
-  float m_truthHiggsE = 0;
+  float m_truthBdR = 0;
+
+  float m_truthTauHiggsPt = 0;
+  float m_truthTauHiggsEta = 0;
+  float m_truthTauHiggsPhi = 0;
+  float m_truthTauHiggsE = 0;
+
+  float m_truthBHiggsPt = 0;
+  float m_truthBHiggsEta = 0;
+  float m_truthBHiggsPhi = 0;
+  float m_truthBHiggsE = 0;
 
   float m_truthHadTauPt = 0;
   float m_truthHadTauEta = 0;
@@ -358,20 +365,20 @@ private:
   std::vector<float> *m_tauEleLoosedR = nullptr;
 
   // Chosen Tau-Ele system
-  float m_chosenTauPt = 0;
-  float m_chosenTauEta = 0;
-  float m_chosenTauPhi = 0;
-  float m_chosenTauE = 0;
-  float m_chosenElePt = 0;
-  float m_chosenEleEta = 0;
-  float m_chosenElePhi = 0;
-  float m_chosenEleE = 0;
-  float m_chosenTauElePt = 0;
-  float m_chosenTauEleEta = 0;
-  float m_chosenTauElePhi = 0;
-  float m_chosenTauEleE = 0;
-  float m_chosenTauEleM = 0;
-  float m_chosenTauEledR = 0;
+  float m_hadElChosenTauPt = 0;
+  float m_hadElChosenTauEta = 0;
+  float m_hadElChosenTauPhi = 0;
+  float m_hadElChosenTauE = 0;
+  float m_hadElChosenElePt = 0;
+  float m_hadElChosenEleEta = 0;
+  float m_hadElChosenElePhi = 0;
+  float m_hadElChosenEleE = 0;
+  float m_hadElChosenTauElePt = 0;
+  float m_hadElChosenTauEleEta = 0;
+  float m_hadElChosenTauElePhi = 0;
+  float m_hadElChosenTauEleE = 0;
+  float m_hadElChosenTauEleM = 0;
+  float m_hadElChosenTauEledR = 0;
 
   // Tau-Mu ditau system
   std::vector<float> *m_tauMuTightPt = nullptr;
@@ -382,16 +389,20 @@ private:
   std::vector<float> *m_tauMuTightdR = nullptr;
 
   // Chosen Tau-Mu system
-  float m_chosenMuPt = 0;
-  float m_chosenMuEta = 0;
-  float m_chosenMuPhi = 0;
-  float m_chosenMuE = 0;
-  float m_chosenTauMuPt = 0;
-  float m_chosenTauMuEta = 0;
-  float m_chosenTauMuPhi = 0;
-  float m_chosenTauMuE = 0;
-  float m_chosenTauMuM = 0;
-  float m_chosenTauMudR = 0;
+  float m_hadMuChosenTauPt = 0;
+  float m_hadMuChosenTauEta = 0;
+  float m_hadMuChosenTauPhi = 0;
+  float m_hadMuChosenTauE = 0;
+  float m_hadMuChosenMuPt = 0;
+  float m_hadMuChosenMuEta = 0;
+  float m_hadMuChosenMuPhi = 0;
+  float m_hadMuChosenMuE = 0;
+  float m_hadMuChosenTauMuPt = 0;
+  float m_hadMuChosenTauMuEta = 0;
+  float m_hadMuChosenTauMuPhi = 0;
+  float m_hadMuChosenTauMuE = 0;
+  float m_hadMuChosenTauMuM = 0;
+  float m_hadMuChosenTauMudR = 0;
 
   // Resolved analysis values
   float m_resolvedMissingMass = 0;

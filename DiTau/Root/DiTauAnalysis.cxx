@@ -201,10 +201,17 @@ StatusCode DiTauAnalysis :: initialize ()
     m_mytree->Branch("TruthAntiBPhi", &m_truthAntiBPhi);
     m_mytree->Branch("TruthAntiBE", &m_truthAntiBE);
 
-    m_mytree->Branch("TruthHiggsPt", &m_truthHiggsPt);
-    m_mytree->Branch("TruthHiggsEta", &m_truthHiggsEta);
-    m_mytree->Branch("TruthHiggsPhi", &m_truthHiggsPhi);
-    m_mytree->Branch("TruthHiggsE", &m_truthHiggsE);
+    m_mytree->Branch("TruthBdR", &m_truthBdR);
+
+    m_mytree->Branch("TruthTauHiggsPt", &m_truthTauHiggsPt);
+    m_mytree->Branch("TruthTauHiggsEta", &m_truthTauHiggsEta);
+    m_mytree->Branch("TruthTauHiggsPhi", &m_truthTauHiggsPhi);
+    m_mytree->Branch("TruthTauHiggsE", &m_truthTauHiggsE);
+
+    m_mytree->Branch("TruthBHiggsPt", &m_truthBHiggsPt);
+    m_mytree->Branch("TruthBHiggsEta", &m_truthBHiggsEta);
+    m_mytree->Branch("TruthBHiggsPhi", &m_truthBHiggsPhi);
+    m_mytree->Branch("TruthBHiggsE", &m_truthBHiggsE);
 
     m_mytree->Branch("TruthHadTauPt", &m_truthHadTauPt);
     m_mytree->Branch("TruthHadTauEta", &m_truthHadTauEta);
@@ -556,20 +563,20 @@ StatusCode DiTauAnalysis :: initialize ()
   m_mytree->Branch("TauEleLoosedR", &m_tauEleLoosedR);
 
   // Chosen Tau-Ele system
-  m_mytree->Branch("ChosenTauPt", &m_chosenTauPt);
-  m_mytree->Branch("ChosenTauEta", &m_chosenTauEta);
-  m_mytree->Branch("ChosenTauPhi", &m_chosenTauPhi);
-  m_mytree->Branch("ChosenTauE", &m_chosenTauE);
-  m_mytree->Branch("ChosenElePt", &m_chosenElePt);
-  m_mytree->Branch("ChosenEleEta", &m_chosenEleEta);
-  m_mytree->Branch("ChosenElePhi", &m_chosenElePhi);
-  m_mytree->Branch("ChosenEleE", &m_chosenEleE);
-  m_mytree->Branch("ChosenTauElePt", &m_chosenTauElePt);
-  m_mytree->Branch("ChosenTauEleEta", &m_chosenTauEleEta);
-  m_mytree->Branch("ChosenTauElePhi", &m_chosenTauElePhi);
-  m_mytree->Branch("ChosenTauEleE", &m_chosenTauEleE);
-  m_mytree->Branch("ChosenTauEleM", &m_chosenTauEleM);
-  m_mytree->Branch("ChosenTauEledR", &m_chosenTauEledR);
+  m_mytree->Branch("HadElChosenTauPt", &m_hadElChosenTauPt);
+  m_mytree->Branch("HadElChosenTauEta", &m_hadElChosenTauEta);
+  m_mytree->Branch("HadElChosenTauPhi", &m_hadElChosenTauPhi);
+  m_mytree->Branch("HadElChosenTauE", &m_hadElChosenTauE);
+  m_mytree->Branch("HadElChosenElePt", &m_hadElChosenElePt);
+  m_mytree->Branch("HadElChosenEleEta", &m_hadElChosenEleEta);
+  m_mytree->Branch("HadElChosenElePhi", &m_hadElChosenElePhi);
+  m_mytree->Branch("HadElChosenEleE", &m_hadElChosenEleE);
+  m_mytree->Branch("HadElChosenTauElePt", &m_hadElChosenTauElePt);
+  m_mytree->Branch("HadElChosenTauEleEta", &m_hadElChosenTauEleEta);
+  m_mytree->Branch("HadElChosenTauElePhi", &m_hadElChosenTauElePhi);
+  m_mytree->Branch("HadElChosenTauEleE", &m_hadElChosenTauEleE);
+  m_mytree->Branch("HadElChosenTauEleM", &m_hadElChosenTauEleM);
+  m_mytree->Branch("HadElChosenTauEledR", &m_hadElChosenTauEledR);
 
   // Tau-Mu ditau system
   m_tauMuTightPt = new std::vector<float>();
@@ -586,20 +593,20 @@ StatusCode DiTauAnalysis :: initialize ()
   m_mytree->Branch("TauMuTightdR", &m_tauMuTightdR);
 
   // Chosen Tau-Mu system
-  m_mytree->Branch("ChosenTauPt", &m_chosenTauPt);
-  m_mytree->Branch("ChosenTauEta", &m_chosenTauEta);
-  m_mytree->Branch("ChosenTauPhi", &m_chosenTauPhi);
-  m_mytree->Branch("ChosenTauE", &m_chosenTauE);
-  m_mytree->Branch("ChosenMuPt", &m_chosenMuPt);
-  m_mytree->Branch("ChosenMuEta", &m_chosenMuEta);
-  m_mytree->Branch("ChosenMuPhi", &m_chosenMuPhi);
-  m_mytree->Branch("ChosenMuE", &m_chosenMuE);
-  m_mytree->Branch("ChosenTauMuPt", &m_chosenTauMuPt);
-  m_mytree->Branch("ChosenTauMuEta", &m_chosenTauMuEta);
-  m_mytree->Branch("ChosenTauMuPhi", &m_chosenTauMuPhi);
-  m_mytree->Branch("ChosenTauMuE", &m_chosenTauMuE);
-  m_mytree->Branch("ChosenTauMuM", &m_chosenTauMuM);
-  m_mytree->Branch("ChosenTauMudR", &m_chosenTauMudR);
+  m_mytree->Branch("HadMuChosenTauPt", &m_hadMuChosenTauPt);
+  m_mytree->Branch("HadMuChosenTauEta", &m_hadMuChosenTauEta);
+  m_mytree->Branch("HadMuChosenTauPhi", &m_hadMuChosenTauPhi);
+  m_mytree->Branch("HadMuChosenTauE", &m_hadMuChosenTauE);
+  m_mytree->Branch("HadMuChosenMuPt", &m_hadMuChosenMuPt);
+  m_mytree->Branch("HadMuChosenMuEta", &m_hadMuChosenMuEta);
+  m_mytree->Branch("HadMuChosenMuPhi", &m_hadMuChosenMuPhi);
+  m_mytree->Branch("HadMuChosenMuE", &m_hadMuChosenMuE);
+  m_mytree->Branch("HadMuChosenTauMuPt", &m_hadMuChosenTauMuPt);
+  m_mytree->Branch("HadMuChosenTauMuEta", &m_hadMuChosenTauMuEta);
+  m_mytree->Branch("HadMuChosenTauMuPhi", &m_hadMuChosenTauMuPhi);
+  m_mytree->Branch("HadMuChosenTauMuE", &m_hadMuChosenTauMuE);
+  m_mytree->Branch("HadMuChosenTauMuM", &m_hadMuChosenTauMuM);
+  m_mytree->Branch("HadMuChosenTauMudR", &m_hadMuChosenTauMudR);
 
   // Resolved analysis values
   m_mytree->Branch("ResolvedMissingMass", &m_resolvedMissingMass);
@@ -807,10 +814,17 @@ StatusCode DiTauAnalysis :: execute ()
   m_truthAntiBPhi = 0;
   m_truthAntiBE = 0;
 
-  m_truthHiggsPt = 0;
-  m_truthHiggsEta = 0;
-  m_truthHiggsPhi = 0;
-  m_truthHiggsE = 0;
+  m_truthBdR = 0;
+
+  m_truthTauHiggsPt = 0;
+  m_truthTauHiggsEta = 0;
+  m_truthTauHiggsPhi = 0;
+  m_truthTauHiggsE = 0;
+
+  m_truthBHiggsPt = 0;
+  m_truthBHiggsEta = 0;
+  m_truthBHiggsPhi = 0;
+  m_truthBHiggsE = 0;
 
   m_truthHadTauPt = 0;
   m_truthHadTauEta = 0;
@@ -1056,20 +1070,20 @@ StatusCode DiTauAnalysis :: execute ()
   m_tauEleLoosedR->clear();
 
   // Chosen tau-ele ditau system
-  m_chosenTauPt = 0;
-  m_chosenTauEta = 0;
-  m_chosenTauPhi = 0;
-  m_chosenTauE = 0;
-  m_chosenElePt = 0;
-  m_chosenEleEta = 0;
-  m_chosenElePhi = 0;
-  m_chosenEleE = 0;
-  m_chosenTauElePt = 0;
-  m_chosenTauEleEta = 0;
-  m_chosenTauElePhi = 0;
-  m_chosenTauEleE = 0;
-  m_chosenTauEleM = 0;
-  m_chosenTauEledR = 0;
+  m_hadElChosenTauPt = 0;
+  m_hadElChosenTauEta = 0;
+  m_hadElChosenTauPhi = 0;
+  m_hadElChosenTauE = 0;
+  m_hadElChosenElePt = 0;
+  m_hadElChosenEleEta = 0;
+  m_hadElChosenElePhi = 0;
+  m_hadElChosenEleE = 0;
+  m_hadElChosenTauElePt = 0;
+  m_hadElChosenTauEleEta = 0;
+  m_hadElChosenTauElePhi = 0;
+  m_hadElChosenTauEleE = 0;
+  m_hadElChosenTauEleM = 0;
+  m_hadElChosenTauEledR = 0;
 
   // Tau-Mu ditau system
   m_tauMuTightPt->clear();
@@ -1080,20 +1094,20 @@ StatusCode DiTauAnalysis :: execute ()
   m_tauMuTightdR->clear();
 
   // Chosen tau-mu ditau system
-  m_chosenTauPt = 0;
-  m_chosenTauEta = 0;
-  m_chosenTauPhi = 0;
-  m_chosenTauE = 0;
-  m_chosenMuPt = 0;
-  m_chosenMuEta = 0;
-  m_chosenMuPhi = 0;
-  m_chosenMuE = 0;
-  m_chosenTauMuPt = 0;
-  m_chosenTauMuEta = 0;
-  m_chosenTauMuPhi = 0;
-  m_chosenTauMuE = 0;
-  m_chosenTauMuM = 0;
-  m_chosenTauMudR = 0;
+  m_hadMuChosenTauPt = 0;
+  m_hadMuChosenTauEta = 0;
+  m_hadMuChosenTauPhi = 0;
+  m_hadMuChosenTauE = 0;
+  m_hadMuChosenMuPt = 0;
+  m_hadMuChosenMuEta = 0;
+  m_hadMuChosenMuPhi = 0;
+  m_hadMuChosenMuE = 0;
+  m_hadMuChosenTauMuPt = 0;
+  m_hadMuChosenTauMuEta = 0;
+  m_hadMuChosenTauMuPhi = 0;
+  m_hadMuChosenTauMuE = 0;
+  m_hadMuChosenTauMuM = 0;
+  m_hadMuChosenTauMudR = 0;
 
   m_resolvedMissingMass = 0;
 
@@ -1319,11 +1333,22 @@ StatusCode DiTauAnalysis :: execute ()
     m_truthAntiBPhi = truth_anti_b->phi();
     m_truthAntiBE = truth_anti_b->e() / 1000.;
 
+    // Truth b dR
+    TLorentzVector truth_b_p4 = truth_b->p4();
+    TLorentzVector truth_antib_p4 = truth_anti_b->p4();
+    m_truthBdR = truth_b_p4.DeltaR(truth_antib_p4);
+
     // Truth Higgs decaying to taus
-    m_truthHiggsPt = truth_tau_higgs->pt() / 1000.;
-    m_truthHiggsEta = truth_tau_higgs->eta();
-    m_truthHiggsPhi = truth_tau_higgs->phi();
-    m_truthHiggsE = truth_tau_higgs->e() / 1000.;
+    m_truthTauHiggsPt = truth_tau_higgs->pt() / 1000.;
+    m_truthTauHiggsEta = truth_tau_higgs->eta();
+    m_truthTauHiggsPhi = truth_tau_higgs->phi();
+    m_truthTauHiggsE = truth_tau_higgs->e() / 1000.;
+
+    // Truth Higgs decaying to b
+    m_truthBHiggsPt = truth_b_higgs->pt() / 1000.;
+    m_truthBHiggsEta = truth_b_higgs->eta();
+    m_truthBHiggsPhi = truth_b_higgs->phi();
+    m_truthBHiggsE = truth_b_higgs->e() / 1000.;
 
     // Define accessor for hadronic tau visible variables
     static SG::AuxElement::Accessor<double> accPtVis("pt_vis");
@@ -2122,12 +2147,14 @@ StatusCode DiTauAnalysis :: execute ()
 
   // Define the chosen tau, electron, and muon to make up ditau system. First electron then muon.
   // Note: Chosen tau will be overwritten but events with loose electron AND tight muon are not placed in either channel
-  TLorentzVector chosen_tau_p4;
+  TLorentzVector chosen_hadel_tau_p4;
+  TLorentzVector chosen_hadmu_tau_p4;
   TLorentzVector chosen_electron_p4;
   TLorentzVector chosen_muon_p4;
   bool set_electron = 0;
   bool set_muon = 0;
-  bool set_tau = 0;
+  bool set_hadel_tau = 0;
+  bool set_hadmu_tau = 0;
 
   // First find leading loose electron if it exists
   if (m_nElectronsLoose > 0) {
@@ -2143,8 +2170,8 @@ StatusCode DiTauAnalysis :: execute ()
       TLorentzVector tau_p4 = tau->p4();
       float dr = chosen_electron_p4.DeltaR(tau_p4);
       if ((dr < min_dr) || (min_dr == 0)) {
-        chosen_tau_p4.SetPtEtaPhiE(tau->pt(), tau->eta(), tau->phi(), tau->e());
-        set_tau = 1;
+        chosen_hadel_tau_p4.SetPtEtaPhiE(tau->pt(), tau->eta(), tau->phi(), tau->e());
+        set_hadel_tau = 1;
         min_dr = dr;
       }
     }
@@ -2153,8 +2180,8 @@ StatusCode DiTauAnalysis :: execute ()
   // If dR between electron and tau is < 0.1, then look for another in 0.1 < dR < 1 and pt > 20 GeV
   float chosen_dr = 0;
   unsigned int switched_taus = 0;
-  if (set_electron && set_tau) {
-    chosen_dr = chosen_electron_p4.DeltaR(chosen_tau_p4);
+  if (set_electron && set_hadel_tau) {
+    chosen_dr = chosen_electron_p4.DeltaR(chosen_hadel_tau_p4);
     if (chosen_dr < 0.1) {
       float min_dr = 0;
       for (auto tau: *taus) {
@@ -2162,8 +2189,8 @@ StatusCode DiTauAnalysis :: execute ()
         float tau_pt = tau->pt() / 1000.;
         float dr = chosen_electron_p4.DeltaR(tau_p4);
         if (((dr < min_dr) || (min_dr == 0)) && tau_pt > 20. && (dr > 0.1) && (dr < 1.0)) {
-          chosen_tau_p4.SetPtEtaPhiE(tau->pt(), tau->eta(), tau->phi(), tau->e());
-          set_tau = 1;
+          chosen_hadel_tau_p4.SetPtEtaPhiE(tau->pt(), tau->eta(), tau->phi(), tau->e());
+          set_hadel_tau = 1;
           min_dr = dr;
           switched_taus = 1;
         }
@@ -2172,7 +2199,7 @@ StatusCode DiTauAnalysis :: execute ()
   } 
 
   // If no tau found but another loose electron within 1.0 switch to that
-  if (set_electron && set_tau && (chosen_dr < 0.1) && !switched_taus) {
+  if (set_electron && set_hadel_tau && (chosen_dr < 0.1) && !switched_taus) {
     float min_dr = 0;
     for (auto loose_electron: loose_electrons) {
       TLorentzVector loose_electron_p4 = loose_electron->p4();
@@ -2187,10 +2214,10 @@ StatusCode DiTauAnalysis :: execute ()
   }
 
   // If electron and tau still within 0.2 then look to ditau with overlapping electron
-  if (set_electron && set_tau) {
-    chosen_dr = chosen_electron_p4.DeltaR(chosen_tau_p4);
+  if (set_electron && set_hadel_tau) {
+    chosen_dr = chosen_electron_p4.DeltaR(chosen_hadel_tau_p4);
   }
-  if (set_electron && set_tau && (chosen_dr < 0.2)) {
+  if (set_electron && set_hadel_tau && (chosen_dr < 0.2)) {
     float max_pt = 0;
     static const SG::AuxElement::Accessor<float> acc_el_pt ("electron_pt");
     static const SG::AuxElement::Accessor<float> acc_el_eta ("electron_eta");
@@ -2217,8 +2244,8 @@ StatusCode DiTauAnalysis :: execute ()
         float hadel_tau_e = acc_tau_E(*ditau);
         TLorentzVector hadel_tau_p4;
         hadel_tau_p4.SetPtEtaPhiE(hadel_tau_pt, hadel_tau_eta, hadel_tau_phi, hadel_tau_e);
-        chosen_tau_p4 = hadel_tau_p4;
-        set_tau = 1;
+        chosen_hadel_tau_p4 = hadel_tau_p4;
+        set_hadel_tau = 1;
         max_pt = ditau_pt;
       }
     }
@@ -2244,52 +2271,59 @@ StatusCode DiTauAnalysis :: execute ()
       }
       // Find leading tau within constraints
       if ((tau_pt > max_pt) || (max_pt == 0)) {
-        chosen_tau_p4.SetPtEtaPhiE(tau->pt(), tau->eta(), tau->phi(), tau->e());
-        set_tau = 1;
+        chosen_hadmu_tau_p4.SetPtEtaPhiE(tau->pt(), tau->eta(), tau->phi(), tau->e());
+        set_hadmu_tau = 1;
         max_pt = tau_pt;
       }
     }
   }    
   
-  if (set_tau) {
-    m_chosenTauPt = chosen_tau_p4.Pt() / 1000.; 
-    m_chosenTauEta = chosen_tau_p4.Eta(); 
-    m_chosenTauPhi = chosen_tau_p4.Phi(); 
-    m_chosenTauE = chosen_tau_p4.E() / 1000.; 
+  if (set_hadel_tau) {
+    m_hadElChosenTauPt = chosen_hadel_tau_p4.Pt() / 1000.; 
+    m_hadElChosenTauEta = chosen_hadel_tau_p4.Eta(); 
+    m_hadElChosenTauPhi = chosen_hadel_tau_p4.Phi(); 
+    m_hadElChosenTauE = chosen_hadel_tau_p4.E() / 1000.; 
+  }
+
+  if (set_hadmu_tau) {
+    m_hadMuChosenTauPt = chosen_hadmu_tau_p4.Pt() / 1000.; 
+    m_hadMuChosenTauEta = chosen_hadmu_tau_p4.Eta(); 
+    m_hadMuChosenTauPhi = chosen_hadmu_tau_p4.Phi(); 
+    m_hadMuChosenTauE = chosen_hadmu_tau_p4.E() / 1000.; 
   }
 
   if (set_electron) {
-    m_chosenElePt = chosen_electron_p4.Pt() / 1000.; 
-    m_chosenEleEta = chosen_electron_p4.Eta(); 
-    m_chosenElePhi = chosen_electron_p4.Phi(); 
-    m_chosenEleE = chosen_electron_p4.E() / 1000.; 
+    m_hadElChosenElePt = chosen_electron_p4.Pt() / 1000.; 
+    m_hadElChosenEleEta = chosen_electron_p4.Eta(); 
+    m_hadElChosenElePhi = chosen_electron_p4.Phi(); 
+    m_hadElChosenEleE = chosen_electron_p4.E() / 1000.; 
   }
 
   if (set_muon) {
-    m_chosenMuPt = chosen_muon_p4.Pt() / 1000;
-    m_chosenMuEta = chosen_muon_p4.Eta();
-    m_chosenMuPhi = chosen_muon_p4.Phi();
-    m_chosenMuE = chosen_muon_p4.E() / 1000;
+    m_hadMuChosenMuPt = chosen_muon_p4.Pt() / 1000;
+    m_hadMuChosenMuEta = chosen_muon_p4.Eta();
+    m_hadMuChosenMuPhi = chosen_muon_p4.Phi();
+    m_hadMuChosenMuE = chosen_muon_p4.E() / 1000;
   }
 
-  if (set_tau && set_electron) {
-    TLorentzVector chosen_tauele_system_p4 = chosen_tau_p4 + chosen_electron_p4;
-    m_chosenTauElePt = chosen_tauele_system_p4.Pt() / 1000.; 
-    m_chosenTauEleEta = chosen_tauele_system_p4.Eta(); 
-    m_chosenTauElePhi = chosen_tauele_system_p4.Phi(); 
-    m_chosenTauEleE = chosen_tauele_system_p4.E() / 1000.; 
-    m_chosenTauEleM = chosen_tauele_system_p4.M() / 1000.; 
-    m_chosenTauEledR = chosen_tau_p4.DeltaR(chosen_electron_p4);
+  if (set_hadel_tau && set_electron) {
+    TLorentzVector chosen_tauele_system_p4 = chosen_hadel_tau_p4 + chosen_electron_p4;
+    m_hadElChosenTauElePt = chosen_tauele_system_p4.Pt() / 1000.; 
+    m_hadElChosenTauEleEta = chosen_tauele_system_p4.Eta(); 
+    m_hadElChosenTauElePhi = chosen_tauele_system_p4.Phi(); 
+    m_hadElChosenTauEleE = chosen_tauele_system_p4.E() / 1000.; 
+    m_hadElChosenTauEleM = chosen_tauele_system_p4.M() / 1000.; 
+    m_hadElChosenTauEledR = chosen_hadel_tau_p4.DeltaR(chosen_electron_p4);
   }
 
-  if (set_tau && set_muon) {
-    TLorentzVector chosen_taumu_system_p4 = chosen_tau_p4 + chosen_muon_p4;
-    m_chosenTauMuPt = chosen_taumu_system_p4.Pt() / 1000.; 
-    m_chosenTauMuEta = chosen_taumu_system_p4.Eta(); 
-    m_chosenTauMuPhi = chosen_taumu_system_p4.Phi(); 
-    m_chosenTauMuE = chosen_taumu_system_p4.E() / 1000.; 
-    m_chosenTauMuM = chosen_taumu_system_p4.M() / 1000.; 
-    m_chosenTauMudR = chosen_tau_p4.DeltaR(chosen_muon_p4);
+  if (set_hadmu_tau && set_muon) {
+    TLorentzVector chosen_hadmu_system_p4 = chosen_hadmu_tau_p4 + chosen_muon_p4;
+    m_hadMuChosenTauMuPt = chosen_hadmu_system_p4.Pt() / 1000.; 
+    m_hadMuChosenTauMuEta = chosen_hadmu_system_p4.Eta(); 
+    m_hadMuChosenTauMuPhi = chosen_hadmu_system_p4.Phi(); 
+    m_hadMuChosenTauMuE = chosen_hadmu_system_p4.E() / 1000.; 
+    m_hadMuChosenTauMuM = chosen_hadmu_system_p4.M() / 1000.; 
+    m_hadMuChosenTauMudR = chosen_hadmu_tau_p4.DeltaR(chosen_muon_p4);
   }
 
   // Missing Mass Calculator
