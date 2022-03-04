@@ -14,10 +14,6 @@ print('NEvents: {}'.format(nevents))
 '''
 print('In jobOptions')
 
-noskim_daod_template = '/eos/user/n/nicholas/SWAN_projects/Derivation/samples/DAOD_HIGGBOOSTED_NOSKIM.{}.pool.root'
-noskim_ntuple_template = '{}.DAOD_HIGGBOOSTEDLH_NOSKIM.ntuple.root'
-daod_template = '/eos/user/n/nicholas/SWAN_projects/Derivation/samples/user.nicholas.{}_DAOD_HIGGBOOSTEDLH_TEST3.pool.root_EXT0/*'
-ntuple_template = '{}.DAOD_HIGGBOOSTEDLH.ntuple.root'
 
 daod_jet_name = 'AntiKt4EMTopoJets_BTagging201810'
 daod_largerjet_name = 'AntiKt10LCTopoJets'
@@ -39,6 +35,9 @@ else:
 
 if sample == 'X1000DAOD':
     sample_name = '450522_X1000_bbtautau_lephad'
+    isSignal = 1
+if sample == 'X1000DAOD_TEST':
+    sample_name = '450522_X1000_bbtautau_lephad_tester'
     isSignal = 1
 elif sample == 'X1000AOD':
     myFiles = glob('/eos/user/n/nicholas/SWAN_projects/DiTauReco/samples/mc16_13TeV.450522.MadGraphPythia8EvtGen_A14NNPDF23LO_X1000tohh_bbtautau_lephad.recon.AOD.e7244_s3126_r10201/*')
@@ -69,6 +68,9 @@ elif sample == 'Z+jets':
     myFiles = glob('/eos/user/n/nicholas/SWAN_projects/DiTauReco/samples/mc16_13TeV.364139.Sherpa_221_NNPDF30NNLO_Ztautau_MAXHTPTV280_500_BFilter.recon.AOD.e5313_s3126_r10201/*')
     outName = 'background_364139_Ztautau_MAXHTPTV280_500_BFilter.recon.AOD.ntuple.root'
     isSignal = 0
+elif sample == 'W+jetsDAOD':
+    sample_name = '364186_Wtaunu_BFilter'
+    isSignal = 0
 elif sample == 'ttbarDAOD':
     sample_name = '410470_ttbar_nonallhad'
     isSignal = 0
@@ -78,13 +80,23 @@ elif sample == 'ttbar':
     isSignal = 0
 
 if isDAOD:
-    if noskim:
-        daod_path = noskim_daod_template.format(sample_name) 
-        outName = noskim_ntuple_template.format(sample_name)
+    daod_version = 'V0'
+    if 'noskim' in locals() and noskim:
+        daod_template = '/eos/user/n/nicholas/SWAN_projects/Derivation/samples/DAOD_HIGGBOOSTEDLH_NOSKIM.{}.pool.root'
+        ntuple_template = '{}.DAOD_HIGGBOOSTEDLH_NOSKIM.ntuple.root'
+    #elif isSignal:
+    #    daod_template = '/eos/user/n/nicholas/SWAN_projects/Derivation/samples/DAOD_HIGGBOOSTEDLH.{}.pool.root'
+    #    ntuple_template = '{}.DAOD_HIGGBOOSTEDLH.ntuple.root'
     else:
-        daod_path = daod_template.format(sample_name)
-        outName = ntuple_template.format(sample_name)
+        daod_template = '/eos/user/n/nicholas/SWAN_projects/Derivation/samples/user.nicholas.{}.DAOD_HIGGBOOSTEDLH.{}.pool.root_EXT0/*'
+        ntuple_template = '{}.DAOD_HIGGBOOSTEDLH.{}.ntuple.root'
+    daod_path = daod_template.format(sample_name, daod_version)
+    outName = ntuple_template.format(sample_name, daod_version)
     myFiles = glob(daod_path)
+
+print(outName)
+print(daod_path)
+print(myFiles)
 
 #override next line on command line with: --filesInput=XXX
 jps.AthenaCommonFlags.FilesInput = myFiles
@@ -182,6 +194,9 @@ alg.bTaggingSelectionTool.MinPt = 20000
 addPrivateTool( alg, 'missingMassTool', 'MissingMassTool')
 alg.missingMassTool.CalibSet = '2016MC15C'
 alg.missingMassTool.Decorate = True
+
+# HbbTagTool
+# addPrivateTool( alg, 'hbbTagTool', 'HbbTagTool')
 
 from AthenaCommon.AppMgr import ToolSvc
 from JetRecTools.JetRecToolsConf import CaloClusterConstituentsOrigin

@@ -28,6 +28,7 @@
 #include "JetInterface/IJetExecuteTool.h"
 
 #include "FTagAnalysisInterfaces/IBTaggingSelectionTool.h"
+#include "FlavorTagDiscriminants/HbbTag.h"
 
 #include "DiTauMassTools/IMissingMassTool.h"
 
@@ -86,6 +87,8 @@ private:
   ToolHandle<IBTaggingSelectionTool> m_bTaggingSelectionTool;
     
   ToolHandle<IMissingMassTool> m_missingMassTool;
+
+  std::unique_ptr<FlavorTagDiscriminants::HbbTag> m_hbbTagTool;
 
   unsigned int m_eventsPassed = 0;
   unsigned int m_pdgTruthMatchType = 0;
@@ -479,12 +482,45 @@ private:
   float m_bLRJetEleLoosedR = 0;
   float m_bLRJetMuTightdR = 0;
 
-  // Large-R X
+  // Large-R X (= di-Higgs)
   float m_largeRXPt = 0;
   float m_largeRXEta = 0;
   float m_largeRXPhi = 0;
   float m_largeRXE = 0;
   float m_largeRXM = 0;
+  
+  // Hbb large-R jets
+  unsigned int m_nLargeRHbbJets = 0;
+  std::vector<float> *m_lRHbbJetPt = nullptr;
+  std::vector<float> *m_lRHbbJetEta = nullptr;
+  std::vector<float> *m_lRHbbJetPhi = nullptr;
+  std::vector<float> *m_lRHbbJetE = nullptr;
+  std::vector<float> *m_lRHbbJetM = nullptr;
+  std::vector<float> *m_lRHbbJetpHiggs = nullptr;
+  std::vector<float> *m_lRHbbJetpQCD = nullptr;
+  std::vector<float> *m_lRHbbJetpTop = nullptr;
+  std::vector<float> *m_lRHbbJetDiscriminant = nullptr;
+  std::vector<float> *m_lRHbbJetTruthdR = nullptr;
+  float m_leadingLRHbbJetPt = 0;
+  float m_leadingLRHbbJetEta = 0;
+  float m_leadingLRHbbJetPhi = 0;
+  float m_leadingLRHbbJetE = 0;
+  float m_leadingLRHbbJetM = 0;
+  float m_subleadingLRHbbJetPt = 0;
+  float m_subleadingLRHbbJetEta = 0;
+  float m_subleadingLRHbbJetPhi = 0;
+  float m_subleadingLRHbbJetE = 0;
+  float m_subleadingLRHbbJetM = 0;
+  float m_hadElLRHbbJetPt = 0;
+  float m_hadElLRHbbJetEta = 0;
+  float m_hadElLRHbbJetPhi = 0;
+  float m_hadElLRHbbJetE = 0;
+  float m_hadElLRHbbJetM = 0;
+  float m_hadMuLRHbbJetPt = 0;
+  float m_hadMuLRHbbJetEta = 0;
+  float m_hadMuLRHbbJetPhi = 0;
+  float m_hadMuLRHbbJetE = 0;
+  float m_hadMuLRHbbJetM = 0;
 };
 
 #endif

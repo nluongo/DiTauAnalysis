@@ -340,8 +340,6 @@ StatusCode DiTauAnalysis :: initialize ()
   m_mytree->Branch("TauPhi", &m_tauPhi);
   m_tauE = new std::vector<float>();
   m_mytree->Branch("TauE", &m_tauE);
-  //m_tauP4 = new std::vector<TLorentzVector>();
-  //m_mytree->Branch("TauP4", &m_tauP4);
   m_mytree->Branch("LeadingTauPt", &m_leadingTauPt);
   m_mytree->Branch("LeadingTauEta", &m_leadingTauEta);
   m_mytree->Branch("LeadingTauPhi", &m_leadingTauPhi);
@@ -695,12 +693,56 @@ StatusCode DiTauAnalysis :: initialize ()
   m_mytree->Branch("BLargeRJetM", &m_bLRJetM);
   m_mytree->Branch("BLargeRJetMuTightdR", &m_bLRJetMuTightdR);
 
-  // Large-R Higgs
+  // Large-R X (= di-Higgs)
   m_mytree->Branch("LargeRXPt", &m_largeRXPt);
   m_mytree->Branch("LargeRXEta", &m_largeRXEta);
   m_mytree->Branch("LargeRXPhi", &m_largeRXPhi);
   m_mytree->Branch("LargeRXE", &m_largeRXE);
   m_mytree->Branch("LargeRXM", &m_largeRXM);
+
+  // Hbb Large-R Jets (used in the Hbb tagging algorithm)
+  m_mytree->Branch("NLargeRHbbJet", &m_nLargeRHbbJets);
+  m_lRHbbJetPt = new std::vector<float>();
+  m_mytree->Branch("LargeRHbbJetPt", &m_lRHbbJetPt);
+  m_lRHbbJetEta = new std::vector<float>();
+  m_mytree->Branch("LargeRHbbJetEta", &m_lRHbbJetEta);
+  m_lRHbbJetPhi = new std::vector<float>();
+  m_mytree->Branch("LargeRHbbJetPhi", &m_lRHbbJetPhi);
+  m_lRHbbJetE = new std::vector<float>();
+  m_mytree->Branch("LargeRHbbJetE", &m_lRHbbJetE);
+  m_lRHbbJetM = new std::vector<float>();
+  m_mytree->Branch("LargeRHbbJetM", &m_lRHbbJetM);
+  m_lRHbbJetpHiggs = new std::vector<float>();
+  m_mytree->Branch("LargeRHbbJetpHiggs", &m_lRHbbJetpHiggs);
+  m_lRHbbJetpQCD = new std::vector<float>();
+  m_mytree->Branch("LargeRHbbJetpQCD", &m_lRHbbJetpQCD);
+  m_lRHbbJetpTop = new std::vector<float>();
+  m_mytree->Branch("LargeRHbbJetpTop", &m_lRHbbJetpTop);
+  m_lRHbbJetDiscriminant = new std::vector<float>();
+  m_mytree->Branch("LargeRHbbJetDiscriminant", &m_lRHbbJetDiscriminant);
+  m_lRHbbJetTruthdR = new std::vector<float>();
+  m_mytree->Branch("LargeRHbbJetTruthdR", &m_lRHbbJetTruthdR);
+  m_mytree->Branch("LeadingLargeRHbbJetPt", &m_leadingLRHbbJetPt);
+  m_mytree->Branch("LeadingLargeRHbbJetEta", &m_leadingLRHbbJetEta);
+  m_mytree->Branch("LeadingLargeRHbbJetPhi", &m_leadingLRHbbJetPhi);
+  m_mytree->Branch("LeadingLargeRHbbJetE", &m_leadingLRHbbJetE);
+  m_mytree->Branch("LeadingLargeRHbbJetM", &m_leadingLRHbbJetM);
+  m_mytree->Branch("SubleadingLargeRHbbJetPt", &m_subleadingLRHbbJetPt);
+  m_mytree->Branch("SubleadingLargeRHbbJetEta", &m_subleadingLRHbbJetEta);
+  m_mytree->Branch("SubleadingLargeRHbbJetPhi", &m_subleadingLRHbbJetPhi);
+  m_mytree->Branch("SubleadingLargeRHbbJetE", &m_subleadingLRHbbJetE);
+  m_mytree->Branch("SubleadingLargeRHbbJetM", &m_subleadingLRHbbJetM);
+  m_mytree->Branch("HadElLargeRHbbJetPt", &m_hadElLRHbbJetPt);
+  m_mytree->Branch("HadElLargeRHbbJetEta", &m_hadElLRHbbJetEta);
+  m_mytree->Branch("HadElLargeRHbbJetPhi", &m_hadElLRHbbJetPhi);
+  m_mytree->Branch("HadElLargeRHbbJetE", &m_hadElLRHbbJetE);
+  m_mytree->Branch("HadElLargeRHbbJetM", &m_hadElLRHbbJetM);
+  m_mytree->Branch("HadMuLargeRHbbJetPt", &m_hadMuLRHbbJetPt);
+  m_mytree->Branch("HadMuLargeRHbbJetEta", &m_hadMuLRHbbJetEta);
+  m_mytree->Branch("HadMuLargeRHbbJetPhi", &m_hadMuLRHbbJetPhi);
+  m_mytree->Branch("HadMuLargeRHbbJetE", &m_hadMuLRHbbJetE);
+  m_mytree->Branch("HadMuLargeRHbbJetM", &m_hadMuLRHbbJetM);
+
 
   // Builders
   m_hadElBuilder = new DiTauRec::HadElBuilder("HadElBuilder");
@@ -744,6 +786,9 @@ StatusCode DiTauAnalysis :: initialize ()
 
   // MMC
   ANA_CHECK(m_missingMassTool.retrieve());
+
+  // Hbb tagger
+  m_hbbTagTool = std::make_unique<FlavorTagDiscriminants::HbbTag>(FlavorTagDiscriminants::HbbTagConfig("BTagging/202006/Xbb/GhostVR30Rmax4Rmin02TrackJet_BTagging201903/network.json"));
 
   return StatusCode::SUCCESS;
 }
@@ -798,6 +843,11 @@ StatusCode DiTauAnalysis :: execute ()
 
   const xAOD::MissingETContainer* mets = nullptr;
   ANA_CHECK( evtStore()->retrieve( mets, "MET_Reference_AntiKt4EMTopo" ) );
+
+  const xAOD::JetContainer* largerjets_hbb = nullptr;
+  if (m_isDAOD) {
+    ANA_CHECK( evtStore()->retrieve( largerjets_hbb, "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets" ) );
+  } 
 
   m_runNumber = 0;
   m_eventNumber = 0;
@@ -1182,12 +1232,46 @@ StatusCode DiTauAnalysis :: execute ()
   m_bLRJetM = 0;
   m_bLRJetEleLoosedR = 0;
 
-  // Large-R Higgs
+  // Large-R X (= di-Higgs)
   m_largeRXPt = 0;
   m_largeRXEta = 0;
   m_largeRXPhi = 0;
   m_largeRXE = 0;
   m_largeRXM = 0;
+
+  // Hbb large-R Jets
+  m_nLargeRHbbJets = 0;
+  m_lRHbbJetPt->clear();
+  m_lRHbbJetEta->clear();
+  m_lRHbbJetPhi->clear();
+  m_lRHbbJetE->clear();
+  m_lRHbbJetM->clear();
+  m_lRHbbJetpHiggs->clear();
+  m_lRHbbJetpQCD->clear();
+  m_lRHbbJetpTop->clear();
+  m_lRHbbJetDiscriminant->clear();
+  m_lRHbbJetTruthdR->clear(); 
+  m_leadingLRHbbJetPt = 0;
+  m_leadingLRHbbJetEta = 0;
+  m_leadingLRHbbJetPhi = 0;
+  m_leadingLRHbbJetE = 0;
+  m_leadingLRHbbJetM = 0;
+  m_subleadingLRHbbJetPt = 0;
+  m_subleadingLRHbbJetEta = 0;
+  m_subleadingLRHbbJetPhi = 0;
+  m_subleadingLRHbbJetE = 0;
+  m_subleadingLRHbbJetM = 0;
+  m_hadElLRHbbJetPt = 0;
+  m_hadElLRHbbJetEta = 0;
+  m_hadElLRHbbJetPhi = 0;
+  m_hadElLRHbbJetE = 0;
+  m_hadElLRHbbJetM = 0;
+  m_hadMuLRHbbJetPt = 0;
+  m_hadMuLRHbbJetEta = 0;
+  m_hadMuLRHbbJetPhi = 0;
+  m_hadMuLRHbbJetE = 0;
+  m_hadMuLRHbbJetM = 0;
+
 
   const xAOD::TruthParticle* truth_tau_higgs = nullptr;
   const xAOD::TruthParticle* truth_b_higgs = nullptr;
@@ -2009,7 +2093,82 @@ StatusCode DiTauAnalysis :: execute ()
       m_subleadingLRJetE = largerjet_e;
       m_subleadingLRJetM = largerjet_m;
     }
+
   }
+
+  const xAOD::Jet* leading_hbb_largerjet;
+  const xAOD::Jet* subleading_hbb_largerjet;
+  if (m_isDAOD) {
+    for (auto largerjet_hbb: *largerjets_hbb) {
+      std::cout << "An Hbb large-R jet" << std::endl;
+
+      m_nLargeRHbbJets++;
+      float largerjet_hbb_pt = largerjet_hbb->pt() / 1000.;
+      float largerjet_hbb_eta = largerjet_hbb->eta();
+      float largerjet_hbb_phi = largerjet_hbb->phi();
+      float largerjet_hbb_e = largerjet_hbb->e() / 1000.;
+      float largerjet_hbb_m = largerjet_hbb->m() / 1000.;
+      m_lRHbbJetPt->push_back(largerjet_hbb_pt);
+      m_lRHbbJetEta->push_back(largerjet_hbb_eta);
+      m_lRHbbJetPhi->push_back(largerjet_hbb_phi);
+      m_lRHbbJetE->push_back(largerjet_hbb_e);
+      m_lRHbbJetM->push_back(largerjet_hbb_m);
+
+      // Fill leading and subleading values
+      if (largerjet_hbb_pt >= m_leadingLRHbbJetPt) {
+        // Leading jet bumped down to subleading
+        subleading_hbb_largerjet = leading_hbb_largerjet;
+        m_subleadingLRHbbJetPt = m_leadingLRHbbJetPt;
+        m_subleadingLRHbbJetEta = m_leadingLRHbbJetEta;
+        m_subleadingLRHbbJetPhi = m_leadingLRHbbJetPhi;
+        m_subleadingLRHbbJetE = m_leadingLRHbbJetE;
+        m_subleadingLRHbbJetM = m_leadingLRHbbJetM;
+        // New jet moved to leading
+        leading_hbb_largerjet = largerjet_hbb;
+        m_leadingLRHbbJetPt = largerjet_hbb_pt;
+        m_leadingLRHbbJetEta = largerjet_hbb_eta;
+        m_leadingLRHbbJetPhi = largerjet_hbb_phi;
+        m_leadingLRHbbJetE = largerjet_hbb_e;
+        m_leadingLRHbbJetM = largerjet_hbb_m;
+      }
+      else if (largerjet_hbb_pt >= m_subleadingLRHbbJetPt) {
+        subleading_hbb_largerjet = largerjet_hbb;
+        m_subleadingLRHbbJetPt = largerjet_hbb_pt;
+        m_subleadingLRHbbJetEta = largerjet_hbb_eta;
+        m_subleadingLRHbbJetPhi = largerjet_hbb_phi;
+        m_subleadingLRHbbJetE = largerjet_hbb_e;
+        m_subleadingLRHbbJetM = largerjet_hbb_m;
+      }
+
+
+      // Hbb calculations
+      m_hbbTagTool->decorate(*largerjet_hbb);
+      float p_higgs = largerjet_hbb->auxdecor<float>("Xbb202006_Higgs");
+      float p_qcd = largerjet_hbb->auxdecor<float>("Xbb202006_QCD");
+      float p_top = largerjet_hbb->auxdecor<float>("Xbb202006_Top");
+      m_lRHbbJetpHiggs->push_back(p_higgs);
+      m_lRHbbJetpQCD->push_back(p_qcd); 
+      m_lRHbbJetpTop->push_back(p_top); 
+      float anti_topness = 0.25;
+      float discriminant = log(p_higgs / ((1 - anti_topness) * p_qcd + anti_topness * p_top));
+      m_lRHbbJetDiscriminant->push_back(discriminant);
+
+      std::cout << "Before has_b_higgs" << std::endl;
+      if (has_b_higgs) {
+        std::cout << "In has_b_higgs" << std::endl;
+        TLorentzVector jet_p4 = largerjet_hbb->p4();
+        TLorentzVector truth_b_p4 = truth_b->p4();
+        TLorentzVector truth_antib_p4 = truth_anti_b->p4();
+        float jet_b_dr = truth_b_p4.DeltaR(jet_p4);
+        float jet_antib_dr = truth_antib_p4.DeltaR(jet_p4); 
+        float jet_bs_dr = sqrt(pow(jet_b_dr, 2) + pow(jet_antib_dr, 2));
+        m_lRHbbJetTruthdR->push_back(jet_bs_dr); 
+      }
+      std::cout << "After has_b_higgs" << std::endl;
+    }
+  }
+
+  std::cout << "Done with Hbb large-R jets" << std::endl;
 
   // Fill topological values of two leading large-R jets
   if (m_nLargeRJets > 1) {
@@ -2146,7 +2305,6 @@ StatusCode DiTauAnalysis :: execute ()
   }
 
   // Define the chosen tau, electron, and muon to make up ditau system. First electron then muon.
-  // Note: Chosen tau will be overwritten but events with loose electron AND tight muon are not placed in either channel
   TLorentzVector chosen_hadel_tau_p4;
   TLorentzVector chosen_hadmu_tau_p4;
   TLorentzVector chosen_electron_p4;
@@ -2324,6 +2482,67 @@ StatusCode DiTauAnalysis :: execute ()
     m_hadMuChosenTauMuE = chosen_hadmu_system_p4.E() / 1000.; 
     m_hadMuChosenTauMuM = chosen_hadmu_system_p4.M() / 1000.; 
     m_hadMuChosenTauMudR = chosen_hadmu_tau_p4.DeltaR(chosen_muon_p4);
+  }
+
+  if (m_isDAOD) {
+    // Fill offlep Hbb jet ie of the leading and subleading, the furthest from chosen lepton
+    
+    // If only one jet then just use the leading
+    if (m_nLargeRHbbJets > 1) {
+      TLorentzVector leading_hbbjet_p4 = leading_hbb_largerjet->p4();
+      TLorentzVector subleading_hbbjet_p4 = subleading_hbb_largerjet->p4();
+    
+      // Electrons
+      float leading_hbbjet_ele_dr = leading_hbbjet_p4.DeltaR(chosen_electron_p4);
+      float subleading_hbbjet_ele_dr = subleading_hbbjet_p4.DeltaR(chosen_electron_p4);
+      if (leading_hbbjet_ele_dr >= subleading_hbbjet_ele_dr) {
+        m_hadElLRHbbJetPt = m_leadingLRHbbJetPt;
+        m_hadElLRHbbJetEta = m_leadingLRHbbJetEta;
+        m_hadElLRHbbJetPhi = m_leadingLRHbbJetPhi;
+        m_hadElLRHbbJetE = m_leadingLRHbbJetE;
+        m_hadElLRHbbJetM = m_leadingLRHbbJetM;
+      }
+      else {
+        m_hadElLRHbbJetPt = m_subleadingLRHbbJetPt;
+        m_hadElLRHbbJetEta = m_subleadingLRHbbJetEta;
+        m_hadElLRHbbJetPhi = m_subleadingLRHbbJetPhi;
+        m_hadElLRHbbJetE = m_subleadingLRHbbJetE;
+        m_hadElLRHbbJetM = m_subleadingLRHbbJetM;
+      }
+
+      // Muons
+      float leading_hbbjet_mu_dr = leading_hbbjet_p4.DeltaR(chosen_muon_p4);
+      float subleading_hbbjet_mu_dr = subleading_hbbjet_p4.DeltaR(chosen_muon_p4);
+      if (leading_hbbjet_mu_dr >= subleading_hbbjet_mu_dr) {
+        m_hadMuLRHbbJetPt = m_leadingLRHbbJetPt;
+        m_hadMuLRHbbJetEta = m_leadingLRHbbJetEta;
+        m_hadMuLRHbbJetPhi = m_leadingLRHbbJetPhi;
+        m_hadMuLRHbbJetE = m_leadingLRHbbJetE;
+        m_hadMuLRHbbJetM = m_leadingLRHbbJetM;
+      }
+      else {
+        m_hadMuLRHbbJetPt = m_subleadingLRHbbJetPt;
+        m_hadMuLRHbbJetEta = m_subleadingLRHbbJetEta;
+        m_hadMuLRHbbJetPhi = m_subleadingLRHbbJetPhi;
+        m_hadMuLRHbbJetE = m_subleadingLRHbbJetE;
+        m_hadMuLRHbbJetM = m_subleadingLRHbbJetM;
+      }
+    }
+    else if (m_nLargeRHbbJets == 1) {
+      TLorentzVector leading_hbbjet_p4 = leading_hbb_largerjet->p4();
+
+      m_hadElLRHbbJetPt = m_leadingLRHbbJetPt;
+      m_hadElLRHbbJetEta = m_leadingLRHbbJetEta;
+      m_hadElLRHbbJetPhi = m_leadingLRHbbJetPhi;
+      m_hadElLRHbbJetE = m_leadingLRHbbJetE;
+      m_hadElLRHbbJetM = m_leadingLRHbbJetM;
+
+      m_hadMuLRHbbJetPt = m_leadingLRHbbJetPt;
+      m_hadMuLRHbbJetEta = m_leadingLRHbbJetEta;
+      m_hadMuLRHbbJetPhi = m_leadingLRHbbJetPhi;
+      m_hadMuLRHbbJetE = m_leadingLRHbbJetE;
+      m_hadMuLRHbbJetM = m_leadingLRHbbJetM;
+    }
   }
 
   // Missing Mass Calculator
