@@ -89,6 +89,7 @@ DiTauAnalysis :: ~DiTauAnalysis () {
   delete m_hadElTauEta;
   delete m_hadElTauPhi;
   delete m_hadElTauE;
+  delete m_hadElTauTruthdR;
   delete m_hadElElectronPt;
   delete m_hadElElectronEta;
   delete m_hadElElectronPhi;
@@ -106,6 +107,7 @@ DiTauAnalysis :: ~DiTauAnalysis () {
   delete m_hadMuTauEta;
   delete m_hadMuTauPhi;
   delete m_hadMuTauE;
+  delete m_hadMuTauTruthdR;
   delete m_hadMuMuonPt;
   delete m_hadMuMuonEta;
   delete m_hadMuMuonPhi;
@@ -116,7 +118,8 @@ DiTauAnalysis :: ~DiTauAnalysis () {
   delete m_tauEta;
   delete m_tauPhi;
   delete m_tauE;
-  //delete m_tauP4;
+  delete m_tauTruthdR;
+  delete m_tauID;
   delete m_tauTightPt;
   delete m_tauTightEta;
   delete m_tauTightPhi;
@@ -138,6 +141,8 @@ DiTauAnalysis :: ~DiTauAnalysis () {
   delete m_muEta;
   delete m_muPhi;
   delete m_muE;
+  delete m_muTruthdR;
+  delete m_muID;
   delete m_muTightPt;
   delete m_muTightEta;
   delete m_muTightPhi;
@@ -155,6 +160,8 @@ DiTauAnalysis :: ~DiTauAnalysis () {
   delete m_eleEta;
   delete m_elePhi;
   delete m_eleE;
+  delete m_eleTruthdR;
+  delete m_eleID;
   delete m_eleTightPt;
   delete m_eleTightEta;
   delete m_eleTightPhi;
@@ -271,6 +278,7 @@ StatusCode DiTauAnalysis :: initialize ()
   m_mytree->Branch("HadElDiTauFlatBDTScore", &m_hadElDiTauFlatBDTScore);
   m_hadElDiTauTruthMatchType = new std::vector<unsigned int>();
   m_mytree->Branch("HadElDiTauTruthMatchType", &m_hadElDiTauTruthMatchType);
+
   m_mytree->Branch("NHadElTau", &m_nHadElTaus);
   m_hadElTauPt = new std::vector<float>();
   m_mytree->Branch("HadElTauPt", &m_hadElTauPt);
@@ -280,6 +288,9 @@ StatusCode DiTauAnalysis :: initialize ()
   m_mytree->Branch("HadElTauPhi", &m_hadElTauPhi);
   m_hadElTauE = new std::vector<float>();
   m_mytree->Branch("HadElTauE", &m_hadElTauE);
+  m_hadElTauTruthdR = new std::vector<float>();
+  m_mytree->Branch("HadElTauTruthdR", &m_hadElTauTruthdR);
+  
   m_mytree->Branch("NHadElElectron", &m_nHadElElectrons);
   m_hadElElectronPt = new std::vector<float>();
   m_mytree->Branch("HadElElectronPt", &m_hadElElectronPt);
@@ -309,6 +320,7 @@ StatusCode DiTauAnalysis :: initialize ()
   m_mytree->Branch("HadMuDiTauFlatBDTScore", &m_hadMuDiTauFlatBDTScore);
   m_hadMuDiTauTruthMatchType = new std::vector<unsigned int>();
   m_mytree->Branch("HadMuDiTauTruthMatchType", &m_hadMuDiTauTruthMatchType);
+
   m_mytree->Branch("NHadMuTau", &m_nHadMuTaus);
   m_hadMuTauPt = new std::vector<float>();
   m_mytree->Branch("HadMuTauPt", &m_hadMuTauPt);
@@ -318,6 +330,9 @@ StatusCode DiTauAnalysis :: initialize ()
   m_mytree->Branch("HadMuTauPhi", &m_hadMuTauPhi);
   m_hadMuTauE = new std::vector<float>();
   m_mytree->Branch("HadMuTauE", &m_hadMuTauE);
+  m_hadMuTauTruthdR = new std::vector<float>();
+  m_mytree->Branch("HadMuTauTruthdR", &m_hadMuTauTruthdR);
+
   m_mytree->Branch("NHadMuMuon", &m_nHadMuMuons);
   m_hadMuMuonPt = new std::vector<float>();
   m_mytree->Branch("HadMuMuonPt", &m_hadMuMuonPt);
@@ -344,7 +359,8 @@ StatusCode DiTauAnalysis :: initialize ()
   m_mytree->Branch("LeadingTauEta", &m_leadingTauEta);
   m_mytree->Branch("LeadingTauPhi", &m_leadingTauPhi);
   m_mytree->Branch("LeadingTauE", &m_leadingTauE);
-
+  m_mytree->Branch("TauTruthdR", &m_tauTruthdR);
+  m_mytree->Branch("TauID", &m_tauID);
   m_mytree->Branch("TauRecoTruthMindR", &m_tauRecoTruthMindR);
 
   // Very Loose taus
@@ -421,7 +437,8 @@ StatusCode DiTauAnalysis :: initialize ()
   m_mytree->Branch("LeadingMuEta", &m_leadingMuEta);
   m_mytree->Branch("LeadingMuPhi", &m_leadingMuPhi);
   m_mytree->Branch("LeadingMuE", &m_leadingMuE);
-
+  m_mytree->Branch("MuTruthdR", &m_muTruthdR);
+  m_mytree->Branch("MuID", &m_muID);
   m_mytree->Branch("MuRecoTruthMindR", &m_muRecoTruthMindR);
 
   // Loose muons
@@ -483,7 +500,8 @@ StatusCode DiTauAnalysis :: initialize ()
   m_mytree->Branch("LeadingEleEta", &m_leadingEleEta);
   m_mytree->Branch("LeadingElePhi", &m_leadingElePhi);
   m_mytree->Branch("LeadingEleE", &m_leadingEleE);
-
+  m_mytree->Branch("EleTruthdR", &m_eleTruthdR);
+  m_mytree->Branch("EleID", &m_eleID);
   m_mytree->Branch("EleRecoTruthMindR", &m_eleRecoTruthMindR);
 
   // VeryLoose electrons
@@ -565,10 +583,15 @@ StatusCode DiTauAnalysis :: initialize ()
   m_mytree->Branch("HadElChosenTauEta", &m_hadElChosenTauEta);
   m_mytree->Branch("HadElChosenTauPhi", &m_hadElChosenTauPhi);
   m_mytree->Branch("HadElChosenTauE", &m_hadElChosenTauE);
+  m_mytree->Branch("HadElChosenTauM", &m_hadElChosenTauM);
+  m_mytree->Branch("HadElChosenTauTruthdR", &m_hadElChosenTauTruthdR);
   m_mytree->Branch("HadElChosenElePt", &m_hadElChosenElePt);
   m_mytree->Branch("HadElChosenEleEta", &m_hadElChosenEleEta);
   m_mytree->Branch("HadElChosenElePhi", &m_hadElChosenElePhi);
   m_mytree->Branch("HadElChosenEleE", &m_hadElChosenEleE);
+  m_mytree->Branch("HadElChosenEleM", &m_hadElChosenEleM);
+  m_mytree->Branch("HadElChosenEleID", &m_hadElChosenEleID);
+  m_mytree->Branch("HadElChosenEleTruthdR", &m_hadElChosenEleTruthdR);
   m_mytree->Branch("HadElChosenTauElePt", &m_hadElChosenTauElePt);
   m_mytree->Branch("HadElChosenTauEleEta", &m_hadElChosenTauEleEta);
   m_mytree->Branch("HadElChosenTauElePhi", &m_hadElChosenTauElePhi);
@@ -595,10 +618,15 @@ StatusCode DiTauAnalysis :: initialize ()
   m_mytree->Branch("HadMuChosenTauEta", &m_hadMuChosenTauEta);
   m_mytree->Branch("HadMuChosenTauPhi", &m_hadMuChosenTauPhi);
   m_mytree->Branch("HadMuChosenTauE", &m_hadMuChosenTauE);
+  m_mytree->Branch("HadMuChosenTauM", &m_hadMuChosenTauM);
+  m_mytree->Branch("HadMuChosenTauTruthdR", &m_hadMuChosenTauTruthdR);
   m_mytree->Branch("HadMuChosenMuPt", &m_hadMuChosenMuPt);
   m_mytree->Branch("HadMuChosenMuEta", &m_hadMuChosenMuEta);
   m_mytree->Branch("HadMuChosenMuPhi", &m_hadMuChosenMuPhi);
   m_mytree->Branch("HadMuChosenMuE", &m_hadMuChosenMuE);
+  m_mytree->Branch("HadMuChosenMuM", &m_hadMuChosenMuM);
+  m_mytree->Branch("HadMuChosenMuID", &m_hadMuChosenMuID);
+  m_mytree->Branch("HadMuChosenMuTruthdR", &m_hadMuChosenMuTruthdR);
   m_mytree->Branch("HadMuChosenTauMuPt", &m_hadMuChosenTauMuPt);
   m_mytree->Branch("HadMuChosenTauMuEta", &m_hadMuChosenTauMuEta);
   m_mytree->Branch("HadMuChosenTauMuPhi", &m_hadMuChosenTauMuPhi);
@@ -737,11 +765,13 @@ StatusCode DiTauAnalysis :: initialize ()
   m_mytree->Branch("HadElLargeRHbbJetPhi", &m_hadElLRHbbJetPhi);
   m_mytree->Branch("HadElLargeRHbbJetE", &m_hadElLRHbbJetE);
   m_mytree->Branch("HadElLargeRHbbJetM", &m_hadElLRHbbJetM);
+  m_mytree->Branch("HadElLargeRHbbJetTruthdR", &m_hadElLRHbbJetTruthdR);
   m_mytree->Branch("HadMuLargeRHbbJetPt", &m_hadMuLRHbbJetPt);
   m_mytree->Branch("HadMuLargeRHbbJetEta", &m_hadMuLRHbbJetEta);
   m_mytree->Branch("HadMuLargeRHbbJetPhi", &m_hadMuLRHbbJetPhi);
   m_mytree->Branch("HadMuLargeRHbbJetE", &m_hadMuLRHbbJetE);
   m_mytree->Branch("HadMuLargeRHbbJetM", &m_hadMuLRHbbJetM);
+  m_mytree->Branch("HadMuLargeRHbbJetTruthdR", &m_hadMuLRHbbJetTruthdR);
 
 
   // Builders
@@ -927,6 +957,7 @@ StatusCode DiTauAnalysis :: execute ()
   m_hadElTauEta->clear();
   m_hadElTauPhi->clear();
   m_hadElTauE->clear();
+  m_hadElTauTruthdR->clear();
   m_nHadElElectrons = 0;
   m_hadElElectronPt->clear();
   m_hadElElectronEta->clear();
@@ -949,6 +980,7 @@ StatusCode DiTauAnalysis :: execute ()
   m_hadMuTauEta->clear();
   m_hadMuTauPhi->clear();
   m_hadMuTauE->clear();
+  m_hadMuTauTruthdR->clear();
   m_nHadMuMuons = 0;
   m_hadMuMuonPt->clear();
   m_hadMuMuonEta->clear();
@@ -962,11 +994,12 @@ StatusCode DiTauAnalysis :: execute ()
   m_tauEta->clear();
   m_tauPhi->clear();
   m_tauE->clear();
-  //m_tauP4->clear();
   m_leadingTauPt = 0;
   m_leadingTauEta = 0;
   m_leadingTauPhi = 0;
   m_leadingTauE = 0;
+  m_tauTruthdR->clear();
+  m_tauID->clear();
 
   // Very Loose taus
   m_nTausVeryLoose = 0;
@@ -1022,6 +1055,8 @@ StatusCode DiTauAnalysis :: execute ()
   m_leadingMuEta = 0;
   m_leadingMuPhi = 0;
   m_leadingMuE = 0;
+  m_muTruthdR->clear();
+  m_muID->clear();
 
   // Loose muons
   m_nMuonsLoose = 0;
@@ -1066,6 +1101,8 @@ StatusCode DiTauAnalysis :: execute ()
   m_leadingEleEta = 0;
   m_leadingElePhi = 0;
   m_leadingEleE = 0;
+  m_eleTruthdR->clear();
+  m_eleID->clear();
 
   // Very Loose electrons
   m_nElectronsVeryLoose = 0;
@@ -1124,10 +1161,15 @@ StatusCode DiTauAnalysis :: execute ()
   m_hadElChosenTauEta = 0;
   m_hadElChosenTauPhi = 0;
   m_hadElChosenTauE = 0;
+  m_hadElChosenTauM = 0;
+  m_hadElChosenTauTruthdR = 0;
   m_hadElChosenElePt = 0;
   m_hadElChosenEleEta = 0;
   m_hadElChosenElePhi = 0;
   m_hadElChosenEleE = 0;
+  m_hadElChosenEleM = 0;
+  m_hadElChosenEleID = 0;
+  m_hadElChosenEleTruthdR = 0;
   m_hadElChosenTauElePt = 0;
   m_hadElChosenTauEleEta = 0;
   m_hadElChosenTauElePhi = 0;
@@ -1148,10 +1190,15 @@ StatusCode DiTauAnalysis :: execute ()
   m_hadMuChosenTauEta = 0;
   m_hadMuChosenTauPhi = 0;
   m_hadMuChosenTauE = 0;
+  m_hadMuChosenTauM = 0;
+  m_hadMuChosenTauTruthdR = 0;
   m_hadMuChosenMuPt = 0;
   m_hadMuChosenMuEta = 0;
   m_hadMuChosenMuPhi = 0;
   m_hadMuChosenMuE = 0;
+  m_hadMuChosenMuM = 0;
+  m_hadMuChosenMuID = 0;
+  m_hadMuChosenMuTruthdR = 0;
   m_hadMuChosenTauMuPt = 0;
   m_hadMuChosenTauMuEta = 0;
   m_hadMuChosenTauMuPhi = 0;
@@ -1266,11 +1313,13 @@ StatusCode DiTauAnalysis :: execute ()
   m_hadElLRHbbJetPhi = 0;
   m_hadElLRHbbJetE = 0;
   m_hadElLRHbbJetM = 0;
+  m_hadElLRHbbJetTruthdR = 0;
   m_hadMuLRHbbJetPt = 0;
   m_hadMuLRHbbJetEta = 0;
   m_hadMuLRHbbJetPhi = 0;
   m_hadMuLRHbbJetE = 0;
   m_hadMuLRHbbJetM = 0;
+  m_hadMuLRHbbJetTruthdR = 0;
 
 
   const xAOD::TruthParticle* truth_tau_higgs = nullptr;
@@ -1377,6 +1426,7 @@ StatusCode DiTauAnalysis :: execute ()
 
   TLorentzVector truth_final_lepton_p4;
   TLorentzVector truth_hadronic_tau_p4;
+  TLorentzVector truth_b_higgs_p4;
 
   bool do_truth = 0;
   if (m_isSignal && has_tau_higgs && has_b_higgs && has_hadronic_tau && has_leptonic_tau && has_final_lepton) {
@@ -1394,6 +1444,7 @@ StatusCode DiTauAnalysis :: execute ()
   {
     truth_final_lepton_p4 = truth_final_lepton->p4();
     truth_hadronic_tau_p4 = truth_hadronic_tau->p4();
+    truth_b_higgs_p4 = truth_b_higgs->p4();
   
     int final_lepton_id = truth_final_lepton->pdgId();
     // Values match up with other TruthMatch variable
@@ -1525,10 +1576,20 @@ StatusCode DiTauAnalysis :: execute ()
     static const SG::AuxElement::Accessor<float> acc_tau_E ("tau_E");
 
     m_nHadElTaus++;
-    m_hadElTauPt->push_back(acc_tau_pt(*hadelditau) / 1000.);
-    m_hadElTauEta->push_back(acc_tau_eta(*hadelditau));
-    m_hadElTauPhi->push_back(acc_tau_phi(*hadelditau));
-    m_hadElTauE->push_back(acc_tau_E(*hadelditau) / 1000.);
+    float hadel_tau_pt = acc_tau_pt(*hadelditau) / 1000.;
+    float hadel_tau_eta = acc_tau_eta(*hadelditau);
+    float hadel_tau_phi = acc_tau_phi(*hadelditau);
+    float hadel_tau_e = acc_tau_E(*hadelditau) / 1000.;
+    m_hadElTauPt->push_back(hadel_tau_pt);
+    m_hadElTauEta->push_back(hadel_tau_eta);
+    m_hadElTauPhi->push_back(hadel_tau_phi);
+    m_hadElTauE->push_back(hadel_tau_e);
+    TLorentzVector hadel_tau_p4;
+    hadel_tau_p4.SetPtEtaPhiE(hadel_tau_pt, hadel_tau_eta, hadel_tau_phi, hadel_tau_e);
+    if (do_truth && has_visible) {
+      float hadel_tau_truth_dr = hadel_tau_p4.DeltaR(vis_had_tau_p4);
+      m_hadElTauTruthdR->push_back(hadel_tau_truth_dr);
+    }
 
     static const SG::AuxElement::Accessor<float> acc_el_pt ("electron_pt");
     static const SG::AuxElement::Accessor<float> acc_el_eta ("electron_eta");
@@ -1615,10 +1676,20 @@ StatusCode DiTauAnalysis :: execute ()
     static const SG::AuxElement::Accessor<float> acc_tau_E ("tau_E");
 
     m_nHadMuTaus++;
-    m_hadMuTauPt->push_back(acc_tau_pt(*hadmuditau) / 1000.);
-    m_hadMuTauEta->push_back(acc_tau_eta(*hadmuditau));
-    m_hadMuTauPhi->push_back(acc_tau_phi(*hadmuditau));
-    m_hadMuTauE->push_back(acc_tau_E(*hadmuditau) / 1000.);
+    float hadmu_tau_pt = acc_tau_pt(*hadmuditau) / 1000.;
+    float hadmu_tau_eta = acc_tau_eta(*hadmuditau);
+    float hadmu_tau_phi = acc_tau_phi(*hadmuditau);
+    float hadmu_tau_e = acc_tau_E(*hadmuditau) / 1000.;
+    m_hadMuTauPt->push_back(hadmu_tau_pt);
+    m_hadMuTauEta->push_back(hadmu_tau_eta);
+    m_hadMuTauPhi->push_back(hadmu_tau_phi);
+    m_hadMuTauE->push_back(hadmu_tau_e);
+    TLorentzVector hadmu_tau_p4;
+    hadmu_tau_p4.SetPtEtaPhiE(hadmu_tau_pt, hadmu_tau_eta, hadmu_tau_phi, hadmu_tau_e);
+    if (do_truth && has_visible) {
+      float hadmu_tau_truth_dr = hadmu_tau_p4.DeltaR(vis_had_tau_p4);
+      m_hadMuTauTruthdR->push_back(hadmu_tau_truth_dr);
+    }
 
     static const SG::AuxElement::Accessor<float> acc_el_pt ("muon_pt");
     static const SG::AuxElement::Accessor<float> acc_el_eta ("muon_eta");
@@ -1687,12 +1758,11 @@ StatusCode DiTauAnalysis :: execute ()
     TLorentzVector tau_p4 = tau->p4();
 
     // Calculate dR of closest reco tau to truth
-    if (do_truth) {
-      if (has_visible) {
-        float truth_dr = tau_p4.DeltaR(vis_had_tau_p4);
-        if (min_tau_truth_dr == -1 || truth_dr < min_tau_truth_dr) {
-          min_tau_truth_dr = truth_dr;
-        }
+    if (do_truth && has_visible) {
+      float truth_dr = tau_p4.DeltaR(vis_had_tau_p4);
+      m_tauTruthdR->push_back(truth_dr);
+      if (min_tau_truth_dr == -1 || truth_dr < min_tau_truth_dr) {
+        min_tau_truth_dr = truth_dr;
       }
     }
 
@@ -1709,9 +1779,12 @@ StatusCode DiTauAnalysis :: execute ()
       m_leadingTauPhi = tau_phi;
       m_leadingTauE = tau_e;
     }
+    // Variable holding tau ID (0=None, 1=VLoose, 2=Loose, 3=Med, 4=Tight)
+    unsigned int tau_id = 0;
     // Very Loose taus
     if (tau->isTau(xAOD::TauJetParameters::IsTauFlag::JetBDTSigVeryLoose)) {
       m_nTausVeryLoose++;
+      tau_id = 1;
       m_tauVeryLoosePt->push_back(tau_pt);
       m_tauVeryLooseEta->push_back(tau_eta);
       m_tauVeryLoosePhi->push_back(tau_phi);
@@ -1727,6 +1800,7 @@ StatusCode DiTauAnalysis :: execute ()
     // Loose taus
     if (tau->isTau(xAOD::TauJetParameters::IsTauFlag::JetBDTSigLoose)) {
       m_nTausLoose++;
+      tau_id = 2;
       m_tauLoosePt->push_back(tau_pt);
       m_tauLooseEta->push_back(tau_eta);
       m_tauLoosePhi->push_back(tau_phi);
@@ -1742,6 +1816,7 @@ StatusCode DiTauAnalysis :: execute ()
     // Medium taus
     if (tau->isTau(xAOD::TauJetParameters::IsTauFlag::JetBDTSigMedium)) {
       m_nTausMedium++;
+      tau_id = 3;
       m_tauMediumPt->push_back(tau_pt);
       m_tauMediumEta->push_back(tau_eta);
       m_tauMediumPhi->push_back(tau_phi);
@@ -1757,6 +1832,7 @@ StatusCode DiTauAnalysis :: execute ()
     // Tight taus
     if (tau->isTau(xAOD::TauJetParameters::IsTauFlag::JetBDTSigTight)) {
       m_nTausTight++;
+      tau_id = 4;
       m_tauTightPt->push_back(tau_pt);
       m_tauTightEta->push_back(tau_eta);
       m_tauTightPhi->push_back(tau_phi);
@@ -1769,6 +1845,7 @@ StatusCode DiTauAnalysis :: execute ()
         m_leadingTauTightE = tau_e;
       }
     }
+    m_tauID->push_back(tau_id);
   }
 
   m_tauRecoTruthMindR = min_tau_truth_dr;
@@ -1786,6 +1863,7 @@ StatusCode DiTauAnalysis :: execute ()
     if (do_truth) {
       TLorentzVector muon_p4 = muon->p4();
       float truth_dr = muon_p4.DeltaR(truth_final_lepton_p4);
+      m_muTruthdR->push_back(truth_dr);
       if (min_mu_truth_dr == -1 || truth_dr < min_mu_truth_dr) {
         min_mu_truth_dr = truth_dr;
       }
@@ -1808,6 +1886,7 @@ StatusCode DiTauAnalysis :: execute ()
     }
     // Muon quality 0=Tight 1=Medium 2=Loose 3=VeryLoose(all)
     unsigned int muQuality = muon->quality();
+    m_muID->push_back(muQuality);
     // Tight muon, fill for all WPs
     if (muQuality == 0) {
       // Loose muon
@@ -1912,6 +1991,7 @@ StatusCode DiTauAnalysis :: execute ()
     if (do_truth) {
       TLorentzVector electron_p4 = electron->p4();
       float truth_dr = electron_p4.DeltaR(truth_final_lepton_p4);
+      m_eleTruthdR->push_back(truth_dr);
       if (min_ele_truth_dr == -1 || truth_dr < min_ele_truth_dr) {
         min_ele_truth_dr = truth_dr;
       }
@@ -1932,8 +2012,11 @@ StatusCode DiTauAnalysis :: execute ()
       m_leadingElePhi = electron_phi;
       m_leadingEleE = electron_e;
     }
+    // Variable holding electron ID (0=None, 1=VLoose, 2=Loose, 3=Med, 4=Tight)
+    unsigned int ele_id = 0;
     if (static_cast<int>(m_checkEleVeryLooseLH->accept(electron))) {
       m_nElectronsVeryLoose++;
+      ele_id = 1;
       m_eleVeryLoosePt->push_back(electron_pt);
       m_eleVeryLooseEta->push_back(electron_eta);
       m_eleVeryLoosePhi->push_back(electron_phi);
@@ -1948,6 +2031,7 @@ StatusCode DiTauAnalysis :: execute ()
     }
     if (static_cast<int>(m_checkEleLooseLH->accept(electron))) {
       m_nElectronsLoose++;
+      ele_id = 2;
       loose_electrons.push_back(electron);
       m_eleLoosePt->push_back(electron_pt);
       m_eleLooseEta->push_back(electron_eta);
@@ -1963,6 +2047,7 @@ StatusCode DiTauAnalysis :: execute ()
     }
     if (static_cast<int>(m_checkEleMediumLH->accept(electron))) {
       m_nElectronsMedium++;
+      ele_id = 3;
       m_eleMediumPt->push_back(electron_pt);
       m_eleMediumEta->push_back(electron_eta);
       m_eleMediumPhi->push_back(electron_phi);
@@ -1977,6 +2062,7 @@ StatusCode DiTauAnalysis :: execute ()
     }
     if (static_cast<int>(m_checkEleTightLH->accept(electron))) {
       m_nElectronsTight++;
+      ele_id = 4;
       m_eleTightPt->push_back(electron_pt);
       m_eleTightEta->push_back(electron_eta);
       m_eleTightPhi->push_back(electron_phi);
@@ -1989,6 +2075,7 @@ StatusCode DiTauAnalysis :: execute ()
         m_leadingEleTightE = electron_e;
       }
     }
+    m_eleID->push_back(ele_id);
   }
 
   m_eleRecoTruthMindR = min_ele_truth_dr;
@@ -2100,8 +2187,6 @@ StatusCode DiTauAnalysis :: execute ()
   const xAOD::Jet* subleading_hbb_largerjet;
   if (m_isDAOD) {
     for (auto largerjet_hbb: *largerjets_hbb) {
-      std::cout << "An Hbb large-R jet" << std::endl;
-
       m_nLargeRHbbJets++;
       float largerjet_hbb_pt = largerjet_hbb->pt() / 1000.;
       float largerjet_hbb_eta = largerjet_hbb->eta();
@@ -2153,22 +2238,14 @@ StatusCode DiTauAnalysis :: execute ()
       float discriminant = log(p_higgs / ((1 - anti_topness) * p_qcd + anti_topness * p_top));
       m_lRHbbJetDiscriminant->push_back(discriminant);
 
-      std::cout << "Before has_b_higgs" << std::endl;
       if (has_b_higgs) {
-        std::cout << "In has_b_higgs" << std::endl;
         TLorentzVector jet_p4 = largerjet_hbb->p4();
-        TLorentzVector truth_b_p4 = truth_b->p4();
-        TLorentzVector truth_antib_p4 = truth_anti_b->p4();
-        float jet_b_dr = truth_b_p4.DeltaR(jet_p4);
-        float jet_antib_dr = truth_antib_p4.DeltaR(jet_p4); 
-        float jet_bs_dr = sqrt(pow(jet_b_dr, 2) + pow(jet_antib_dr, 2));
-        m_lRHbbJetTruthdR->push_back(jet_bs_dr); 
+        TLorentzVector truth_higgs_p4 = truth_b_higgs->p4();
+        float jet_higgs_dr = jet_p4.DeltaR(truth_higgs_p4);
+        m_lRHbbJetTruthdR->push_back(jet_higgs_dr); 
       }
-      std::cout << "After has_b_higgs" << std::endl;
     }
   }
-
-  std::cout << "Done with Hbb large-R jets" << std::endl;
 
   // Fill topological values of two leading large-R jets
   if (m_nLargeRJets > 1) {
@@ -2307,7 +2384,9 @@ StatusCode DiTauAnalysis :: execute ()
   // Define the chosen tau, electron, and muon to make up ditau system. First electron then muon.
   TLorentzVector chosen_hadel_tau_p4;
   TLorentzVector chosen_hadmu_tau_p4;
+  unsigned int chosen_electron_id;
   TLorentzVector chosen_electron_p4;
+  unsigned int chosen_muon_id;
   TLorentzVector chosen_muon_p4;
   bool set_electron = 0;
   bool set_muon = 0;
@@ -2318,6 +2397,19 @@ StatusCode DiTauAnalysis :: execute ()
   if (m_nElectronsLoose > 0) {
     auto el = leading_loose_electron;
     chosen_electron_p4.SetPtEtaPhiE(el->pt(), el->eta(), el->phi(), el->e());
+    // Chosen electron ID (0=None, 1=VLoose, 2=Loose, 3=Med, 4=Tight)
+    if (static_cast<int>(m_checkEleVeryLooseLH->accept(el))) {
+      chosen_electron_id = 1;
+    }
+    if (static_cast<int>(m_checkEleLooseLH->accept(el))) {
+      chosen_electron_id = 2;
+    }
+    if (static_cast<int>(m_checkEleMediumLH->accept(el))) {
+      chosen_electron_id = 3;
+    }
+    if (static_cast<int>(m_checkEleTightLH->accept(el))) {
+      chosen_electron_id = 4;
+    }
     set_electron = 1;
   }
 
@@ -2365,7 +2457,19 @@ StatusCode DiTauAnalysis :: execute ()
       if (((dr < min_dr) || min_dr == 0) && (dr > 0.1) && (dr < 1.0)) {
         auto el = loose_electron;
         chosen_electron_p4.SetPtEtaPhiE(el->pt(), el->eta(), el->phi(), el->e());
-        set_electron = 1;
+        // Chosen electron ID (0=None, 1=VLoose, 2=Loose, 3=Med, 4=Tight)
+        if (static_cast<int>(m_checkEleVeryLooseLH->accept(el))) {
+          chosen_electron_id = 1;
+        }
+        if (static_cast<int>(m_checkEleLooseLH->accept(el))) {
+          chosen_electron_id = 2;
+        }
+        if (static_cast<int>(m_checkEleMediumLH->accept(el))) {
+          chosen_electron_id = 3;
+        }
+        if (static_cast<int>(m_checkEleTightLH->accept(el))) {
+          chosen_electron_id = 4;
+        }
         min_dr = dr;
       }
     } 
@@ -2413,6 +2517,7 @@ StatusCode DiTauAnalysis :: execute ()
   if (m_nMuonsTight > 0) {
     auto mu = leading_tight_muon;
     chosen_muon_p4.SetPtEtaPhiE(mu->pt(), mu->eta(), mu->phi(), mu->e());
+    chosen_muon_id = mu->quality();
     set_muon = 1;
   }
 
@@ -2435,12 +2540,31 @@ StatusCode DiTauAnalysis :: execute ()
       }
     }
   }    
+
+  // If no tau found then use closest to chosen muon
+  if (set_muon && !set_hadmu_tau && (m_nTaus > 0)) {
+    float min_dr = 0;
+    for (auto tau: *taus) {
+      TLorentzVector tau_p4 = tau->p4();
+      float dr = chosen_muon_p4.DeltaR(tau_p4);
+      if ((dr < min_dr) || (min_dr == 0)) {
+        chosen_hadmu_tau_p4.SetPtEtaPhiE(tau->pt(), tau->eta(), tau->phi(), tau->e());
+        set_hadmu_tau = 1;
+        min_dr = dr;
+      }
+    }
+  }
   
   if (set_hadel_tau) {
     m_hadElChosenTauPt = chosen_hadel_tau_p4.Pt() / 1000.; 
     m_hadElChosenTauEta = chosen_hadel_tau_p4.Eta(); 
     m_hadElChosenTauPhi = chosen_hadel_tau_p4.Phi(); 
     m_hadElChosenTauE = chosen_hadel_tau_p4.E() / 1000.; 
+    m_hadElChosenTauM = chosen_hadel_tau_p4.M() / 1000.; 
+    if (do_truth && has_visible) {
+      float dr = chosen_hadel_tau_p4.DeltaR(vis_had_tau_p4);
+      m_hadElChosenTauTruthdR = dr;
+    }
   }
 
   if (set_hadmu_tau) {
@@ -2448,6 +2572,11 @@ StatusCode DiTauAnalysis :: execute ()
     m_hadMuChosenTauEta = chosen_hadmu_tau_p4.Eta(); 
     m_hadMuChosenTauPhi = chosen_hadmu_tau_p4.Phi(); 
     m_hadMuChosenTauE = chosen_hadmu_tau_p4.E() / 1000.; 
+    m_hadMuChosenTauM = chosen_hadmu_tau_p4.M() / 1000.; 
+    if (do_truth && has_visible) {
+      float dr = chosen_hadmu_tau_p4.DeltaR(vis_had_tau_p4);
+      m_hadMuChosenTauTruthdR = dr;
+    }
   }
 
   if (set_electron) {
@@ -2455,6 +2584,12 @@ StatusCode DiTauAnalysis :: execute ()
     m_hadElChosenEleEta = chosen_electron_p4.Eta(); 
     m_hadElChosenElePhi = chosen_electron_p4.Phi(); 
     m_hadElChosenEleE = chosen_electron_p4.E() / 1000.; 
+    m_hadElChosenEleM = chosen_electron_p4.M() / 1000.; 
+    if (do_truth && has_final_lepton) {
+      float dr = chosen_electron_p4.DeltaR(truth_final_lepton_p4);
+      m_hadElChosenEleTruthdR = dr;
+    }
+    m_hadElChosenEleID = chosen_electron_id;
   }
 
   if (set_muon) {
@@ -2462,6 +2597,13 @@ StatusCode DiTauAnalysis :: execute ()
     m_hadMuChosenMuEta = chosen_muon_p4.Eta();
     m_hadMuChosenMuPhi = chosen_muon_p4.Phi();
     m_hadMuChosenMuE = chosen_muon_p4.E() / 1000;
+    m_hadMuChosenMuM = chosen_muon_p4.M() / 1000;
+    if (do_truth && has_final_lepton) {
+      float dr = chosen_muon_p4.DeltaR(truth_final_lepton_p4);
+      m_hadMuChosenMuTruthdR = dr;
+    }
+    // This is to change the athena ID (0=Tight ..) to 4=Tight so that 0 remains if no chosen muon found
+    m_hadMuChosenMuID = 4 - chosen_muon_id;
   }
 
   if (set_hadel_tau && set_electron) {
@@ -2491,6 +2633,8 @@ StatusCode DiTauAnalysis :: execute ()
     if (m_nLargeRHbbJets > 1) {
       TLorentzVector leading_hbbjet_p4 = leading_hbb_largerjet->p4();
       TLorentzVector subleading_hbbjet_p4 = subleading_hbb_largerjet->p4();
+      float leading_hbbjet_truth_dr = leading_hbbjet_p4.DeltaR(truth_b_higgs_p4);
+      float subleading_hbbjet_truth_dr = subleading_hbbjet_p4.DeltaR(truth_b_higgs_p4);
     
       // Electrons
       float leading_hbbjet_ele_dr = leading_hbbjet_p4.DeltaR(chosen_electron_p4);
@@ -2501,6 +2645,7 @@ StatusCode DiTauAnalysis :: execute ()
         m_hadElLRHbbJetPhi = m_leadingLRHbbJetPhi;
         m_hadElLRHbbJetE = m_leadingLRHbbJetE;
         m_hadElLRHbbJetM = m_leadingLRHbbJetM;
+        m_hadElLRHbbJetTruthdR = leading_hbbjet_truth_dr;
       }
       else {
         m_hadElLRHbbJetPt = m_subleadingLRHbbJetPt;
@@ -2508,6 +2653,7 @@ StatusCode DiTauAnalysis :: execute ()
         m_hadElLRHbbJetPhi = m_subleadingLRHbbJetPhi;
         m_hadElLRHbbJetE = m_subleadingLRHbbJetE;
         m_hadElLRHbbJetM = m_subleadingLRHbbJetM;
+        m_hadElLRHbbJetTruthdR = subleading_hbbjet_truth_dr;
       }
 
       // Muons
@@ -2519,6 +2665,7 @@ StatusCode DiTauAnalysis :: execute ()
         m_hadMuLRHbbJetPhi = m_leadingLRHbbJetPhi;
         m_hadMuLRHbbJetE = m_leadingLRHbbJetE;
         m_hadMuLRHbbJetM = m_leadingLRHbbJetM;
+        m_hadMuLRHbbJetTruthdR = leading_hbbjet_truth_dr;
       }
       else {
         m_hadMuLRHbbJetPt = m_subleadingLRHbbJetPt;
@@ -2526,22 +2673,26 @@ StatusCode DiTauAnalysis :: execute ()
         m_hadMuLRHbbJetPhi = m_subleadingLRHbbJetPhi;
         m_hadMuLRHbbJetE = m_subleadingLRHbbJetE;
         m_hadMuLRHbbJetM = m_subleadingLRHbbJetM;
+        m_hadMuLRHbbJetTruthdR = subleading_hbbjet_truth_dr;
       }
     }
     else if (m_nLargeRHbbJets == 1) {
       TLorentzVector leading_hbbjet_p4 = leading_hbb_largerjet->p4();
+      float leading_hbbjet_truth_dr = leading_hbbjet_p4.DeltaR(truth_b_higgs_p4);
 
       m_hadElLRHbbJetPt = m_leadingLRHbbJetPt;
       m_hadElLRHbbJetEta = m_leadingLRHbbJetEta;
       m_hadElLRHbbJetPhi = m_leadingLRHbbJetPhi;
       m_hadElLRHbbJetE = m_leadingLRHbbJetE;
       m_hadElLRHbbJetM = m_leadingLRHbbJetM;
+      m_hadElLRHbbJetTruthdR = leading_hbbjet_truth_dr;
 
       m_hadMuLRHbbJetPt = m_leadingLRHbbJetPt;
       m_hadMuLRHbbJetEta = m_leadingLRHbbJetEta;
       m_hadMuLRHbbJetPhi = m_leadingLRHbbJetPhi;
       m_hadMuLRHbbJetE = m_leadingLRHbbJetE;
       m_hadMuLRHbbJetM = m_leadingLRHbbJetM;
+      m_hadMuLRHbbJetTruthdR = leading_hbbjet_truth_dr;
     }
   }
 

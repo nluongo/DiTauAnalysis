@@ -170,6 +170,7 @@ private:
   std::vector<float> *m_hadElTauEta = nullptr;
   std::vector<float> *m_hadElTauPhi = nullptr;
   std::vector<float> *m_hadElTauE = nullptr;
+  std::vector<float> *m_hadElTauTruthdR = nullptr;
   unsigned int m_nHadElElectrons = 0;
   std::vector<float> *m_hadElElectronPt = nullptr;
   std::vector<float> *m_hadElElectronEta = nullptr;
@@ -191,6 +192,7 @@ private:
   std::vector<float> *m_hadMuTauEta = nullptr;
   std::vector<float> *m_hadMuTauPhi = nullptr;
   std::vector<float> *m_hadMuTauE = nullptr;
+  std::vector<float> *m_hadMuTauTruthdR = nullptr;
   unsigned int m_nHadMuMuons = 0;
   std::vector<float> *m_hadMuMuonPt = nullptr;
   std::vector<float> *m_hadMuMuonEta = nullptr;
@@ -204,12 +206,12 @@ private:
   std::vector<float> *m_tauEta = nullptr;
   std::vector<float> *m_tauPhi = nullptr;
   std::vector<float> *m_tauE = nullptr;
-  //std::vector<TLorentzVector> *m_tauP4 = nullptr;
   float m_leadingTauPt = 0;
   float m_leadingTauEta = 0;
   float m_leadingTauPhi = 0;
   float m_leadingTauE = 0;
-
+  std::vector<float> *m_tauTruthdR = nullptr;
+  std::vector<unsigned int> *m_tauID = nullptr;
   float m_tauRecoTruthMindR = 0;
 
   // Very Loose taus
@@ -266,7 +268,8 @@ private:
   float m_leadingMuEta = 0;
   float m_leadingMuPhi = 0;
   float m_leadingMuE = 0;
-
+  std::vector<float> *m_muTruthdR = nullptr;
+  std::vector<unsigned int> *m_muID = nullptr;
   float m_muRecoTruthMindR = 0;
 
   // Loose muons
@@ -312,6 +315,8 @@ private:
   float m_leadingEleEta = 0;
   float m_leadingElePhi = 0;
   float m_leadingEleE = 0;
+  std::vector<float> *m_eleTruthdR = nullptr;
+  std::vector<unsigned int> *m_eleID = nullptr;
 
   float m_eleRecoTruthMindR = 0;
 
@@ -372,10 +377,15 @@ private:
   float m_hadElChosenTauEta = 0;
   float m_hadElChosenTauPhi = 0;
   float m_hadElChosenTauE = 0;
+  float m_hadElChosenTauM = 0;
+  float m_hadElChosenTauTruthdR = 0;
   float m_hadElChosenElePt = 0;
   float m_hadElChosenEleEta = 0;
   float m_hadElChosenElePhi = 0;
   float m_hadElChosenEleE = 0;
+  float m_hadElChosenEleM = 0;
+  float m_hadElChosenEleID = 0;
+  float m_hadElChosenEleTruthdR = 0;
   float m_hadElChosenTauElePt = 0;
   float m_hadElChosenTauEleEta = 0;
   float m_hadElChosenTauElePhi = 0;
@@ -396,10 +406,15 @@ private:
   float m_hadMuChosenTauEta = 0;
   float m_hadMuChosenTauPhi = 0;
   float m_hadMuChosenTauE = 0;
+  float m_hadMuChosenTauM = 0;
+  float m_hadMuChosenTauTruthdR = 0;
   float m_hadMuChosenMuPt = 0;
   float m_hadMuChosenMuEta = 0;
   float m_hadMuChosenMuPhi = 0;
   float m_hadMuChosenMuE = 0;
+  float m_hadMuChosenMuM = 0;
+  float m_hadMuChosenMuID = 0;
+  float m_hadMuChosenMuTruthdR = 0;
   float m_hadMuChosenTauMuPt = 0;
   float m_hadMuChosenTauMuEta = 0;
   float m_hadMuChosenTauMuPhi = 0;
@@ -516,11 +531,13 @@ private:
   float m_hadElLRHbbJetPhi = 0;
   float m_hadElLRHbbJetE = 0;
   float m_hadElLRHbbJetM = 0;
+  float m_hadElLRHbbJetTruthdR = 0;
   float m_hadMuLRHbbJetPt = 0;
   float m_hadMuLRHbbJetEta = 0;
   float m_hadMuLRHbbJetPhi = 0;
   float m_hadMuLRHbbJetE = 0;
   float m_hadMuLRHbbJetM = 0;
+  float m_hadMuLRHbbJetTruthdR = 0;
 };
 
 #endif
