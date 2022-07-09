@@ -40,7 +40,6 @@ public:
 
   ~DiTauAnalysis () override;
 
-
   // these are the functions inherited from Algorithm
   virtual StatusCode initialize () override;
   virtual StatusCode execute () override;
@@ -98,6 +97,7 @@ private:
 
   unsigned int m_runNumber = 0;
   unsigned long long m_eventNumber = 0;
+  unsigned long long m_uniqueEventID = 0;
 
   float m_truthBPt = 0;
   float m_truthBEta = 0;
@@ -516,28 +516,64 @@ private:
   std::vector<float> *m_lRHbbJetpTop = nullptr;
   std::vector<float> *m_lRHbbJetDiscriminant = nullptr;
   std::vector<float> *m_lRHbbJetTruthdR = nullptr;
+  
   float m_leadingLRHbbJetPt = 0;
   float m_leadingLRHbbJetEta = 0;
   float m_leadingLRHbbJetPhi = 0;
   float m_leadingLRHbbJetE = 0;
   float m_leadingLRHbbJetM = 0;
+  float m_leadingLRHbbJetDisc = 0;
+
   float m_subleadingLRHbbJetPt = 0;
   float m_subleadingLRHbbJetEta = 0;
   float m_subleadingLRHbbJetPhi = 0;
   float m_subleadingLRHbbJetE = 0;
   float m_subleadingLRHbbJetM = 0;
+  float m_subleadingLRHbbJetDisc = 0;
+  
+  float m_maxDiscLRHbbJetDisc = 0;
+
   float m_hadElLRHbbJetPt = 0;
   float m_hadElLRHbbJetEta = 0;
   float m_hadElLRHbbJetPhi = 0;
   float m_hadElLRHbbJetE = 0;
   float m_hadElLRHbbJetM = 0;
+  float m_hadElLRHbbJetDisc = 0;
   float m_hadElLRHbbJetTruthdR = 0;
+  
+  float m_hadElDiHiggsPt = 0;
+  float m_hadElDiHiggsEta = 0;
+  float m_hadElDiHiggsPhi = 0;
+  float m_hadElDiHiggsE = 0;
+  float m_hadElDiHiggsM = 0;
+  float m_hadElDiHiggsTruthdR = 0;
+  
   float m_hadMuLRHbbJetPt = 0;
   float m_hadMuLRHbbJetEta = 0;
   float m_hadMuLRHbbJetPhi = 0;
   float m_hadMuLRHbbJetE = 0;
   float m_hadMuLRHbbJetM = 0;
+  float m_hadMuLRHbbJetDisc = 0;
   float m_hadMuLRHbbJetTruthdR = 0;
+
+  float m_hadMuDiHiggsPt = 0;
+  float m_hadMuDiHiggsEta = 0;
+  float m_hadMuDiHiggsPhi = 0;
+  float m_hadMuDiHiggsE = 0;
+  float m_hadMuDiHiggsM = 0;
+  float m_hadMuDiHiggsDisc = 0;
+  float m_hadMuDiHiggsTruthdR = 0;
+
+  float calculate_hbb_discriminant(const xAOD::Jet * jet) {
+    float p_higgs = jet->auxdecor<float>("Xbb202006_Higgs");
+    float p_qcd = jet->auxdecor<float>("Xbb202006_QCD");
+    float p_top = jet->auxdecor<float>("Xbb202006_Top");
+    
+    float anti_topness = 0.25;
+    float discriminant = log(p_higgs / ((1 - anti_topness) * p_qcd + anti_topness * p_top));
+
+    return discriminant;
+  }
 };
 
 #endif

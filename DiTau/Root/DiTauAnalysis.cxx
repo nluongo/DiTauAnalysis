@@ -24,6 +24,7 @@
 
 #include <typeinfo>
 #include <cmath>
+#include <string>
 
 DiTauAnalysis :: DiTauAnalysis (const std::string& name,
                                   ISvcLocator *pSvcLocator)
@@ -193,6 +194,7 @@ StatusCode DiTauAnalysis :: initialize ()
 
   m_mytree->Branch("RunNumber", &m_runNumber);
   m_mytree->Branch("EventNumber", &m_eventNumber);
+  m_mytree->Branch("UniqueEventID", &m_uniqueEventID);
 
   if(m_isSignal)
   {
@@ -750,29 +752,48 @@ StatusCode DiTauAnalysis :: initialize ()
   m_mytree->Branch("LargeRHbbJetDiscriminant", &m_lRHbbJetDiscriminant);
   m_lRHbbJetTruthdR = new std::vector<float>();
   m_mytree->Branch("LargeRHbbJetTruthdR", &m_lRHbbJetTruthdR);
+
   m_mytree->Branch("LeadingLargeRHbbJetPt", &m_leadingLRHbbJetPt);
   m_mytree->Branch("LeadingLargeRHbbJetEta", &m_leadingLRHbbJetEta);
   m_mytree->Branch("LeadingLargeRHbbJetPhi", &m_leadingLRHbbJetPhi);
   m_mytree->Branch("LeadingLargeRHbbJetE", &m_leadingLRHbbJetE);
   m_mytree->Branch("LeadingLargeRHbbJetM", &m_leadingLRHbbJetM);
+
   m_mytree->Branch("SubleadingLargeRHbbJetPt", &m_subleadingLRHbbJetPt);
   m_mytree->Branch("SubleadingLargeRHbbJetEta", &m_subleadingLRHbbJetEta);
   m_mytree->Branch("SubleadingLargeRHbbJetPhi", &m_subleadingLRHbbJetPhi);
   m_mytree->Branch("SubleadingLargeRHbbJetE", &m_subleadingLRHbbJetE);
   m_mytree->Branch("SubleadingLargeRHbbJetM", &m_subleadingLRHbbJetM);
+
+  m_mytree->Branch("MaxDiscLargeRHbbJetDiscriminant", &m_maxDiscLRHbbJetDisc);
+
   m_mytree->Branch("HadElLargeRHbbJetPt", &m_hadElLRHbbJetPt);
   m_mytree->Branch("HadElLargeRHbbJetEta", &m_hadElLRHbbJetEta);
   m_mytree->Branch("HadElLargeRHbbJetPhi", &m_hadElLRHbbJetPhi);
   m_mytree->Branch("HadElLargeRHbbJetE", &m_hadElLRHbbJetE);
   m_mytree->Branch("HadElLargeRHbbJetM", &m_hadElLRHbbJetM);
+  m_mytree->Branch("HadElLargeRHbbJetDiscriminant", &m_hadElLRHbbJetDisc);
   m_mytree->Branch("HadElLargeRHbbJetTruthdR", &m_hadElLRHbbJetTruthdR);
+
+  m_mytree->Branch("HadElDiHiggsPt", &m_hadElDiHiggsPt);
+  m_mytree->Branch("HadElDiHiggsEta", &m_hadElDiHiggsEta);
+  m_mytree->Branch("HadElDiHiggsPhi", &m_hadElDiHiggsPhi);
+  m_mytree->Branch("HadElDiHiggsE", &m_hadElDiHiggsE);
+  m_mytree->Branch("HadElDiHiggsM", &m_hadElDiHiggsM);
+
   m_mytree->Branch("HadMuLargeRHbbJetPt", &m_hadMuLRHbbJetPt);
   m_mytree->Branch("HadMuLargeRHbbJetEta", &m_hadMuLRHbbJetEta);
   m_mytree->Branch("HadMuLargeRHbbJetPhi", &m_hadMuLRHbbJetPhi);
   m_mytree->Branch("HadMuLargeRHbbJetE", &m_hadMuLRHbbJetE);
   m_mytree->Branch("HadMuLargeRHbbJetM", &m_hadMuLRHbbJetM);
+  m_mytree->Branch("HadMuLargeRHbbJetDiscriminant", &m_hadMuLRHbbJetDisc);
   m_mytree->Branch("HadMuLargeRHbbJetTruthdR", &m_hadMuLRHbbJetTruthdR);
 
+  m_mytree->Branch("HadMuDiHiggsPt", &m_hadMuDiHiggsPt);
+  m_mytree->Branch("HadMuDiHiggsEta", &m_hadMuDiHiggsEta);
+  m_mytree->Branch("HadMuDiHiggsPhi", &m_hadMuDiHiggsPhi);
+  m_mytree->Branch("HadMuDiHiggsE", &m_hadMuDiHiggsE);
+  m_mytree->Branch("HadMuDiHiggsM", &m_hadMuDiHiggsM);
 
   // Builders
   m_hadElBuilder = new DiTauRec::HadElBuilder("HadElBuilder");
@@ -881,6 +902,7 @@ StatusCode DiTauAnalysis :: execute ()
 
   m_runNumber = 0;
   m_eventNumber = 0;
+  m_uniqueEventID = 0;
 
   m_pdgTruthMatchType = 0;
 
@@ -1247,11 +1269,13 @@ StatusCode DiTauAnalysis :: execute ()
   m_lRJetPhi->clear();
   m_lRJetE->clear();
   m_lRJetM->clear();
+
   m_leadingLRJetPt = 0;
   m_leadingLRJetEta = 0;
   m_leadingLRJetPhi = 0;
   m_leadingLRJetE = 0;
   m_leadingLRJetM = 0;
+
   m_subleadingLRJetPt = 0;
   m_subleadingLRJetEta = 0;
   m_subleadingLRJetPhi = 0;
@@ -1298,29 +1322,50 @@ StatusCode DiTauAnalysis :: execute ()
   m_lRHbbJetpTop->clear();
   m_lRHbbJetDiscriminant->clear();
   m_lRHbbJetTruthdR->clear(); 
+
   m_leadingLRHbbJetPt = 0;
   m_leadingLRHbbJetEta = 0;
   m_leadingLRHbbJetPhi = 0;
   m_leadingLRHbbJetE = 0;
   m_leadingLRHbbJetM = 0;
+  m_leadingLRHbbJetDisc = 0;
+  
   m_subleadingLRHbbJetPt = 0;
   m_subleadingLRHbbJetEta = 0;
   m_subleadingLRHbbJetPhi = 0;
   m_subleadingLRHbbJetE = 0;
   m_subleadingLRHbbJetM = 0;
+  m_subleadingLRHbbJetDisc = 0;
+
+  m_maxDiscLRHbbJetDisc = 0;
+
   m_hadElLRHbbJetPt = 0;
   m_hadElLRHbbJetEta = 0;
   m_hadElLRHbbJetPhi = 0;
   m_hadElLRHbbJetE = 0;
   m_hadElLRHbbJetM = 0;
+  m_hadElLRHbbJetDisc = 0;
   m_hadElLRHbbJetTruthdR = 0;
+
+  m_hadElDiHiggsPt = 0;
+  m_hadElDiHiggsEta = 0;
+  m_hadElDiHiggsPhi = 0;
+  m_hadElDiHiggsE = 0;
+  m_hadElDiHiggsM = 0;
+
   m_hadMuLRHbbJetPt = 0;
   m_hadMuLRHbbJetEta = 0;
   m_hadMuLRHbbJetPhi = 0;
   m_hadMuLRHbbJetE = 0;
   m_hadMuLRHbbJetM = 0;
+  m_hadMuLRHbbJetDisc = 0;
   m_hadMuLRHbbJetTruthdR = 0;
 
+  m_hadMuDiHiggsPt = 0;
+  m_hadMuDiHiggsEta = 0;
+  m_hadMuDiHiggsPhi = 0;
+  m_hadMuDiHiggsE = 0;
+  m_hadMuDiHiggsM = 0;
 
   const xAOD::TruthParticle* truth_tau_higgs = nullptr;
   const xAOD::TruthParticle* truth_b_higgs = nullptr;
@@ -2186,6 +2231,7 @@ StatusCode DiTauAnalysis :: execute ()
   const xAOD::Jet* leading_hbb_largerjet;
   const xAOD::Jet* subleading_hbb_largerjet;
   if (m_isDAOD) {
+    float max_hbb_discriminant = -10;
     for (auto largerjet_hbb: *largerjets_hbb) {
       m_nLargeRHbbJets++;
       float largerjet_hbb_pt = largerjet_hbb->pt() / 1000.;
@@ -2193,11 +2239,28 @@ StatusCode DiTauAnalysis :: execute ()
       float largerjet_hbb_phi = largerjet_hbb->phi();
       float largerjet_hbb_e = largerjet_hbb->e() / 1000.;
       float largerjet_hbb_m = largerjet_hbb->m() / 1000.;
+
+      // Hbb calculations
+      m_hbbTagTool->decorate(*largerjet_hbb);
+      float p_higgs = largerjet_hbb->auxdecor<float>("Xbb202006_Higgs");
+      float p_qcd = largerjet_hbb->auxdecor<float>("Xbb202006_QCD");
+      float p_top = largerjet_hbb->auxdecor<float>("Xbb202006_Top");
+      m_lRHbbJetpHiggs->push_back(p_higgs);
+      m_lRHbbJetpQCD->push_back(p_qcd); 
+      m_lRHbbJetpTop->push_back(p_top); 
+      float largerjet_hbb_discriminant = calculate_hbb_discriminant(largerjet_hbb);
+
       m_lRHbbJetPt->push_back(largerjet_hbb_pt);
       m_lRHbbJetEta->push_back(largerjet_hbb_eta);
       m_lRHbbJetPhi->push_back(largerjet_hbb_phi);
       m_lRHbbJetE->push_back(largerjet_hbb_e);
       m_lRHbbJetM->push_back(largerjet_hbb_m);
+      m_lRHbbJetDiscriminant->push_back(largerjet_hbb_discriminant);
+
+      // Fill maximum Hbb discriminant value, -10 chosen as default below any real value
+      if (largerjet_hbb_discriminant > max_hbb_discriminant) {
+        max_hbb_discriminant = largerjet_hbb_discriminant;
+      }
 
       // Fill leading and subleading values
       if (largerjet_hbb_pt >= m_leadingLRHbbJetPt) {
@@ -2208,6 +2271,7 @@ StatusCode DiTauAnalysis :: execute ()
         m_subleadingLRHbbJetPhi = m_leadingLRHbbJetPhi;
         m_subleadingLRHbbJetE = m_leadingLRHbbJetE;
         m_subleadingLRHbbJetM = m_leadingLRHbbJetM;
+        m_subleadingLRHbbJetDisc = m_leadingLRHbbJetDisc;
         // New jet moved to leading
         leading_hbb_largerjet = largerjet_hbb;
         m_leadingLRHbbJetPt = largerjet_hbb_pt;
@@ -2215,6 +2279,7 @@ StatusCode DiTauAnalysis :: execute ()
         m_leadingLRHbbJetPhi = largerjet_hbb_phi;
         m_leadingLRHbbJetE = largerjet_hbb_e;
         m_leadingLRHbbJetM = largerjet_hbb_m;
+        m_leadingLRHbbJetDisc = largerjet_hbb_discriminant;
       }
       else if (largerjet_hbb_pt >= m_subleadingLRHbbJetPt) {
         subleading_hbb_largerjet = largerjet_hbb;
@@ -2223,20 +2288,8 @@ StatusCode DiTauAnalysis :: execute ()
         m_subleadingLRHbbJetPhi = largerjet_hbb_phi;
         m_subleadingLRHbbJetE = largerjet_hbb_e;
         m_subleadingLRHbbJetM = largerjet_hbb_m;
+        m_subleadingLRHbbJetDisc = largerjet_hbb_discriminant;
       }
-
-
-      // Hbb calculations
-      m_hbbTagTool->decorate(*largerjet_hbb);
-      float p_higgs = largerjet_hbb->auxdecor<float>("Xbb202006_Higgs");
-      float p_qcd = largerjet_hbb->auxdecor<float>("Xbb202006_QCD");
-      float p_top = largerjet_hbb->auxdecor<float>("Xbb202006_Top");
-      m_lRHbbJetpHiggs->push_back(p_higgs);
-      m_lRHbbJetpQCD->push_back(p_qcd); 
-      m_lRHbbJetpTop->push_back(p_top); 
-      float anti_topness = 0.25;
-      float discriminant = log(p_higgs / ((1 - anti_topness) * p_qcd + anti_topness * p_top));
-      m_lRHbbJetDiscriminant->push_back(discriminant);
 
       if (has_b_higgs) {
         TLorentzVector jet_p4 = largerjet_hbb->p4();
@@ -2245,6 +2298,8 @@ StatusCode DiTauAnalysis :: execute ()
         m_lRHbbJetTruthdR->push_back(jet_higgs_dr); 
       }
     }
+
+    m_maxDiscLRHbbJetDisc = max_hbb_discriminant;
   }
 
   // Fill topological values of two leading large-R jets
@@ -2606,18 +2661,20 @@ StatusCode DiTauAnalysis :: execute ()
     m_hadMuChosenMuID = 4 - chosen_muon_id;
   }
 
+  TLorentzVector chosen_hadel_system_p4;
   if (set_hadel_tau && set_electron) {
-    TLorentzVector chosen_tauele_system_p4 = chosen_hadel_tau_p4 + chosen_electron_p4;
-    m_hadElChosenTauElePt = chosen_tauele_system_p4.Pt() / 1000.; 
-    m_hadElChosenTauEleEta = chosen_tauele_system_p4.Eta(); 
-    m_hadElChosenTauElePhi = chosen_tauele_system_p4.Phi(); 
-    m_hadElChosenTauEleE = chosen_tauele_system_p4.E() / 1000.; 
-    m_hadElChosenTauEleM = chosen_tauele_system_p4.M() / 1000.; 
+    chosen_hadel_system_p4 = chosen_hadel_tau_p4 + chosen_electron_p4;
+    m_hadElChosenTauElePt = chosen_hadel_system_p4.Pt() / 1000.; 
+    m_hadElChosenTauEleEta = chosen_hadel_system_p4.Eta(); 
+    m_hadElChosenTauElePhi = chosen_hadel_system_p4.Phi(); 
+    m_hadElChosenTauEleE = chosen_hadel_system_p4.E() / 1000.; 
+    m_hadElChosenTauEleM = chosen_hadel_system_p4.M() / 1000.; 
     m_hadElChosenTauEledR = chosen_hadel_tau_p4.DeltaR(chosen_electron_p4);
   }
 
+  TLorentzVector chosen_hadmu_system_p4;
   if (set_hadmu_tau && set_muon) {
-    TLorentzVector chosen_hadmu_system_p4 = chosen_hadmu_tau_p4 + chosen_muon_p4;
+    chosen_hadmu_system_p4 = chosen_hadmu_tau_p4 + chosen_muon_p4;
     m_hadMuChosenTauMuPt = chosen_hadmu_system_p4.Pt() / 1000.; 
     m_hadMuChosenTauMuEta = chosen_hadmu_system_p4.Eta(); 
     m_hadMuChosenTauMuPhi = chosen_hadmu_system_p4.Phi(); 
@@ -2629,7 +2686,9 @@ StatusCode DiTauAnalysis :: execute ()
   if (m_isDAOD) {
     // Fill offlep Hbb jet ie of the leading and subleading, the furthest from chosen lepton
     
-    // If only one jet then just use the leading
+    TLorentzVector hadel_chosen_hbbjet_p4;
+    TLorentzVector hadmu_chosen_hbbjet_p4;
+
     if (m_nLargeRHbbJets > 1) {
       TLorentzVector leading_hbbjet_p4 = leading_hbb_largerjet->p4();
       TLorentzVector subleading_hbbjet_p4 = subleading_hbb_largerjet->p4();
@@ -2640,46 +2699,59 @@ StatusCode DiTauAnalysis :: execute ()
       float leading_hbbjet_ele_dr = leading_hbbjet_p4.DeltaR(chosen_electron_p4);
       float subleading_hbbjet_ele_dr = subleading_hbbjet_p4.DeltaR(chosen_electron_p4);
       if (leading_hbbjet_ele_dr >= subleading_hbbjet_ele_dr) {
+        hadel_chosen_hbbjet_p4 = leading_hbbjet_p4;
         m_hadElLRHbbJetPt = m_leadingLRHbbJetPt;
         m_hadElLRHbbJetEta = m_leadingLRHbbJetEta;
         m_hadElLRHbbJetPhi = m_leadingLRHbbJetPhi;
         m_hadElLRHbbJetE = m_leadingLRHbbJetE;
         m_hadElLRHbbJetM = m_leadingLRHbbJetM;
+        m_hadElLRHbbJetDisc = m_leadingLRHbbJetDisc;
         m_hadElLRHbbJetTruthdR = leading_hbbjet_truth_dr;
       }
       else {
+        hadel_chosen_hbbjet_p4 = subleading_hbbjet_p4;
         m_hadElLRHbbJetPt = m_subleadingLRHbbJetPt;
         m_hadElLRHbbJetEta = m_subleadingLRHbbJetEta;
         m_hadElLRHbbJetPhi = m_subleadingLRHbbJetPhi;
         m_hadElLRHbbJetE = m_subleadingLRHbbJetE;
         m_hadElLRHbbJetM = m_subleadingLRHbbJetM;
+        m_hadElLRHbbJetDisc = m_subleadingLRHbbJetDisc;
         m_hadElLRHbbJetTruthdR = subleading_hbbjet_truth_dr;
       }
+      
 
       // Muons
       float leading_hbbjet_mu_dr = leading_hbbjet_p4.DeltaR(chosen_muon_p4);
       float subleading_hbbjet_mu_dr = subleading_hbbjet_p4.DeltaR(chosen_muon_p4);
       if (leading_hbbjet_mu_dr >= subleading_hbbjet_mu_dr) {
+        hadmu_chosen_hbbjet_p4 = leading_hbbjet_p4;
         m_hadMuLRHbbJetPt = m_leadingLRHbbJetPt;
         m_hadMuLRHbbJetEta = m_leadingLRHbbJetEta;
         m_hadMuLRHbbJetPhi = m_leadingLRHbbJetPhi;
         m_hadMuLRHbbJetE = m_leadingLRHbbJetE;
         m_hadMuLRHbbJetM = m_leadingLRHbbJetM;
+        m_hadMuLRHbbJetDisc = m_leadingLRHbbJetDisc;
         m_hadMuLRHbbJetTruthdR = leading_hbbjet_truth_dr;
       }
       else {
+        hadmu_chosen_hbbjet_p4 = subleading_hbbjet_p4;
         m_hadMuLRHbbJetPt = m_subleadingLRHbbJetPt;
         m_hadMuLRHbbJetEta = m_subleadingLRHbbJetEta;
         m_hadMuLRHbbJetPhi = m_subleadingLRHbbJetPhi;
         m_hadMuLRHbbJetE = m_subleadingLRHbbJetE;
         m_hadMuLRHbbJetM = m_subleadingLRHbbJetM;
+        m_hadMuLRHbbJetDisc = m_subleadingLRHbbJetDisc;
         m_hadMuLRHbbJetTruthdR = subleading_hbbjet_truth_dr;
       }
     }
+    // If only one jet then just use the leading
     else if (m_nLargeRHbbJets == 1) {
       TLorentzVector leading_hbbjet_p4 = leading_hbb_largerjet->p4();
       float leading_hbbjet_truth_dr = leading_hbbjet_p4.DeltaR(truth_b_higgs_p4);
 
+      hadel_chosen_hbbjet_p4 = leading_hbbjet_p4;
+      hadmu_chosen_hbbjet_p4 = leading_hbbjet_p4;
+    
       m_hadElLRHbbJetPt = m_leadingLRHbbJetPt;
       m_hadElLRHbbJetEta = m_leadingLRHbbJetEta;
       m_hadElLRHbbJetPhi = m_leadingLRHbbJetPhi;
@@ -2694,6 +2766,20 @@ StatusCode DiTauAnalysis :: execute ()
       m_hadMuLRHbbJetM = m_leadingLRHbbJetM;
       m_hadMuLRHbbJetTruthdR = leading_hbbjet_truth_dr;
     }
+
+    TLorentzVector chosen_hadel_dihiggs_p4 = hadel_chosen_hbbjet_p4 + chosen_hadel_system_p4;
+    m_hadElDiHiggsPt = chosen_hadel_dihiggs_p4.Pt() / 1000.;
+    m_hadElDiHiggsEta = chosen_hadel_dihiggs_p4.Eta();
+    m_hadElDiHiggsPhi = chosen_hadel_dihiggs_p4.Phi();
+    m_hadElDiHiggsE = chosen_hadel_dihiggs_p4.E() / 1000.;
+    m_hadElDiHiggsM = chosen_hadel_dihiggs_p4.M() / 1000.;
+
+    TLorentzVector chosen_hadmu_dihiggs_p4 = hadmu_chosen_hbbjet_p4 + chosen_hadmu_system_p4;
+    m_hadMuDiHiggsPt = chosen_hadmu_dihiggs_p4.Pt() / 1000.;
+    m_hadMuDiHiggsEta = chosen_hadmu_dihiggs_p4.Eta();
+    m_hadMuDiHiggsPhi = chosen_hadmu_dihiggs_p4.Phi();
+    m_hadMuDiHiggsE = chosen_hadmu_dihiggs_p4.E() / 1000.;
+    m_hadMuDiHiggsM = chosen_hadmu_dihiggs_p4.M() / 1000.;
   }
 
   // Missing Mass Calculator
@@ -2713,6 +2799,19 @@ StatusCode DiTauAnalysis :: execute ()
     CP::CorrectionCode c = m_missingMassTool->apply(*eventInfo, leading_tau, leading_medium_muon, met, njet25); 
     m_resolvedMissingMass = eventInfo->auxdata<double>("mmc_mlnu3p_mass");
   }
+
+  std::string event_num_string = std::to_string(m_eventNumber);
+  std::string leading_jet_pt_string = std::to_string(int(m_leadingLRJetPt));
+  std::string leading_eleloose_pt_string = std::to_string(int(m_leadingEleLoosePt));
+  std::string leading_mutight_pt_string = std::to_string(int(m_leadingMuTightPt));
+
+  leading_jet_pt_string.resize(3, '0');
+  leading_eleloose_pt_string.resize(3, '0');
+  leading_mutight_pt_string.resize(3, '0');
+
+  std::string unique_event_id_str = event_num_string + leading_jet_pt_string + leading_eleloose_pt_string + leading_mutight_pt_string;
+  unsigned long long unique_event_id = std::stol(unique_event_id_str);
+  m_uniqueEventID = unique_event_id;  
 
 
   m_mytree->Fill();
