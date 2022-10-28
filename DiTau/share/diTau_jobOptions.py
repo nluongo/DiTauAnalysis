@@ -215,7 +215,7 @@ alg.jetConstituentModSequence.Modifiers = [clusterOrigin]
 athAlgSeq += alg
 
 # limit the number of events (for testing purposes)
-theApp.EvtMax = 100
+theApp.EvtMax = -1
 
 #MessageSvc.OutputLevel = 1
 

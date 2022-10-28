@@ -227,14 +227,19 @@ private:
 
   // Loose taus
   unsigned int m_nTausLoose = 0;
+  unsigned int m_nResolvedTaus = 0;
   std::vector<float> *m_tauLoosePt = nullptr;
   std::vector<float> *m_tauLooseEta = nullptr;
   std::vector<float> *m_tauLoosePhi = nullptr;
   std::vector<float> *m_tauLooseE = nullptr;
+  std::vector<float> *m_tauLooseNTracks = nullptr;
+  std::vector<float> *m_tauLooseCharge = nullptr;
   float m_leadingTauLoosePt = 0;
   float m_leadingTauLooseEta = 0;
   float m_leadingTauLoosePhi = 0;
   float m_leadingTauLooseE = 0;
+  float m_leadingTauLooseNTracks = 0;
+  float m_leadingTauLooseCharge = 0;
 
   // Medium taus
   unsigned int m_nTausMedium = 0;
@@ -274,6 +279,7 @@ private:
 
   // Loose muons
   unsigned int m_nMuonsLoose = 0;
+  unsigned int m_nResolvedMuons = 0;
   std::vector<float> *m_muLoosePt = nullptr;
   std::vector<float> *m_muLooseEta = nullptr;
   std::vector<float> *m_muLoosePhi = nullptr;
@@ -289,10 +295,12 @@ private:
   std::vector<float> *m_muMediumEta = nullptr;
   std::vector<float> *m_muMediumPhi = nullptr;
   std::vector<float> *m_muMediumE = nullptr;
+  std::vector<float> *m_muMediumCharge = nullptr;
   float m_leadingMuMediumPt = 0;
   float m_leadingMuMediumEta = 0;
   float m_leadingMuMediumPhi = 0;
   float m_leadingMuMediumE = 0;
+  float m_leadingMuMediumCharge = 0;
 
   // Tight muons
   unsigned int m_nMuonsTight = 0;
@@ -333,6 +341,7 @@ private:
 
   // Loose electrons
   unsigned int m_nElectronsLoose = 0;
+  unsigned int m_nResolvedElectrons = 0;
   std::vector<float> *m_eleLoosePt = nullptr;
   std::vector<float> *m_eleLooseEta = nullptr;
   std::vector<float> *m_eleLoosePhi = nullptr;
@@ -359,10 +368,12 @@ private:
   std::vector<float> *m_eleTightEta = nullptr;
   std::vector<float> *m_eleTightPhi = nullptr;
   std::vector<float> *m_eleTightE = nullptr;
+  std::vector<float> *m_eleTightCharge = nullptr;
   float m_leadingEleTightPt = 0;
   float m_leadingEleTightEta = 0;
   float m_leadingEleTightPhi = 0;
   float m_leadingEleTightE = 0;
+  float m_leadingEleTightCharge = 0;
 
   // Tau-Ele ditau system
   std::vector<float> *m_tauEleLoosePt = nullptr;
@@ -424,6 +435,7 @@ private:
 
   // Resolved analysis values
   float m_resolvedMissingMass = 0;
+  float m_resolvedDiBJetMass = 0;
 
   // Jets
   unsigned int m_nJets = 0;
